@@ -1,3 +1,62 @@
+import fs from 'fs';
+import path from 'path';
+
+export const getDirsNames = (camera) => {
+  const cameraDir = camera._id.toString();
+  console.log('getCameraNames cameraDir-', cameraDir);
+  return {
+    cameraDir,
+    screenshotsDir: 'screenshots',
+    imagesDir: 'images',
+    videosDir: 'videos',
+    logFile: 'log.txt',
+  };
+};
+
+export const getDirsPaths = (names) => {
+  const { cameraDir, screenshotsDir, imagesDir, videosDir, logFile } = names;
+  const pathToCameraDir = path.join(cameraDir);
+  console.log('getCameraPaths pathToCameraDir -', pathToCameraDir);
+  return {
+    pathToCameraDir,
+    pathToScreenshotsDir: path.join(pathToCameraDir, screenshotsDir),
+    pathToImagesDir: path.join(pathToCameraDir, imagesDir),
+    pathToVideosDir: path.join(pathToCameraDir, videosDir),
+    pathToLogFile: path.join(pathToCameraDir, logFile),
+  };
+};
+
+export const readFilesAndDirs = (
+  pathToStorage,
+  startPath,
+  startParent,
+  fileType = 'imageByTime',
+  foldetType = 'folder'
+) => {
+  const fullPath = path.join(pathToStorage, ...startPath);
+  const files = fs.readdirSync(fullPath);
+
+  console.log(222, 'files', files);
+
+  const result = [];
+
+  files.forEach((fileName) => {
+    const fullFilePath = path.join(fullPath, fileName);
+    const fileStat = fs.statSync(fullFilePath);
+
+    const item = { name: fileName, path: startPath, parent: startParent };
+
+    if (fileStat.isDirectory()) {
+      const nextPath = [...startPath, fileName];
+      result.push({ ...item, type: foldetType }, ...readFilesAndDirs(pathToStorage, nextPath, fileName));
+    } else {
+      result.push({ ...item, type: fileType });
+    }
+  });
+
+  return result;
+};
+
 export const promisifyUploadStream = (uploadStream) => {
   return new Promise((resolve, reject) => {
     uploadStream.on('error', () => {

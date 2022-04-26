@@ -7,7 +7,7 @@ const CameraFileSchema = mongoose.Schema({
   camera: { type: mongoose.ObjectId, ref: 'Camera' },
   parent: { type: mongoose.ObjectId, ref: 'CameraFile' },
   children: [{ type: mongoose.ObjectId, ref: 'CameraFile' }],
-  type: { type: String }, // image, imageByTime, video, videoByTime
+  type: { type: String }, // image, imageByTime, video, videoByTime, folder
   storage: { type: String }, // disk, gridfs
   path: [{ type: String }],
 });

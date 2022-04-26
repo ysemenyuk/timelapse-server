@@ -1,4 +1,5 @@
 import express from 'express';
+import 'dotenv/config';
 import mongoose from 'mongoose';
 import mongodb from 'mongodb';
 import fileUpload from 'express-fileupload';
@@ -18,7 +19,6 @@ const mode = process.env.NODE_ENV || 'development';
 const PORT = process.env.PORT || 4000;
 // const dbUri = 'mongodb://localhost:27017/timelapse';
 const dbUri = process.env.MONGO_URI;
-
 
 const logger = debug('server');
 
@@ -45,7 +45,6 @@ const startServer = async () => {
     });
 
     await mongoClient.connect();
-
 
     console.log(`MongoClient successfully Connected`);
     logger(`MongoClient successfully Connected`);
