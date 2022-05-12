@@ -1,7 +1,6 @@
 import express from 'express';
 import 'dotenv/config';
 import mongoose from 'mongoose';
-import mongodb from 'mongodb';
 import fileUpload from 'express-fileupload';
 import debug from 'debug';
 import debugMiddleware from './middleware/debugMiddleware.js';
@@ -13,19 +12,16 @@ import initSocket from './socket.js';
 import initStorage from './storage/index.js';
 import getRouters from './routes/index.js';
 import getControllers from './controllers/index.js';
-// import __dirname from './dirname.js';
 
 const mode = process.env.NODE_ENV || 'development';
 const PORT = process.env.PORT || 4000;
-// const dbUri = 'mongodb://localhost:27017/timelapse';
 const dbUri = process.env.MONGO_URI;
 
 const logger = debug('server');
-
 const app = express();
 const httpServer = http.createServer(app);
 
-if (process.env.NODE_ENV === 'development') {
+if (mode === 'development') {
   app.use(debugMiddleware);
 }
 
@@ -37,18 +33,6 @@ const startServer = async () => {
   try {
     console.log(`Starting server`);
 
-    const { MongoClient } = mongodb;
-
-    const mongoClient = new MongoClient(dbUri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-
-    await mongoClient.connect();
-
-    console.log(`MongoClient successfully Connected`);
-    logger(`MongoClient successfully Connected`);
-
     await mongoose.connect(dbUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
@@ -59,9 +43,8 @@ const startServer = async () => {
     logger(`Mongoose successfully Connected`);
 
     const io = initSocket(httpServer);
-    const storage = initStorage(mongoClient);
-
-    const worker = await initWorker(mongoClient, storage, io);
+    const storage = await initStorage();
+    const worker = await initWorker(storage, io);
 
     app.io = io;
     app.storage = storage;
@@ -70,7 +53,7 @@ const startServer = async () => {
     const routers = getRouters();
     const controllers = getControllers();
 
-    app.use('/files', routers.storage());
+    app.use('/files', routers.storage(storage));
 
     app.use('/api/cameras/:cameraId/tasks', routers.cameraTask(controllers.cameraTask()));
     app.use('/api/cameras/:cameraId/files', routers.cameraFile(controllers.cameraFile()));

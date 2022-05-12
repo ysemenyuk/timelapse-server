@@ -1,18 +1,15 @@
 import { createReadStream, createWriteStream } from 'fs';
-import __dirname from '../dirname.js';
 import path from 'path';
-import fs from "fs";
+import fs from 'fs';
 const fsp = fs.promises;
 
-const pathToFiles = path.join(__dirname, 'files');
+const pathToStorage = process.env.PATH_TO_STORAGE;
 
 export default () => {
   const writeFile = async ({ filePath, fileName, logger, data }) => {
     logger(`disk.storage.writeFile fileName: ${fileName}`);
 
-    const fullPath = path.join(pathToFiles, ...filePath, fileName);
-    console.log(11111111111, fullPath)
-
+    const fullPath = path.join(pathToStorage, ...filePath, fileName);
     const file = await fsp.writeFile(fullPath, data);
 
     return file;
@@ -23,10 +20,7 @@ export default () => {
 
     // TODO: check pathToFiles, make if not exist
 
-    const fullPath = path.join(pathToFiles, ...filePath, fileName);
-
-    // console.log(11111111111, fullPath)
-
+    const fullPath = path.join(pathToStorage, ...filePath, fileName);
     const uploadStream = createWriteStream(fullPath);
 
     return uploadStream;
@@ -39,7 +33,7 @@ export default () => {
       throw new Error('disk.storage.openDownloadStream have not file.path');
     }
 
-    const fullPath = path.join(pathToFiles, ...file.path, file.name);
+    const fullPath = path.join(pathToStorage, ...file.path, file.name);
     const stream = createReadStream(fullPath);
 
     return stream;

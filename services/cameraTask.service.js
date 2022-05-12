@@ -1,4 +1,7 @@
 import CameraTask from '../models/CameraTask.js';
+import { makeFileName, promisifyUploadStream } from '../utils/index.js';
+import cameraFileService from './cameraFile.service.js';
+import cameraApiService from './cameraApi.service.js';
 
 const getAll = async ({ cameraId, logger }) => {
   logger(`cameraTaskService.getAll cameraId: ${cameraId}`);
@@ -78,4 +81,43 @@ const deleteCameraTasks = async ({ cameraId, logger }) => {
   return deleted;
 };
 
-export default { getAll, getOne, createOne, updateOne, deleteOne, deleteCameraTasks };
+const createScreenshot = async ({ userId, cameraId, payload, storage, logger }) => {
+  logger(`cameraService.createScreenshot payload: ${payload}`);
+
+  const { parentId } = payload;
+
+  const camera = await Camera.findOne({ _id: cameraId });
+  const parent = await cameraFileService.getOneById({ fileId: parentId, logger });
+
+  // TODO: check folder if not exist create
+
+  const filePath = [camera._id.toString(), parent.name];
+
+  const date = new Date();
+  const fileName = makeFileName(date);
+
+  const dataStream = await cameraApiService.getScreenshot(camera.screenshotLink, 'stream');
+  const uploadStream = storage.openUploadStream({ filePath, fileName, logger });
+
+  dataStream.pipe(uploadStream);
+
+  await promisifyUploadStream(uploadStream);
+
+  const screenshot = await cameraFileService.createOne({
+    name: fileName,
+    date: date,
+    user: userId,
+    camera: cameraId,
+    parent: parentId,
+    path: filePath,
+    storage: storage.type,
+    type: constants.SCREENSHOT,
+    logger,
+  });
+
+  console.log(33333, 'screenshot', screenshot);
+
+  return screenshot;
+};
+
+export default { getAll, getOne, createOne, updateOne, deleteOne, deleteCameraTasks, createScreenshot };

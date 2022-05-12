@@ -1,10 +1,10 @@
-import fs from "fs";
-import path from "path";
-const fsp = fs.promises;
-import moment from 'moment';
-import { makeFileName, promisifyUploadStream } from '../utils/index.js';
+// import fs from 'fs';
+import path from 'path';
+// const fsp = fs.promises;
+// import moment from 'moment';
+// import { makeFileName, promisifyUploadStream } from '../utils/index.js';
 import cameraFileService from './cameraFile.service.js';
-import cameraApiService from './cameraApi.service.js';
+// import cameraApiService from './cameraApi.service.js';
 import cameraTaskService from './cameraTask.service.js';
 import Camera from '../models/Camera.js';
 import * as constants from '../utils/constants.js';
@@ -46,14 +46,14 @@ const createOne = async ({ userId, payload, logger }) => {
 
   await camera.save();
 
-  // TODO: create default folders for camera
+  // create default folders for camera
 
   const mainFolder = await cameraFileService.createOne({
     name: constants.MAIN,
     user: userId,
     camera: camera._id,
     parent: null,
-    path: path.join(camera._id.toString()),
+    path: [],
     type: constants.FOLDER,
     logger,
   });
@@ -62,7 +62,7 @@ const createOne = async ({ userId, payload, logger }) => {
     user: userId,
     camera: camera._id,
     parent: mainFolder._id,
-    path: path.join(camera._id.toString(), mainFolder.name),
+    path: [camera._id.toString()],
     type: constants.FOLDER,
     logger,
   };
@@ -87,7 +87,7 @@ const createOne = async ({ userId, payload, logger }) => {
     ...foldersPayload,
   });
 
-  // TODO: create default tasks
+  // TODO: create default tasks!
 
   await camera.updateOne({
     mainFolder: mainFolder._id,
@@ -101,56 +101,9 @@ const createOne = async ({ userId, payload, logger }) => {
 
   const created = await Camera.findOne({ _id: camera._id }).populate(populateItems);
 
+  console.log(1111, 'created camera', created);
+
   return created;
-};
-
-const createScreenshot = async ({ userId, cameraId, payload, storage, logger }) => {
-  logger(`cameraService.createScreenshot payload: ${payload}`);
-
-  const { parentId } = payload;
-
-  const camera = await Camera.findOne({ _id: cameraId });
-  const parent = await cameraFileService.getOneById({ fileId: parentId, logger });
-
-  // TODO: check folder if not exist create
-
-  const filePath = [camera._id.toString(), parent.name]
-
-  const date = new Date();
-  const fileName = makeFileName(date);
-  
-  // const date = moment().format()
-  // const fileName = `${date}.jpg`;
-  // console.log(111, date, date.toString())
-
-  const dataStream = await cameraApiService.getScreenshot(camera.screenshotLink, 'stream');
-  const uploadStream = storage.openUploadStream({ filePath, fileName, logger });
-
-  dataStream.pipe(uploadStream);
-
-  await promisifyUploadStream(uploadStream);
-
-  // const file = await storage.writeFile({ filePath, fileName, logger, data });
-  // console.log(2222, file)
-
-  // console.log('date', date, date.toLocaleString());
-  // console.log('date', date, date.toISOString());
-
-  const screenshot = await cameraFileService.createOne({
-    name: fileName,
-    date: date,
-    user: userId,
-    camera: cameraId,
-    parent: parentId,
-    path: filePath,
-    storage: storage.type,
-    type: constants.SCREENSHOT,
-    logger,
-  });
-
-  console.log(33333, 'screenshot', screenshot);
-
-  return screenshot;
 };
 
 const updateOne = async ({ cameraId, payload, logger }) => {
@@ -178,4 +131,4 @@ const deleteOne = async ({ cameraId, logger }) => {
   return deleted;
 };
 
-export default { getAll, getOne, getOneById, createOne, createScreenshot, updateOne, deleteOne };
+export default { getAll, getOne, getOneById, createOne, updateOne, deleteOne };

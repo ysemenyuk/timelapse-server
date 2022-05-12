@@ -1,15 +1,14 @@
 import diskStorage from './disk.storage.js';
 import gridFsStorage from './gridFS.storage.js';
 
-const storageType = process.env.STORAGE_TYPE || 'gridfs';
+const storageType = process.env.STORAGE_TYPE;
+console.log('storageType', storageType);
 
-console.log('storageType', storageType)
-
-export default (mongoClient) => {
+export default async () => {
   const storages = {
     disk: diskStorage,
     gridfs: gridFsStorage,
   };
 
-  return storages[storageType](mongoClient);
+  return await storages[storageType]();
 };

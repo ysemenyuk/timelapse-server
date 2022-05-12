@@ -63,35 +63,7 @@ export default () => {
     req.logResp(req);
   };
 
-  const createScreenshot = async (req, res) => {
-    req.logger(`cameraController.createScreenshot req.params.cameraId: ${req.params.cameraId}`);
 
-    const screenshot = await cameraService.createScreenshot({
-      userId: req.userId,
-      cameraId: req.params.cameraId,
-      payload: req.body,
-      storage: req.app.storage,
-      logger: req.logger,
-    });
 
-    res.status(201).send(screenshot);
-    req.logResp(req);
-  };
-
-  const createVideoFile = async (req, res) => {
-    req.logger(`cameraController.createVideoFile req.params.cameraId: ${req.params.cameraId}`);
-
-    const videoFile = await cameraService.createVideoFile({
-      userId: req.userId,
-      cameraId: req.params.cameraId,
-      payload: req.body,
-      storage: req.app.storage,
-      logger: req.logger,
-    });
-
-    res.status(201).send(videoFile);
-    req.logResp(req);
-  };
-
-  return { getAll, getOne, createOne, updateOne, deleteOne, createScreenshot, createVideoFile };
+  return { getAll, getOne, createOne, updateOne, deleteOne };
 };

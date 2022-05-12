@@ -1,20 +1,30 @@
 import { Agenda } from 'agenda/es.js';
+import mongodb from 'mongodb';
 import jobs from './jobs/index.js';
 
+const dbUri = process.env.MONGO_URI;
+const dbName = process.env.MONGO_DB_NAME;
 const jobTypes = process.env.JOB_TYPES ? process.env.JOB_TYPES.split(',') : [];
 
-export default async (mongoClient, storage, io) => {
-  const agenda = new Agenda({ mongo: mongoClient.db('timelapse') });
+export default async (storage, io) => {
+  const { MongoClient } = mongodb;
 
-  agenda.processEvery('10 seconds');
+  const mongoClient = new MongoClient(dbUri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
+
+  await mongoClient.connect();
+  console.log(`mongoClient successfully Connected`);
+
+  const agenda = new Agenda({ mongo: mongoClient.db(dbName) });
 
   jobTypes.forEach((type) => {
     jobs[type](agenda, storage, io);
   });
 
-  if (jobTypes.length) {
-    await agenda.start();
-  }
+  await agenda.start();
+  console.log(`agenda successfully started`);
 
   // const { ObjectID } = mongodb;
   // const id = new ObjectID('61fd39591baa2821f1a4a508');

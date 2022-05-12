@@ -1,6 +1,8 @@
+import path from 'path';
 import CameraFile from '../models/CameraFile.js';
+import fileService from './file.service.js';
 
-const storageType = process.env.STORAGE_TYPE || 'gridfs';
+const storageType = process.env.STORAGE_TYPE;
 
 const getAll = async ({ cameraId, parentId, logger }) => {
   logger(`cameraFileService.getAll cameraId: ${cameraId} parentId: ${parentId}`);
@@ -28,6 +30,10 @@ const getOneByName = async ({ fileName, logger }) => {
 
 const createOne = async ({ logger, ...payload }) => {
   logger && logger(`cameraFileService.createOne payload.name: ${payload.name}`);
+
+  if (storageType === 'disk') {
+    fileService.makeDir(path.join(...payload.path, payload.name));
+  }
 
   const file = new CameraFile({
     ...payload,

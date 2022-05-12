@@ -26,31 +26,28 @@ export const getDirsPaths = (names) => {
   };
 };
 
-export const readFilesAndDirs = (
+export const readFilesAndFolders = (
   pathToStorage,
   startPath,
   startParent,
   fileType = 'imageByTime',
-  foldetType = 'folder'
+  folderType = 'folder'
 ) => {
   const fullPath = path.join(pathToStorage, ...startPath);
-  const files = fs.readdirSync(fullPath);
-
-  console.log(222, 'files', files);
+  const items = fs.readdirSync(fullPath);
 
   const result = [];
 
-  files.forEach((fileName) => {
-    const fullFilePath = path.join(fullPath, fileName);
-    const fileStat = fs.statSync(fullFilePath);
+  items.forEach((itemName) => {
+    const fullItemPath = path.join(fullPath, itemName);
+    const itemStat = fs.statSync(fullItemPath);
+    const itemType = itemStat.isDirectory() ? folderType : fileType;
+    const item = { name: itemName, path: startPath, parent: startParent, type: itemType };
 
-    const item = { name: fileName, path: startPath, parent: startParent };
-
-    if (fileStat.isDirectory()) {
-      const nextPath = [...startPath, fileName];
-      result.push({ ...item, type: foldetType }, ...readFilesAndDirs(pathToStorage, nextPath, fileName));
+    if (itemStat.isDirectory()) {
+      result.push(item, ...readFilesAndFolders(pathToStorage, [...startPath, itemName], itemName));
     } else {
-      result.push({ ...item, type: fileType });
+      result.push(item);
     }
   });
 

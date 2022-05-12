@@ -4,7 +4,7 @@ import cameraFileService from '../services/cameraFile.service.js';
 import imageService from '../services/image.service.js';
 import * as consts from '../utils/constants.js';
 
-export default () => {
+export default (storage) => {
   const router = express.Router();
 
   router.get(
@@ -23,12 +23,12 @@ export default () => {
         return;
       }
 
-      const isThumbnail = req.query && req.query.size && req.query.size === 'thumbnail';
-
-      const stream = req.app.storage.openDownloadStream({
+      const stream = storage.openDownloadStream({
         file,
         logger: req.logger,
       });
+
+      const isThumbnail = req.query && req.query.size && req.query.size === 'thumbnail';
 
       if (isThumbnail) {
         stream.pipe(imageService.resize(consts.THUMBNAIL_SIZE)).pipe(res);
