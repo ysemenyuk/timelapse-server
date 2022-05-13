@@ -7,23 +7,22 @@ import { readFilesAndFolders } from '../utils/index.js';
 const dbUri = process.env.MONGO_URI;
 const pathToStorage = process.env.PATH_TO_STORAGE;
 
-// const pathToStorage = 'G:\\timelapse\\storage';
-const startPath = ['60b56c7c2fdb7d0b6a820a73', 'screenshots'];
-const startParent = 'screenshots';
+const startPath = ['627cbb044c4bb63594cc2bd2', 'ScreenshotsByTime'];
+const startParent = 'ScreenshotsByTime';
 
 const userId = '60db0585ad1d0c334ff80948';
-const cameraId = '60b56c7c2fdb7d0b6a820a73';
-const screenshotsFolderId = '60db02309ba0333035783f10';
+const cameraId = '627cbb044c4bb63594cc2bd2';
+const parentId = '627cbb054c4bb63594cc2bd8';
 
 const updateFolderInDb = async (folder) => {
-  const folderInDb = await CameraFile.findOne({ camera: cameraId, parent: screenshotsFolderId, name: folder.name });
+  const folderInDb = await CameraFile.findOne({ camera: cameraId, parent: parentId, name: folder.name });
 
   const item = {
     name: folder.name,
     date: moment(folder.name).format(),
     user: userId,
     camera: cameraId,
-    parent: screenshotsFolderId,
+    parent: parentId,
     path: folder.path,
     type: folder.type,
   };
@@ -40,7 +39,7 @@ const updateFolderInDb = async (folder) => {
 
 const updateFileInDb = async (file) => {
   const fileInDb = await CameraFile.findOne({ camera: cameraId, name: file.name });
-  const parentInDb = await CameraFile.findOne({ camera: cameraId, parent: screenshotsFolderId, name: file.parent });
+  const parentInDb = await CameraFile.findOne({ camera: cameraId, parent: parentId, name: file.parent });
 
   if (!parentInDb) {
     return;

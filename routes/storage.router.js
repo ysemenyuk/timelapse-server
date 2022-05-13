@@ -2,9 +2,10 @@ import express from 'express';
 import { asyncHandler } from '../middleware/errorHandlerMiddleware.js';
 import cameraFileService from '../services/cameraFile.service.js';
 import imageService from '../services/image.service.js';
+import storageService from '../services/storage.service.js';
 import * as consts from '../utils/constants.js';
 
-export default (storage) => {
+export default () => {
   const router = express.Router();
 
   router.get(
@@ -23,8 +24,9 @@ export default (storage) => {
         return;
       }
 
-      const stream = storage.openDownloadStream({
-        file,
+      const stream = storageService.openDownloadStream({
+        filePath: file.path,
+        fileName: file.name,
         logger: req.logger,
       });
 

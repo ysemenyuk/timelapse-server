@@ -9,7 +9,6 @@ import http from 'http';
 import cors from 'cors';
 import initWorker from './worker.js';
 import initSocket from './socket.js';
-import initStorage from './storage/index.js';
 import getRouters from './routes/index.js';
 import getControllers from './controllers/index.js';
 
@@ -17,9 +16,9 @@ const mode = process.env.NODE_ENV || 'development';
 const PORT = process.env.PORT || 4000;
 const dbUri = process.env.MONGO_URI;
 
-const logger = debug('server');
 const app = express();
 const httpServer = http.createServer(app);
+const logger = debug('server');
 
 if (mode === 'development') {
   app.use(debugMiddleware);
@@ -31,7 +30,7 @@ app.use(fileUpload());
 
 const startServer = async () => {
   try {
-    console.log(`Starting server`);
+    logger(`Starting server`);
 
     await mongoose.connect(dbUri, {
       useNewUrlParser: true,
@@ -39,21 +38,20 @@ const startServer = async () => {
       useFindAndModify: false,
     });
 
-    console.log(`Mongoose successfully Connected`);
     logger(`Mongoose successfully Connected`);
 
     const io = initSocket(httpServer);
-    const storage = await initStorage();
-    const worker = await initWorker(storage, io);
+    const worker = await initWorker(io);
+
+    logger(`worker successfully started`);
 
     app.io = io;
-    app.storage = storage;
     app.worker = worker;
 
     const routers = getRouters();
     const controllers = getControllers();
 
-    app.use('/files', routers.storage(storage));
+    app.use('/files', routers.storage());
 
     app.use('/api/cameras/:cameraId/tasks', routers.cameraTask(controllers.cameraTask()));
     app.use('/api/cameras/:cameraId/files', routers.cameraFile(controllers.cameraFile()));
@@ -67,7 +65,6 @@ const startServer = async () => {
     app.use(errorHandlerMiddleware);
 
     httpServer.listen(PORT, () => {
-      console.log(`httpServer running in ${mode} mode on port ${PORT}`);
       logger(`httpServer running in ${mode} mode on port ${PORT}`);
     });
   } catch (e) {

@@ -14,7 +14,7 @@ export default (cameraTaskController) => {
 
   router.post('/', asyncHandler(cameraTaskController.createOne));
   router.post('/screenshot', asyncHandler(cameraTaskController.createScreenshot));
-  router.post('/videofile', asyncHandler(cameraTaskController.createVideoFile));
+  router.post('/video', asyncHandler(cameraTaskController.createOne));
 
   router.put('/:taskId', asyncHandler(cameraTaskController.updateOne));
 

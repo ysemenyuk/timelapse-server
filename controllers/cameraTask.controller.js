@@ -1,5 +1,5 @@
-// import mongodb from 'mongodb';
 import cameraTaskService from '../services/cameraTask.service.js';
+import screenshotService from '../services/screenshot.service.js';
 
 export default () => {
   const getAll = async (req, res) => {
@@ -32,6 +32,7 @@ export default () => {
     const task = await cameraTaskService.createOne({
       userId: req.userId,
       cameraId: req.params.cameraId,
+      worker: req.app.worker,
       payload: req.body,
       logger: req.logger,
     });
@@ -68,11 +69,10 @@ export default () => {
   const createScreenshot = async (req, res) => {
     req.logger(`cameraTask.controller createScreenshot req.params.cameraId: ${req.params.cameraId}`);
 
-    const screenshot = await cameraService.createScreenshot({
+    const screenshot = await screenshotService.createScreenshot({
       userId: req.userId,
       cameraId: req.params.cameraId,
       payload: req.body,
-      storage: req.app.storage,
       logger: req.logger,
     });
 
@@ -80,20 +80,5 @@ export default () => {
     req.logResp(req);
   };
 
-  const createVideoFile = async (req, res) => {
-    req.logger(`cameraTask.controller createVideoFile req.params.cameraId: ${req.params.cameraId}`);
-
-    const videoFile = await cameraService.createVideoFile({
-      userId: req.userId,
-      cameraId: req.params.cameraId,
-      payload: req.body,
-      storage: req.app.storage,
-      logger: req.logger,
-    });
-
-    res.status(201).send(videoFile);
-    req.logResp(req);
-  };
-
-  return { getAll, getOne, createOne, updateOne, deleteOne, createScreenshot, createVideoFile };
+  return { getAll, getOne, createOne, updateOne, deleteOne, createScreenshot };
 };

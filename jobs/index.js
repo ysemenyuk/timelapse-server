@@ -1,7 +1,9 @@
-import consoleLogJob from './consoleLog.js';
-import screenshotsByTimeJob from './screenshotsByTime.js';
+import consoleLog from './consoleLog.js';
+import createScreenshot from './createScreenshot.js';
+import screenshotsByTime from './screenshotsByTime.js';
 
 export default {
-  consoleLog: consoleLogJob,
-  imageByTime: screenshotsByTimeJob,
+  consoleLog,
+  createScreenshot,
+  screenshotsByTime,
 };

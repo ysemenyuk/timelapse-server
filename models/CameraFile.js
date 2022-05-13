@@ -8,8 +8,8 @@ const CameraFileSchema = mongoose.Schema({
   parent: { type: mongoose.ObjectId, ref: 'CameraFile' },
   children: [{ type: mongoose.ObjectId, ref: 'CameraFile' }],
   type: { type: String }, // image, imageByTime, video, videoByTime, folder
-  storage: { type: String }, // disk, gridfs
   path: [{ type: String }],
+  removable: { type: Boolean, default: true },
 });
 
 const CameraFile = mongoose.model('CameraFile', CameraFileSchema);

@@ -4,9 +4,10 @@ import jobs from './jobs/index.js';
 
 const dbUri = process.env.MONGO_URI;
 const dbName = process.env.MONGO_DB_NAME;
-const jobTypes = process.env.JOB_TYPES ? process.env.JOB_TYPES.split(',') : [];
+// const jobTypes = process.env.JOB_TYPES ? process.env.JOB_TYPES.split(',') : [];
+const jobTypes = ['createScreenshot', 'screenshotsByTime'];
 
-export default async (storage, io) => {
+export default async (io) => {
   const { MongoClient } = mongodb;
 
   const mongoClient = new MongoClient(dbUri, {
@@ -15,16 +16,15 @@ export default async (storage, io) => {
   });
 
   await mongoClient.connect();
-  console.log(`mongoClient successfully Connected`);
 
   const agenda = new Agenda({ mongo: mongoClient.db(dbName) });
 
   jobTypes.forEach((type) => {
-    jobs[type](agenda, storage, io);
+    jobs[type](agenda, io);
   });
 
   await agenda.start();
-  console.log(`agenda successfully started`);
+  // console.log(`agenda successfully started`);
 
   // const { ObjectID } = mongodb;
   // const id = new ObjectID('61fd39591baa2821f1a4a508');
@@ -34,11 +34,6 @@ export default async (storage, io) => {
 
   return agenda;
 };
-
-// const agenda = new Agenda({ db: { adress: dbUri, options: {
-//   useNewUrlParser: true,
-//   useUnifiedTopology: true
-//  } }});
 
 // agenda.define('console1', { lockLifetime: 10000 }, (job) => {
 //   console.log(111111, new Date().toISOString(), job.attrs);

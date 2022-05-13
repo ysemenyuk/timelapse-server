@@ -59,11 +59,9 @@ export default () => {
       logger: req.logger,
     });
 
-    res.status(204).send();
+    res.status(204).send(deleted);
     req.logResp(req);
   };
-
-
 
   return { getAll, getOne, createOne, updateOne, deleteOne };
 };

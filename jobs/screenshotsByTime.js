@@ -1,5 +1,5 @@
-export default (agenda, storage, io) => {
-  agenda.define('screenshotsByTime', { lockLifetime: 1000 }, (job) => {
+export default (agenda, io) => {
+  agenda.define('screenshotsByTime', (job) => {
     console.log('screenshotsByTime job.attrs:', job.attrs);
   });
 };

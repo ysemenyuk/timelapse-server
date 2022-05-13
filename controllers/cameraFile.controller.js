@@ -41,29 +41,39 @@ export default () => {
   };
 
   const deleteOne = async (req, res) => {
-    req.logger(`cameraFileController.deleteOne api/cameras/:cameraId/files/${req.params.fileId}`);
+    const { fileId } = req.params;
 
-    const file = await cameraFileService.getOne({ fileId, logger });
+    req.logger(`cameraFileController.deleteOne api/cameras/:cameraId/files/${fileId}`);
+
+    const file = await cameraFileService.getOneById({ fileId, logger: req.logger });
 
     if (!file) {
-      req.logger(`cameraFileController.deleteOne api/cameras/:cameraId/files/${req.params.fileId}  - not found`);
+      req.logger(`cameraFileController.deleteOne api/cameras/:cameraId/files/${fileId}  - not found`);
       throw new Error('file not found');
     }
 
     // TODO: delete file from storage
+    
 
-    const deleted = await cameraFileService.deleteOne({ fileId, logger });
-    return deleted;
+    const deleted = await cameraFileService.deleteOne({ fileId, logger: req.logger });
+
+    console.log(123, deleted);
+
+    res.status(204).send(deleted);
+    req.logResp(req);
   };
 
   const deleteMany = async (req, res) => {
-    logger(`fileController.deleteMany api/cameras/:cameraId/files`);
+    req.logger(`fileController.deleteMany api/cameras/:cameraId/files`);
 
     // TODO: delete files from storage
 
     const filesIds = []; // from query or body?
 
-    return await cameraFileService.deleteMany({ filesIds, logger });
+    const deleted = await cameraFileService.deleteManyByIds({ filesIds, logger: req.logger });
+
+    res.status(204).send(deleted);
+    req.logResp(req);
   };
 
   return { getAll, getOne, createOne, deleteOne, deleteMany };

@@ -40,18 +40,19 @@ export default () => {
   };
 
   const getOne = async (req, res) => {
-    logger(`userController.getOne userId: ${req.userId}`);
+    req.logger(`userController.getOne userId: ${req.userId}`);
 
     const user = await userService.getById({
       userId: req.userId,
       logger: req.logger,
     });
 
-    return user;
+    res.status(200).send({ user });
+    req.logResp(req);
   };
 
   const updateOne = async (req, res) => {
-    logger(`userController.updateOne userId: ${req.userId}`);
+    req.logger(`userController.updateOne userId: ${req.userId}`);
 
     const updated = await userService.updateOne({
       userId: req.userId,
@@ -59,18 +60,20 @@ export default () => {
       logger: req.logger,
     });
 
-    return updated;
+    res.status(201).send({ user: updated });
+    req.logResp(req);
   };
 
   const deleteOne = async (req, res) => {
-    logger(`userController.deleteOne userId: ${req.userId}`);
+    req.logger(`userController.deleteOne userId: ${req.userId}`);
 
     const deleted = await userService.deleteOne({
       userId: req.userId,
       logger: req.logger,
     });
 
-    return deleted;
+    res.status(204).send({ user: deleted });
+    req.logResp(req);
   };
 
   return { singUp, logIn, auth, getOne, updateOne, deleteOne };

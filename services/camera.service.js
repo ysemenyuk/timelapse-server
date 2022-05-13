@@ -1,15 +1,10 @@
-// import fs from 'fs';
-import path from 'path';
-// const fsp = fs.promises;
-// import moment from 'moment';
-// import { makeFileName, promisifyUploadStream } from '../utils/index.js';
-import cameraFileService from './cameraFile.service.js';
-// import cameraApiService from './cameraApi.service.js';
-import cameraTaskService from './cameraTask.service.js';
 import Camera from '../models/Camera.js';
+import cameraFileService from './cameraFile.service.js';
+import storageService from './storage.service.js';
+import cameraTaskService from './cameraTask.service.js';
 import * as constants from '../utils/constants.js';
 
-const populateItems = ['avatar', 'mainFolder', 'screenshotsFolder', 'screenshotsByTimeFolder', 'imagesByTimeTask'];
+const populateItems = ['avatar', 'mainFolder', 'screenshotsFolder', 'screenshotsByTimeFolder'];
 
 const getAll = async ({ userId, logger }) => {
   logger(`cameraService.getAll userId: ${userId}`);
@@ -46,15 +41,16 @@ const createOne = async ({ userId, payload, logger }) => {
 
   await camera.save();
 
-  // create default folders for camera
+  // create default folders in db
 
   const mainFolder = await cameraFileService.createOne({
-    name: constants.MAIN,
+    name: camera._id.toString(),
     user: userId,
     camera: camera._id,
     parent: null,
     path: [],
     type: constants.FOLDER,
+    removable: false,
     logger,
   });
 
@@ -62,8 +58,9 @@ const createOne = async ({ userId, payload, logger }) => {
     user: userId,
     camera: camera._id,
     parent: mainFolder._id,
-    path: [camera._id.toString()],
+    path: [mainFolder.name],
     type: constants.FOLDER,
+    removable: false,
     logger,
   };
 
@@ -87,6 +84,38 @@ const createOne = async ({ userId, payload, logger }) => {
     ...foldersPayload,
   });
 
+  // create default folders on disk
+
+  await storageService.createFolder({
+    logger,
+    folderPath: mainFolder.path,
+    folderName: mainFolder.name,
+  });
+
+  await storageService.createFolder({
+    logger,
+    folderPath: screenshotsFolder.path,
+    folderName: screenshotsFolder.name,
+  });
+
+  await storageService.createFolder({
+    logger,
+    folderPath: screenshotsByTimeFolder.path,
+    folderName: screenshotsByTimeFolder.name,
+  });
+
+  await storageService.createFolder({
+    logger,
+    folderPath: videosFolder.path,
+    folderName: videosFolder.name,
+  });
+
+  await storageService.createFolder({
+    logger,
+    folderPath: videosByTimeFolder.path,
+    folderName: videosByTimeFolder.name,
+  });
+
   // TODO: create default tasks!
 
   await camera.updateOne({
@@ -100,33 +129,28 @@ const createOne = async ({ userId, payload, logger }) => {
   });
 
   const created = await Camera.findOne({ _id: camera._id }).populate(populateItems);
-
-  console.log(1111, 'created camera', created);
-
   return created;
 };
 
 const updateOne = async ({ cameraId, payload, logger }) => {
   logger(`cameraService.updateOne cameraId: ${cameraId}, payload: ${payload}`);
 
-  const updated = await Camera.updateOne({ _id: cameraId }, payload);
+  await Camera.updateOne({ _id: cameraId }, payload);
+
+  const updated = await Camera.findOne({ _id: cameraId }).populate(populateItems);
   return updated;
 };
 
 const deleteOne = async ({ cameraId, logger }) => {
   logger(`cameraService.deleteOne cameraId: ${cameraId}`);
 
-  // TODO: delete all camera folders, files, tasks
+  // TODO: delete camera folders and files on disk
 
-  const deletefFiles = await cameraFileService.deleteCameraFiles({ cameraId, logger });
-  console.log(1112, deletefFiles);
-
-  const deletefTasks = await cameraTaskService.deleteCameraTasks({ cameraId, logger });
-  console.log(1113, deletefTasks);
+  await cameraFileService.deleteCameraFiles({ cameraId, logger });
+  await cameraTaskService.deleteCameraTasks({ cameraId, logger });
 
   const camera = await Camera.findOne({ _id: cameraId });
   const deleted = await camera.remove();
-  console.log(1114, deleted);
 
   return deleted;
 };
