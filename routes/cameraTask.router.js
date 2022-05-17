@@ -15,7 +15,7 @@ export default (cameraTaskController) => {
   router.post('/screenshot', asyncHandler(cameraTaskController.createScreenshot));
   router.post('/', asyncHandler(cameraTaskController.createOne));
 
-  router.put('/:taskId/screenshotsByTime', asyncHandler(cameraTaskController.createScreenshotsByTime));
+  router.put('/:taskId/screenshotsByTime', asyncHandler(cameraTaskController.updateScreenshotsByTime));
   router.put('/:taskId', asyncHandler(cameraTaskController.updateOne));
 
   router.delete('/:taskId', asyncHandler(cameraTaskController.deleteOne));

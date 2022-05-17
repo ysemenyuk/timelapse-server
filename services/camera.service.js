@@ -36,18 +36,10 @@ const getOneById = async ({ logger, cameraId, populateItems = defaultPopulateIte
   return camera;
 };
 
-const createOne = async ({ userId, payload, logger, populateItems = defaultPopulateItems }) => {
+const createOne = async ({ logger, ...payload }) => {
   logger && logger(`cameraService.createOne payload.name: ${payload.name}`);
 
-  const { name, description, screenshotLink } = payload;
-
-  const camera = new Camera({
-    user: userId,
-    name,
-    description,
-    screenshotLink,
-  });
-
+  const camera = new Camera({ ...payload });
   await camera.save();
 
   // create default folders in db
@@ -125,7 +117,32 @@ const createOne = async ({ userId, payload, logger, populateItems = defaultPopul
     folderName: videosByTimeFolder.name,
   });
 
-  // TODO: create default tasks!
+  // create defaul task (tasksBytime)
+
+  const screenshotsByTimeTask = await cameraTaskService.createOne({
+    logger,
+    userId,
+    cameraId: camera._id,
+    type: 'screenshotsByTime',
+    screenshotsByTimeTotalFiles: 0,
+    screenshotsByTimeSettings: {
+      startTime: '08:00',
+      stopTime: '20:00',
+      interval: 60,
+    },
+  });
+
+  const videosByTimeTask = await cameraTaskService.createOne({
+    logger,
+    userId,
+    cameraId: camera._id,
+    type: 'videosByTime',
+    videosByTimeTotalFiles: 0,
+    screenshotsByTimeSettings: {
+      startTime: '08:00',
+      length: 60,
+    },
+  });
 
   await camera.updateOne({
     mainFolder: mainFolder._id,
@@ -133,24 +150,24 @@ const createOne = async ({ userId, payload, logger, populateItems = defaultPopul
     screenshotsByTimeFolder: screenshotsByTimeFolder._id,
     videosFolder: videosFolder._id,
     videosByTimeFolder: videosByTimeFolder._id,
-    screenshotsByTimeTask: null,
-    videosByTimeTask: null,
+    screenshotsByTimeTask: screenshotsByTimeTask._id,
+    videosByTimeTask: videosByTimeTask._id,
   });
 
-  const created = await Camera.findOne({ _id: camera._id }).populate(populateItems);
-  return created;
+  const createdCamera = await Camera.findOne({ _id: camera._id }).populate(defaultPopulateItems);
+  return createdCamera;
 };
 
-const updateOne = async ({ logger, cameraId, payload, populateItems = defaultPopulateItems }) => {
-  logger && logger(`cameraService.updateOne cameraId: ${cameraId}, payload: ${payload}`);
+const updateOneById = async ({ logger, cameraId, payload }) => {
+  logger && logger(`cameraService.updateOne cameraId: ${cameraId}`);
 
   await Camera.updateOne({ _id: cameraId }, payload);
 
-  const updated = await Camera.findOne({ _id: cameraId }).populate(populateItems);
+  const updated = await Camera.findOne({ _id: cameraId }).populate(defaultPopulateItems);
   return updated;
 };
 
-const deleteOne = async ({ cameraId, logger }) => {
+const deleteOneById = async ({ logger, cameraId }) => {
   logger && logger(`cameraService.deleteOne cameraId: ${cameraId}`);
 
   // TODO: delete camera folders and files on disk
@@ -164,4 +181,4 @@ const deleteOne = async ({ cameraId, logger }) => {
   return deleted;
 };
 
-export default { getAll, getOne, getOneById, createOne, updateOne, deleteOne };
+export default { getAll, getOne, getOneById, createOne, updateOneById, deleteOneById };

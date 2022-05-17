@@ -5,8 +5,8 @@ export default () => {
     req.logger('cameraController GET /api/cameras/');
 
     const cameras = await cameraService.getAll({
-      userId: req.userId,
       logger: req.logger,
+      userId: req.userId,
     });
 
     res.status(200).send(cameras);
@@ -17,8 +17,8 @@ export default () => {
     req.logger(`cameraController.get /api/cameras/${req.params.cameraId}`);
 
     const camera = await cameraService.getOne({
-      cameraId: req.params.cameraId,
       logger: req.logger,
+      cameraId: req.params.cameraId,
     });
 
     res.status(200).send(camera);
@@ -28,10 +28,13 @@ export default () => {
   const createOne = async (req, res) => {
     req.logger('cameraController.post /api/cameras');
 
+    // TODO: check req.body take fields by schema!
+    const payload = req.body;
+
     const camera = await cameraService.createOne({
-      userId: req.userId,
-      payload: req.body,
       logger: req.logger,
+      user: req.userId,
+      ...payload,
     });
 
     res.status(201).send(camera);
@@ -41,10 +44,13 @@ export default () => {
   const updateOne = async (req, res) => {
     req.logger(`cameraController.updateOne /api/cameras/${req.params.cameraId}`);
 
-    const updated = await cameraService.updateOne({
-      cameraId: req.params.cameraId,
-      payload: req.body,
+    // TODO: check req.body take fields by schema!
+    const payload = req.body;
+
+    const updated = await cameraService.updateOneById({
       logger: req.logger,
+      cameraId: req.params.cameraId,
+      payload,
     });
 
     res.status(201).send(updated);
@@ -54,9 +60,9 @@ export default () => {
   const deleteOne = async (req, res) => {
     req.logger(`cameraController.deleteOne /api/cameras/${req.params.cameraId}`);
 
-    const deleted = await cameraService.deleteOne({
-      cameraId: req.params.cameraId,
+    const deleted = await cameraService.deleteOneById({
       logger: req.logger,
+      cameraId: req.params.cameraId,
     });
 
     res.status(204).send(deleted);

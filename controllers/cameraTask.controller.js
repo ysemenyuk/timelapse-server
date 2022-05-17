@@ -1,5 +1,4 @@
 import cameraTaskService from '../services/cameraTask.service.js';
-import screenshotService from '../services/screenshot.service.js';
 
 export default () => {
   const getAll = async (req, res) => {
@@ -29,36 +28,41 @@ export default () => {
   const createOne = async (req, res) => {
     req.logger(`cameraTask.controller createOne api/cameras/:cameraId/tasks/`);
 
+    // TODO: check req.body take fields by schema!
+    const payload = req.body;
+
     const task = await cameraTaskService.createOne({
-      userId: req.userId,
-      cameraId: req.params.cameraId,
-      worker: req.app.worker,
-      payload: req.body,
       logger: req.logger,
+      user: req.userId,
+      camera: req.params.cameraId,
+      ...payload,
     });
 
     res.status(201).send(task);
     req.logResp(req);
   };
 
-  const updateOne = async (req, res) => {
-    req.logger(`cameraTask.controller updateOne api/cameras/:cameraId/tasks/${req.params.taskId}`);
+  const updateOneById = async (req, res) => {
+    req.logger(`cameraTask.controller updateOneById api/cameras/:cameraId/tasks/${req.params.taskId}`);
+
+    // TODO: check req.body take fields by schema!
+    const payload = req.body;
 
     const updated = await cameraTaskService.updateOne({
-      taskId: req.params.taskId,
-      payload: req.body,
       logger: req.logger,
+      taskId: req.params.taskId,
+      payload,
     });
 
     res.status(201).send(updated);
     req.logResp(req);
   };
 
-  const deleteOne = async (req, res) => {
+  const deleteOneById = async (req, res) => {
     req.logger(`cameraTask.controller deleteOne api/cameras/:cameraId/tasks/${req.params.taskId}`);
 
     const deleted = await cameraTaskService.deleteOne({
-      id: req.params.taskId,
+      taskId: req.params.taskId,
       logger: req.logger,
     });
 
@@ -80,10 +84,10 @@ export default () => {
     req.logResp(req);
   };
 
-  const createScreenshotsByTime = async (req, res) => {
+  const updateScreenshotsByTime = async (req, res) => {
     req.logger(`cameraTask.controller createScreenshotsByTime`);
 
-    const task = await cameraTaskService.createScreenshotsByTime({
+    const task = await cameraTaskService.updateScreenshotsByTime({
       userId: req.userId,
       cameraId: req.params.cameraId,
       taskId: req.params.taskId,
@@ -100,9 +104,9 @@ export default () => {
     getAll,
     getOne,
     createOne,
-    updateOne,
-    deleteOne,
+    updateOneById,
+    deleteOneById,
     createScreenshot,
-    createScreenshotsByTime,
+    updateScreenshotsByTime,
   };
 };

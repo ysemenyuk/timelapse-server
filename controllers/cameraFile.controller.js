@@ -29,11 +29,14 @@ export default () => {
   const createOne = async (req, res) => {
     req.logger('cameraFileController.createOne api/cameras/:cameraId/files');
 
+    // TODO: check req.body take fields by schema!
+    const payload = req.body;
+
     const file = await cameraFileService.createOne({
-      userId: req.userId,
-      cameraId: req.cameraId,
-      ...req.body,
       logger: req.logger,
+      user: req.userId,
+      camera: req.cameraId,
+      ...payload,
     });
 
     res.status(201).send(file);
@@ -53,7 +56,6 @@ export default () => {
     }
 
     // TODO: delete file from storage
-    
 
     const deleted = await cameraFileService.deleteOne({ fileId, logger: req.logger });
 

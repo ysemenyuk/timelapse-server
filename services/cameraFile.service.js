@@ -37,7 +37,7 @@ const createOne = async ({ logger, ...payload }) => {
   return file;
 };
 
-const updateOne = async ({ logger, fileId, payload }) => {
+const updateOneById = async ({ logger, fileId, payload }) => {
   logger && logger(`cameraFileService.updateOne fileId: ${fileId}, payload: ${payload}`);
 
   const updated = await CameraFile.updateOne({ _id: fileId }, payload);
@@ -75,7 +75,7 @@ export default {
   getOneById,
   getOneByName,
   createOne,
-  updateOne,
+  updateOneById,
   deleteOneById,
   deleteCameraFiles,
   deleteManyByIds,
