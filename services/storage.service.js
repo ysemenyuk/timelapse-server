@@ -10,6 +10,8 @@ const createFolder = async ({ logger, folderPath, folderName }) => {
   logger && logger(`disk.storage.makeFolder fileName: ${folderName}`);
 
   const fullPath = creteFullPath(folderPath, folderName);
+  logger && logger(`disk.storage.makeFolder fullPath: ${fullPath}`);
+
   const folder = await fsp.mkdir(fullPath);
   return folder;
 };
@@ -68,12 +70,12 @@ const openDownloadStream = ({ logger, filePath, fileName }) => {
   return stream;
 };
 
-export default { 
-  createFolder, 
-  writeFile, 
-  readFile, 
-  removeFolder, 
-  removeFile, 
-  openUploadStream, 
-  openDownloadStream 
+export default {
+  createFolder,
+  writeFile,
+  readFile,
+  removeFolder,
+  removeFile,
+  openUploadStream,
+  openDownloadStream,
 };

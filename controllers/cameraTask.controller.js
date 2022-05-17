@@ -17,7 +17,7 @@ export default () => {
   const getOne = async (req, res) => {
     req.logger(`cameraTask.controller getOne api/cameras/:cameraId/tasks/${req.params.taskId}`);
 
-    const task = await cameraTaskService.getOne({
+    const task = await cameraTaskService.getOneById({
       taskId: req.params.taskId,
       logger: req.logger,
     });
@@ -67,18 +67,42 @@ export default () => {
   };
 
   const createScreenshot = async (req, res) => {
-    req.logger(`cameraTask.controller createScreenshot req.params.cameraId: ${req.params.cameraId}`);
+    req.logger(`cameraTask.controller createScreenshot`);
 
-    const screenshot = await screenshotService.createScreenshot({
+    const task = await cameraTaskService.createScreenshot({
       userId: req.userId,
       cameraId: req.params.cameraId,
-      payload: req.body,
+      worker: req.app.worker,
       logger: req.logger,
     });
 
-    res.status(201).send(screenshot);
+    res.status(201).send(task);
     req.logResp(req);
   };
 
-  return { getAll, getOne, createOne, updateOne, deleteOne, createScreenshot };
+  const createScreenshotsByTime = async (req, res) => {
+    req.logger(`cameraTask.controller createScreenshotsByTime`);
+
+    const task = await cameraTaskService.createScreenshotsByTime({
+      userId: req.userId,
+      cameraId: req.params.cameraId,
+      taskId: req.params.taskId,
+      payload: req.body,
+      worker: req.app.worker,
+      logger: req.logger,
+    });
+
+    res.status(201).send(task);
+    req.logResp(req);
+  };
+
+  return {
+    getAll,
+    getOne,
+    createOne,
+    updateOne,
+    deleteOne,
+    createScreenshot,
+    createScreenshotsByTime,
+  };
 };

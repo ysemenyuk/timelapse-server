@@ -4,31 +4,40 @@ import storageService from './storage.service.js';
 import cameraTaskService from './cameraTask.service.js';
 import * as constants from '../utils/constants.js';
 
-const populateItems = ['avatar', 'mainFolder', 'screenshotsFolder', 'screenshotsByTimeFolder'];
+const defaultPopulateItems = [
+  'avatar',
+  'mainFolder',
+  'screenshotsFolder',
+  'screenshotsByTimeFolder',
+  // 'screenshotsByTimeTask',
+  'videosFolder',
+  'videosByTimeFolder',
+  // 'videosByTimeTask',
+];
 
-const getAll = async ({ userId, logger }) => {
-  logger(`cameraService.getAll userId: ${userId}`);
+const getAll = async ({ userId, logger, populateItems = defaultPopulateItems }) => {
+  logger && logger(`cameraService.getAll userId: ${userId}`);
 
   const cameras = await Camera.find({ user: userId }).populate(populateItems);
   return cameras;
 };
 
-const getOne = async ({ cameraId, logger }) => {
-  logger(`cameraService.getOne cameraId: ${cameraId}`);
+const getOne = async ({ cameraId, logger, populateItems = defaultPopulateItems }) => {
+  logger && logger(`cameraService.getOne cameraId: ${cameraId}`);
 
   const camera = await Camera.findOne({ _id: cameraId }).populate(populateItems);
   return camera;
 };
 
-const getOneById = async ({ cameraId, logger }) => {
-  logger(`cameraService.getOneById cameraId: ${cameraId}`);
+const getOneById = async ({ logger, cameraId, populateItems = defaultPopulateItems }) => {
+  logger && logger(`cameraService.getOneById cameraId: ${cameraId}`);
 
   const camera = await Camera.findOne({ _id: cameraId }).populate(populateItems);
   return camera;
 };
 
-const createOne = async ({ userId, payload, logger }) => {
-  logger(`cameraService.createOne payload.name: ${payload.name}`);
+const createOne = async ({ userId, payload, logger, populateItems = defaultPopulateItems }) => {
+  logger && logger(`cameraService.createOne payload.name: ${payload.name}`);
 
   const { name, description, screenshotLink } = payload;
 
@@ -132,8 +141,8 @@ const createOne = async ({ userId, payload, logger }) => {
   return created;
 };
 
-const updateOne = async ({ cameraId, payload, logger }) => {
-  logger(`cameraService.updateOne cameraId: ${cameraId}, payload: ${payload}`);
+const updateOne = async ({ logger, cameraId, payload, populateItems = defaultPopulateItems }) => {
+  logger && logger(`cameraService.updateOne cameraId: ${cameraId}, payload: ${payload}`);
 
   await Camera.updateOne({ _id: cameraId }, payload);
 
@@ -142,7 +151,7 @@ const updateOne = async ({ cameraId, payload, logger }) => {
 };
 
 const deleteOne = async ({ cameraId, logger }) => {
-  logger(`cameraService.deleteOne cameraId: ${cameraId}`);
+  logger && logger(`cameraService.deleteOne cameraId: ${cameraId}`);
 
   // TODO: delete camera folders and files on disk
 

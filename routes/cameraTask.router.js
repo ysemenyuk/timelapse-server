@@ -9,13 +9,13 @@ export default (cameraTaskController) => {
   router.use(authMiddleware);
   router.use(userCameraMiddleware);
 
-  router.get('/', asyncHandler(cameraTaskController.getAll));
   router.get('/:taskId', asyncHandler(cameraTaskController.getOne));
+  router.get('/', asyncHandler(cameraTaskController.getAll));
 
-  router.post('/', asyncHandler(cameraTaskController.createOne));
   router.post('/screenshot', asyncHandler(cameraTaskController.createScreenshot));
-  router.post('/video', asyncHandler(cameraTaskController.createOne));
+  router.post('/', asyncHandler(cameraTaskController.createOne));
 
+  router.put('/:taskId/screenshotsByTime', asyncHandler(cameraTaskController.createScreenshotsByTime));
   router.put('/:taskId', asyncHandler(cameraTaskController.updateOne));
 
   router.delete('/:taskId', asyncHandler(cameraTaskController.deleteOne));

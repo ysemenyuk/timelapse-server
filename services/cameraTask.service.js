@@ -1,64 +1,55 @@
+import mongodb from 'mongodb';
 import CameraTask from '../models/CameraTask.js';
+import cameraService from './camera.service.js';
 
 const getAll = async ({ cameraId, logger }) => {
-  logger(`cameraTaskService.getAll cameraId: ${cameraId}`);
+  logger && logger(`cameraTaskService.getAll cameraId: ${cameraId}`);
   const tasks = await CameraTask.find({ camera: cameraId });
   return tasks;
 };
 
-const getOne = async ({ taskId, logger }) => {
-  logger(`cameraTaskService.getOne taskId: ${taskId}`);
+const getOne = async ({ logger, ...query }) => {
+  logger && logger(`cameraTaskService.getOne`);
+  const task = await CameraTask.findOne({ ...query });
+  return task;
+};
+
+const getOneById = async ({ taskId, logger }) => {
+  logger && logger(`cameraTaskService.getOne taskId: ${taskId}`);
   const task = await CameraTask.findOne({ _id: taskId });
   return task;
 };
 
-const createOne = async ({ userId, cameraId, payload, worker, logger }) => {
-  logger(`cameraTaskService.createOne`);
+const createOne = async ({ userId, cameraId, payload, logger }) => {
+  logger && logger(`cameraTaskService.createOne`);
 
-  // TODO: create jobs?
+  const { status, screenshotsByTime } = payload;
 
-  console.log(33333333);
+  const task = new CameraTask({
+    user: userId,
+    camera: cameraId,
+    type: 'createScreenshotsByTime',
+    status,
+    screenshotsByTime,
+  });
 
-  const job = worker.create('screenshotsByTime', { userId, cameraId });
-  job.repeatEvery('1 minute');
+  await task.save();
 
-  await job.save();
+  await cameraService.updateOne({ logger, cameraId, payload: { screenshotsByTimeTask: task._id } });
 
-  console.log(222, job);
-
-  // const task = new CameraTask({
-  //   user: userId,
-  //   camera: cameraId,
-  //   name: 'createScreenshot',
-  //   status: 'started',
-  //   job: job.attrs._id,
-  // });
-
-  // await task.save();
-  // await job.save();
-  // return task;
+  return task;
 };
 
-const updateOne = async ({ taskId, payload, worker, logger }) => {
-  logger(`cameraTaskService.updateOne taskId: ${taskId}, payload: ${payload}`);
-  return await CameraTask.updateOne({ _id: id }, payload);
+const updateOne = async ({ taskId, payload, logger }) => {
+  logger && logger(`cameraTaskService.updateOne taskId: ${taskId}`);
 
-  // const { ObjectID } = mongodb;
-  // const id = new ObjectID(task.job);
-
-  // const { jobName, status, ...data } = payload;
-
-  // const jobs = await worker.jobs({ _id: task.job });
-
-  // console.log(111333, jobs);
-
-  // await CameraTask.updateOne({ _id: taskId }, payload);
-  // const updated = await CameraTask.findOne({ _id: taskId });
-  // return updated;
+  await CameraTask.updateOne({ _id: taskId }, payload);
+  const updated = await CameraTask.findOne({ _id: taskId });
+  return updated;
 };
 
 const deleteOne = async ({ taskId, logger }) => {
-  logger(`cameraTaskService.deleteOne taskId: ${taskId}`);
+  logger && logger(`cameraTaskService.deleteOne taskId: ${taskId}`);
 
   const camera = await CameraTask.findOne({ _id: taskId });
   const deleted = await camera.remove();
@@ -66,7 +57,7 @@ const deleteOne = async ({ taskId, logger }) => {
 };
 
 const deleteCameraTasks = async ({ cameraId, logger }) => {
-  logger(`cameraFileService.deleteCameraTasks`);
+  logger && logger(`cameraFileService.deleteCameraTasks`);
 
   // console.log('ids', ids);
 
@@ -74,4 +65,65 @@ const deleteCameraTasks = async ({ cameraId, logger }) => {
   return deleted;
 };
 
-export default { getAll, getOne, createOne, updateOne, deleteOne, deleteCameraTasks };
+const createScreenshot = async ({ userId, cameraId, worker, logger }) => {
+  logger && logger(`cameraTaskService.createScreenshot`);
+
+  const task = new CameraTask({
+    user: userId,
+    camera: cameraId,
+    type: 'createScreenshot',
+    createdAt: new Date(),
+    startedAt: new Date(),
+    status: 'Running',
+  });
+
+  await task.save();
+
+  const job = worker.create('createScreenshot', { userId, cameraId, taskId: task._id });
+
+  await job.save();
+
+  return task;
+};
+
+const createScreenshotsByTime = async ({ userId, cameraId, taskId, payload, worker, logger }) => {
+  logger && logger(`cameraTaskService.createScreenshotsByTime`);
+
+  const { status, screenshotsByTime } = payload;
+  const { startTime, stopTime, interval } = screenshotsByTime;
+
+  const jobs = await worker.jobs({ name: 'createScreenshotsByTime', 'data.cameraId': cameraId });
+
+  if (jobs[0]) {
+    await jobs[0].remove();
+  }
+
+  if (status === 'Running') {
+    const task = await CameraTask.findOne({ _id: taskId });
+
+    const job = worker.create('createScreenshotsByTime', { userId, cameraId, taskId });
+    job.repeatEvery(`${task.screenshotsByTime.interval} seconds`);
+
+    await job.save();
+  }
+
+  const updatedTask = await CameraTask.findOneAndUpdate(
+    { _id: taskId },
+    { status, screenshotsByTime: { startTime, stopTime, interval } },
+    { new: true }
+  );
+
+  return updatedTask;
+};
+
+export default {
+  getAll,
+  getOne,
+  getOneById,
+  createOne,
+  updateOne,
+  deleteOne,
+  deleteCameraTasks,
+  createScreenshot,
+  createScreenshotsByTime,
+};

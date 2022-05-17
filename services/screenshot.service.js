@@ -5,23 +5,18 @@ import cameraService from './camera.service.js';
 import * as constants from '../utils/constants.js';
 import storageService from './storage.service.js';
 
-const createScreenshot = async ({ logger, userId, cameraId, payload }) => {
-  const { parentId } = payload;
+const createScreenshot = async ({ logger, userId, camera, parent }) => {
+  logger && logger(`screenshotService.createScreenshot`);
 
-  logger(`screenshotService.createScreenshot parentId: ${parentId}`);
-
-  const camera = await cameraService.getOne({ cameraId, logger });
-  const parent = await cameraFileService.getOneById({ fileId: parentId, logger });
-
-  // TODO: check folder if not exist create
-
-  const filePath = [...parent.path, parent.name];
+  // const camera = await cameraService.getOneById({ cameraId, populateItems: [], logger });
+  // const parent = await cameraFileService.getOneById({ fileId: parentId, logger });
 
   const date = new Date();
   const fileName = makeFileName(date);
+  const filePath = [...parent.path, parent.name];
 
   const dataStream = await cameraApiService.getScreenshot(camera.screenshotLink, 'stream');
-  const uploadStream = storageService.openUploadStream({ filePath, fileName, logger });
+  const uploadStream = storageService.openUploadStream({ filePath, fileName });
 
   dataStream.pipe(uploadStream);
 
@@ -31,14 +26,12 @@ const createScreenshot = async ({ logger, userId, cameraId, payload }) => {
     name: fileName,
     date: date,
     user: userId,
-    camera: cameraId,
-    parent: parentId,
+    camera: camera._id,
+    parent: parent._id,
     path: filePath,
     type: constants.SCREENSHOT,
     logger,
   });
-
-  console.log(33333, 'screenshot', screenshot);
 
   return screenshot;
 };
