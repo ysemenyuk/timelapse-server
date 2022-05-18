@@ -7,7 +7,7 @@ const CameraFileSchema = mongoose.Schema({
   camera: { type: mongoose.ObjectId, ref: 'Camera' },
   parent: { type: mongoose.ObjectId, ref: 'CameraFile' },
   children: [{ type: mongoose.ObjectId, ref: 'CameraFile' }],
-  type: { type: String }, // image, imageByTime, video, videoByTime, folder
+  type: { type: String }, // screenshot, screenshotByTime, video, videoByTime, folder
   path: [{ type: String }],
   removable: { type: Boolean, default: true },
 });

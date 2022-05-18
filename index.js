@@ -1,16 +1,19 @@
-import express from 'express';
 import 'dotenv/config';
+import express from 'express';
 import mongoose from 'mongoose';
-import fileUpload from 'express-fileupload';
 import debug from 'debug';
-import debugMiddleware from './middleware/debugMiddleware.js';
-import { errorHandlerMiddleware } from './middleware/errorHandlerMiddleware.js';
 import http from 'http';
 import cors from 'cors';
+import fileUpload from 'express-fileupload';
+import debugMiddleware from './middleware/debugMiddleware.js';
+import { errorHandlerMiddleware } from './middleware/errorHandlerMiddleware.js';
 import initWorker from './worker.js';
 import initSocket from './socket.js';
-import getRouters from './routes/index.js';
-import getControllers from './controllers/index.js';
+import cameraRouter from './routes/camera.router.js';
+import cameraFileRouter from './routes/cameraFile.router.js';
+import cameraTaskRouter from './routes/cameraTask.router.js';
+import storageRouter from './routes/storage.router.js';
+import userRouter from './routes/user.router.js';
 
 const mode = process.env.NODE_ENV || 'development';
 const PORT = process.env.PORT || 4000;
@@ -48,15 +51,12 @@ const startServer = async () => {
     app.io = io;
     app.worker = worker;
 
-    const routers = getRouters();
-    const controllers = getControllers();
+    app.use('/files', storageRouter);
 
-    app.use('/files', routers.storage());
-
-    app.use('/api/cameras/:cameraId/tasks', routers.cameraTask(controllers.cameraTask()));
-    app.use('/api/cameras/:cameraId/files', routers.cameraFile(controllers.cameraFile()));
-    app.use('/api/cameras', routers.camera(controllers.camera()));
-    app.use('/api/users', routers.user(controllers.user()));
+    app.use('/api/cameras/:cameraId/tasks', cameraTaskRouter);
+    app.use('/api/cameras/:cameraId/files', cameraFileRouter);
+    app.use('/api/cameras', cameraRouter);
+    app.use('/api/users', userRouter);
 
     app.use((req, res) => {
       res.status(404).send('Sorry cant find that!');

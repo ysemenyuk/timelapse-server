@@ -27,7 +27,7 @@ const createOne = async ({ logger, ...payload }) => {
   return task;
 };
 
-const updateOne = async ({ logger, taskId, payload }) => {
+const updateOneById = async ({ logger, taskId, payload }) => {
   logger && logger(`cameraTaskService.updateOne taskId: ${taskId}`);
 
   await CameraTask.updateOne({ _id: taskId }, payload);
@@ -35,7 +35,7 @@ const updateOne = async ({ logger, taskId, payload }) => {
   return updated;
 };
 
-const deleteOne = async ({ taskId, logger }) => {
+const deleteOneById = async ({ logger, taskId }) => {
   logger && logger(`cameraTaskService.deleteOne taskId: ${taskId}`);
 
   const camera = await CameraTask.findOne({ _id: taskId });
@@ -104,8 +104,8 @@ export default {
   getOne,
   getOneById,
   createOne,
-  updateOne,
-  deleteOne,
+  updateOneById,
+  deleteOneById,
   deleteCameraTasks,
   createScreenshotTask,
   updateScreenshotsByTimeTask,

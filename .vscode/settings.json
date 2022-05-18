@@ -4,7 +4,7 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "editor.formatOnSave": true,
-  "eslint.format.enable": true,
+
   "editor.codeActionsOnSave": {
     "source.fixAll": true,
     "source.fixAll.eslint": true
@@ -13,5 +13,10 @@
   "eslint.options": {
     "ignore": false
   },
-  "prettier.printWidth": 120
+  "eslint.alwaysShowStatus": true,
+  "eslint.codeActionsOnSave.mode": "problems",
+  "eslint.format.enable": true,
+  "prettier.printWidth": 120,
+  "eslint.debug": true,
+  "eslint.lintTask.enable": true
 }

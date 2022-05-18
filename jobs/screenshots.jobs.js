@@ -4,7 +4,6 @@ import cameraTaskService from '../services/cameraTask.service.js';
 import screenshotService from '../services/screenshot.service.js';
 import { dd, makeTodayName, parseTime } from '../utils/index.js';
 import * as constants from '../utils/constants.js';
-import storageService from '../services/storage.service.js';
 
 export default (agenda, io, logger) => {
   agenda.define('createScreenshot', async (job) => {
@@ -20,16 +19,17 @@ export default (agenda, io, logger) => {
     // console.log(2222, 'camera', camera);
 
     const screenshot = await screenshotService.createScreenshot({
-      logger,
+      logger: logg,
       userId,
       camera,
       parent,
+      type: 'Screenshot',
     });
 
     console.log(3333, 'createScreenshot screenshot', screenshot);
 
     const updatedTask = await cameraTaskService.updateOne({
-      logger,
+      logger: logg,
       taskId,
       payload: { status: 'Finished', finishedAt: new Date() },
     });
@@ -49,7 +49,7 @@ export default (agenda, io, logger) => {
 
     const { cameraId, userId, taskId } = job.attrs.data;
 
-    const task = await cameraTaskService.getOneById({ taskId });
+    const task = await cameraTaskService.getOneById({ logger: logg, taskId });
     // console.log(2222, 'createScreenshotsByTime task', task);
 
     const { screenshotsByTimeSettings } = task;
@@ -68,20 +68,24 @@ export default (agenda, io, logger) => {
       return;
     }
 
-    const camera = await cameraService.getOneById({ cameraId, populateItems: ['screenshotsByTimeFolder'] });
+    const camera = await cameraService.getOneById({
+      logger: logg,
+      cameraId,
+      populateItems: ['screenshotsByTimeFolder'],
+    });
     // console.log(2222, 'camera', camera);
 
     const todayFolderName = makeTodayName(time);
     // console.log(9999, 'folderName:', todayFolderName);
 
-    let parent = await cameraFileService.getOneByName({ fileName: todayFolderName });
+    let parent = await cameraFileService.getOne({ logger: logg, camera: cameraId, name: todayFolderName });
     // console.log(9999, 'parent:', parent);
 
     // TODO: check folder on disk?
 
     if (!parent) {
-      parent = await cameraFileService.createOne({
-        logger,
+      parent = await cameraFileService.createFolder({
+        logger: logg,
         user: userId,
         camera: camera._id,
         name: todayFolderName,
@@ -89,29 +93,24 @@ export default (agenda, io, logger) => {
         path: [...camera.screenshotsByTimeFolder.path, camera.screenshotsByTimeFolder.name],
         type: constants.FOLDER,
       });
-
-      await storageService.createFolder({
-        logger,
-        folderPath: todayFolder.path,
-        folderName: todayFolder.name,
-      });
     }
 
     // console.log(9999, 'parent:', parent);
 
     const screenshot = await screenshotService.createScreenshot({
-      logger,
+      logger: logg,
       userId,
       camera,
       parent,
+      type: 'ScreenshotByTime',
     });
 
     console.log(3333, 'createScreenshot screenshot', screenshot);
 
     const screenshotsByTimeTotalFiles = task.screenshotsByTimeTotalFiles ? task.screenshotsByTimeTotalFiles + 1 : 1;
 
-    const updatedTask = await cameraTaskService.updateOne({
-      logger,
+    const updatedTask = await cameraTaskService.updateOneById({
+      logger: logg,
       taskId,
       payload: { screenshotsByTimeTotalFiles },
     });
