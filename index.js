@@ -58,11 +58,11 @@ const startServer = async () => {
     app.use('/api/cameras', cameraRouter);
     app.use('/api/users', userRouter);
 
+    app.use(errorHandlerMiddleware);
+
     app.use((req, res) => {
       res.status(404).send('Sorry cant find that!');
     });
-
-    app.use(errorHandlerMiddleware);
 
     httpServer.listen(PORT, () => {
       logger(`httpServer running in ${mode} mode on port ${PORT}`);

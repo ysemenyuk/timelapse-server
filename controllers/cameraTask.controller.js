@@ -76,7 +76,7 @@ const createScreenshotTask = async (req, res) => {
     worker: req.app.worker,
     logger: req.logger,
     userId: req.userId,
-    cameraId: req.params.cameraId,
+    cameraId: req.cameraId,
   });
 
   res.status(201).send(task);

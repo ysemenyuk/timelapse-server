@@ -1,12 +1,50 @@
 import cameraFileService from '../services/cameraFile.service.js';
 
 const getAll = async (req, res) => {
-  req.logger(`cameraFileController.getAll api/cameras/:cameraId/files?parent=${req.query.parentId}`);
+  req.logger(`cameraFileController.getAll api/cameras/:cameraId/files`);
+
+  console.log(9999, req.query);
+
+  if (req.query.parentId) {
+    const files = await cameraFileService.getManyByParentId({
+      logger: req.logger,
+      cameraId: req.cameraId,
+      parentId: req.query.parentId,
+    });
+
+    res.status(200).send(files);
+    req.logResp(req);
+    return;
+  }
+
+  if (req.query.query) {
+    const files = await cameraFileService.getManyByQuery({
+      logger: req.logger,
+      cameraId: req.cameraId,
+      query: req.query,
+    });
+
+    res.status(200).send(files);
+    req.logResp(req);
+    return;
+  }
+
+  if (req.query.count) {
+    const count = await cameraFileService.getCountByQuery({
+      logger: req.logger,
+      cameraId: req.cameraId,
+      query: req.query,
+    });
+
+    res.status(200).send({ count });
+    req.logResp(req);
+    return;
+  }
 
   const files = await cameraFileService.getAll({
-    cameraId: req.cameraId,
-    parentId: req.query.parentId,
     logger: req.logger,
+    cameraId: req.cameraId,
+    query: req.query,
   });
 
   res.status(200).send(files);
@@ -14,9 +52,9 @@ const getAll = async (req, res) => {
 };
 
 const getOne = async (req, res) => {
-  req.logger(`cameraFileController.getOne api/cameras/:cameraId/files/${req.params.fileId}`);
+  req.logger(`cameraFileController.getOne api/cameras/:cameraId/files/:fileId`);
 
-  const file = await cameraFileService.getOne({
+  const file = await cameraFileService.getOneById({
     fileId: req.params.fileId,
     logger: req.logger,
   });
@@ -45,12 +83,19 @@ const createOne = async (req, res) => {
 const deleteOne = async (req, res) => {
   req.logger(`cameraFileController.deleteOne api/cameras/:cameraId/files/${req.params.fileId}`);
 
-  throw new Error('1111111111');
+  const item = await cameraFileService.getOneById({
+    fileId: req.params.fileId,
+    logger: req.logger,
+  });
 
-  // const deleted = await cameraFileService.deleteOneById({ fileId: req.params.fileId, logger: req.logger });
+  if (item.type === 'folder') {
+    await cameraFileService.deleteFolder({ logger: req.logger, folder: item });
+  } else {
+    await cameraFileService.deleteFile({ logger: req.logger, file: item });
+  }
 
-  // res.status(204).send(deleted);
-  // req.logResp(req);
+  res.status(204).send();
+  req.logResp(req);
 };
 
 const deleteMany = async (req, res) => {
@@ -58,9 +103,9 @@ const deleteMany = async (req, res) => {
 
   const filesIds = []; // from query or body?
 
-  const deleted = await cameraFileService.deleteManyByIds({ filesIds, logger: req.logger });
+  await cameraFileService.deleteManyByIds({ filesIds, logger: req.logger });
 
-  res.status(204).send(deleted);
+  res.status(204).send();
   req.logResp(req);
 };
 

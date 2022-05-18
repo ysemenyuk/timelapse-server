@@ -9,20 +9,26 @@ const CameraTaskSchema = mongoose.Schema({
   stoppedAt: { type: Date },
   finishedAt: { type: Date },
 
-  type: { type: String }, // createScreenshot, screenshotsByTime, createVideo, videosByTime,
-  status: { type: String, default: 'Created' }, // created, running, stopped, finished, failed
+  type: { type: String }, // Screenshot, ScreenshotsByTask, Video, VideosByTask,
+  status: { type: String, default: 'Created' }, // Created, Running, Stopped, Finished, Failed
 
-  screenshotsByTimeTotalFiles: { type: Number },
   screenshotsByTimeSettings: {
     interval: { type: Number },
     startTime: { type: String },
     stopTime: { type: String },
   },
 
-  videosByTimeTotalFiles: { type: Number },
+  videoSettings: {
+    startDate: { type: String },
+    finishDate: { type: String },
+    duration: { type: Number }, // video file duration seconds
+    fps: { type: Number },
+  },
+
   videosByTimeSettings: {
-    length: { type: Number }, // video length seconds
-    startTime: { type: String }, // time for create video file
+    startTime: { type: String }, // time for make video file
+    duration: { type: Number }, // video file duration seconds
+    fps: { type: Number },
   },
 });
 

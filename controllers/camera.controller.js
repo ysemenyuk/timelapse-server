@@ -17,7 +17,8 @@ const getOne = async (req, res) => {
 
   const camera = await cameraService.getOne({
     logger: req.logger,
-    cameraId: req.params.cameraId,
+    userId: req.userId,
+    cameraId: req.cameraId,
   });
 
   res.status(200).send(camera);
@@ -41,14 +42,15 @@ const createOne = async (req, res) => {
 };
 
 const updateOne = async (req, res) => {
-  req.logger(`cameraController.updateOne /api/cameras/${req.params.cameraId}`);
+  req.logger(`cameraController.updateOne /api/cameras/${req.cameraId}`);
 
   // TODO: check req.body take fields by schema!
   const payload = req.body;
 
   const updated = await cameraService.updateOneById({
     logger: req.logger,
-    cameraId: req.params.cameraId,
+    userId: req.userId,
+    cameraId: req.cameraId,
     payload,
   });
 
@@ -57,11 +59,12 @@ const updateOne = async (req, res) => {
 };
 
 const deleteOne = async (req, res) => {
-  req.logger(`cameraController.deleteOne /api/cameras/${req.params.cameraId}`);
+  req.logger(`cameraController.deleteOne /api/cameras/${req.cameraId}`);
 
   const deleted = await cameraService.deleteOneById({
     logger: req.logger,
-    cameraId: req.params.cameraId,
+    userId: req.userId,
+    cameraId: req.cameraId,
   });
 
   res.status(204).send(deleted);
