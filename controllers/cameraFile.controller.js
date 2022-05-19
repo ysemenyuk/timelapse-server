@@ -3,32 +3,6 @@ import cameraFileService from '../services/cameraFile.service.js';
 const getAll = async (req, res) => {
   req.logger(`cameraFileController.getAll api/cameras/:cameraId/files`);
 
-  console.log(9999, req.query);
-
-  if (req.query.parentId) {
-    const files = await cameraFileService.getManyByParentId({
-      logger: req.logger,
-      cameraId: req.cameraId,
-      parentId: req.query.parentId,
-    });
-
-    res.status(200).send(files);
-    req.logResp(req);
-    return;
-  }
-
-  if (req.query.query) {
-    const files = await cameraFileService.getManyByQuery({
-      logger: req.logger,
-      cameraId: req.cameraId,
-      query: req.query,
-    });
-
-    res.status(200).send(files);
-    req.logResp(req);
-    return;
-  }
-
   if (req.query.count) {
     const count = await cameraFileService.getCountByQuery({
       logger: req.logger,
@@ -41,7 +15,7 @@ const getAll = async (req, res) => {
     return;
   }
 
-  const files = await cameraFileService.getAll({
+  const files = await cameraFileService.getManyByQuery({
     logger: req.logger,
     cameraId: req.cameraId,
     query: req.query,

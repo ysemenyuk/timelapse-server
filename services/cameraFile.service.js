@@ -1,66 +1,35 @@
+import _ from 'lodash';
 import CameraFile from '../models/CameraFile.js';
 import { promisifyUploadStream } from '../utils/index.js';
 import storageService from './storage.service.js';
 
-const getAll = async ({ logger, cameraId, query }) => {
-  logger && logger(`cameraFileService.getAll`);
-
-  console.log(1111, query);
-
-  return await CameraFile.find({
-    camera: cameraId,
-  });
-};
-
-const getManyByParentId = async ({ logger, cameraId, parentId }) => {
-  logger && logger(`cameraFileService.getManyByParentId`);
-
-  return await CameraFile.find({
-    camera: cameraId,
-    parent: parentId,
-  });
+const getQueryForFiles = (cameraId, query) => {
+  const { parentId, type, startDateTime, endDateTime } = query;
+  const date = startDateTime && endDateTime && { $gte: new Date(startDateTime), $lt: new Date(endDateTime) };
+  return _.pickBy({ camera: cameraId, parent: parentId, type, date }, _.identity);
 };
 
 const getManyByQuery = async ({ logger, cameraId, query }) => {
-  logger && logger(`cameraFileService.getManyForVideo`);
+  logger && logger(`cameraFileService.getManyByQuery`);
 
-  const { type, startTime, stopTime } = query;
-  const date = { $gte: new Date(startTime), $lt: new Date(stopTime) };
-
-  const files = await CameraFile.find({
-    camera: cameraId,
-    type,
-    date,
-  });
-
+  const queryObject = getQueryForFiles(cameraId, query);
+  const files = await CameraFile.find(queryObject);
   return files;
 };
 
 const getCountByQuery = async ({ logger, cameraId, query }) => {
-  logger && logger(`cameraFileService.getManyForVideo`);
+  logger && logger(`cameraFileService.getCountByQuery`);
 
-  const { type, startTime, stopTime } = query;
-  const date = { $gte: new Date(startTime), $lt: new Date(stopTime) };
-
-  const count = await CameraFile.countDocuments({
-    camera: cameraId,
-    type,
-    date,
-  });
-
+  const queryObject = getQueryForFiles(cameraId, query);
+  const count = await CameraFile.countDocuments(queryObject);
   return count;
-};
-
-const getOne = async ({ logger, ...query }) => {
-  logger && logger(`cameraFileService.getOne}`);
-
-  return await CameraFile.findOne({ ...query });
 };
 
 const getOneById = async ({ logger, fileId }) => {
   logger && logger(`cameraFileService.getOneById fileId: ${fileId}`);
 
-  return await CameraFile.findOne({ _id: fileId });
+  const file = await CameraFile.findOne({ _id: fileId });
+  return file;
 };
 
 const createFolder = async ({ logger, ...payload }) => {
@@ -174,11 +143,8 @@ const deleteManyByIds = async ({ logger, filesIds }) => {
 };
 
 export default {
-  getAll,
-  getManyByParentId,
   getManyByQuery,
   getCountByQuery,
-  getOne,
   getOneById,
   createFolder,
   createFile,

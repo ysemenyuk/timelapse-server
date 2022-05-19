@@ -28,7 +28,7 @@ export default (agenda, io, logger) => {
 
     console.log(3333, 'createScreenshot screenshot', screenshot);
 
-    const updatedTask = await cameraTaskService.updateOne({
+    const updatedTask = await cameraTaskService.updateOneById({
       logger: logg,
       taskId,
       payload: { status: 'Finished', finishedAt: new Date() },
@@ -107,17 +107,7 @@ export default (agenda, io, logger) => {
 
     console.log(3333, 'createScreenshot screenshot', screenshot);
 
-    const screenshotsByTimeTotalFiles = task.screenshotsByTimeTotalFiles ? task.screenshotsByTimeTotalFiles + 1 : 1;
-
-    const updatedTask = await cameraTaskService.updateOneById({
-      logger: logg,
-      taskId,
-      payload: { screenshotsByTimeTotalFiles },
-    });
-
-    console.log(4444, 'createScreenshot updatedTask', updatedTask);
-
-    // socket emit screenshot, updatedTask
+    // socket emit screenshot
 
     logg('finish createScreenshotsByTime job');
   });

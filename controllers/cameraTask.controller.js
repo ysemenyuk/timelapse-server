@@ -102,6 +102,43 @@ const updateScreenshotsByTimeTask = async (req, res) => {
   req.logResp(req);
 };
 
+const createVideoTask = async (req, res) => {
+  req.logger(`cameraTask.controller createVideoTask`);
+
+  // TODO: check req.body take fields by schema!
+  const payload = req.body;
+
+  const task = await cameraTaskService.createVideoTask({
+    worker: req.app.worker,
+    logger: req.logger,
+    userId: req.userId,
+    cameraId: req.cameraId,
+    payload,
+  });
+
+  res.status(201).send(task);
+  req.logResp(req);
+};
+
+const updateVideosByTimeTask = async (req, res) => {
+  req.logger(`cameraTask.controller updateVideosByTimeTask`);
+
+  // TODO: check req.body take fields by schema!
+  const payload = req.body;
+
+  const task = await cameraTaskService.updateVideosByTimeTask({
+    worker: req.app.worker,
+    logger: req.logger,
+    userId: req.userId,
+    cameraId: req.params.cameraId,
+    taskId: req.params.taskId,
+    payload,
+  });
+
+  res.status(201).send(task);
+  req.logResp(req);
+};
+
 export default {
   getAll,
   getOne,
@@ -110,4 +147,6 @@ export default {
   deleteOneById,
   createScreenshotTask,
   updateScreenshotsByTimeTask,
+  createVideoTask,
+  updateVideosByTimeTask,
 };

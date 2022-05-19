@@ -1,7 +1,9 @@
 import screenshotsJobs from './screenshots.jobs.js';
 import videosJobs from './videos.jobs.js';
 
-export default {
+const jobs = {
   screenshotsJobs,
   videosJobs,
 };
+
+export default jobs;

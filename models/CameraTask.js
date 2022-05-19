@@ -19,8 +19,8 @@ const CameraTaskSchema = mongoose.Schema({
   },
 
   videoSettings: {
-    startDate: { type: String },
-    finishDate: { type: String },
+    startDateTime: { type: String },
+    endDateTime: { type: String },
     duration: { type: Number }, // video file duration seconds
     fps: { type: Number },
   },
