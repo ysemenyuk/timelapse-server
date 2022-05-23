@@ -10,7 +10,7 @@ const router = express.Router();
 router.get(
   '/:fileId',
   asyncHandler(async (req, res) => {
-    req.logger(`storage.router.get /files/${req.params.fileName}`);
+    req.logger(`storage.router.get /files/${req.params.fileId}`);
 
     const file = await cameraFileService.getOneById({
       fileId: req.params.fileId,
@@ -24,8 +24,8 @@ router.get(
     }
 
     const stream = storageService.openDownloadStream({
-      filePath: file.path,
-      fileName: file.name,
+      filePath: file.pathOnDisk,
+      fileName: file.nameOnDisk,
       logger: req.logger,
     });
 

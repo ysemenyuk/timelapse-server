@@ -1,14 +1,15 @@
 import mongoose from 'mongoose';
 
 const CameraFileSchema = mongoose.Schema({
-  name: { type: String, required: true },
   date: { type: Date, default: new Date() },
   user: { type: mongoose.ObjectId, ref: 'User' },
   camera: { type: mongoose.ObjectId, ref: 'Camera' },
   parent: { type: mongoose.ObjectId, ref: 'CameraFile' },
-  children: [{ type: mongoose.ObjectId, ref: 'CameraFile' }],
-  type: { type: String }, // screenshot, screenshotByTime, video, videoByTime, folder
-  path: [{ type: String }],
+  pathOnDisk: { type: [{ type: String }], required: true },
+  nameOnDisk: { type: String, required: true },
+  name: { type: String, required: true },
+  type: { type: String }, // folder, screenshot, screenshotByTime, video, videoByTime
+  fileType: { type: String }, // image, video, ...
   removable: { type: Boolean, default: true },
 });
 

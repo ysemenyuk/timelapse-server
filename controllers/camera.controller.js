@@ -33,7 +33,7 @@ const createOne = async (req, res) => {
 
   const camera = await cameraService.createOne({
     logger: req.logger,
-    user: req.userId,
+    userId: req.userId,
     ...payload,
   });
 
@@ -66,6 +66,8 @@ const deleteOne = async (req, res) => {
     userId: req.userId,
     cameraId: req.cameraId,
   });
+
+  console.log(2222, deleted);
 
   res.status(204).send(deleted);
   req.logResp(req);

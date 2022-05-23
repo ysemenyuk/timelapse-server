@@ -1,7 +1,7 @@
 import Camera from '../models/Camera.js';
 import cameraFileService from './cameraFile.service.js';
 import cameraTaskService from './cameraTask.service.js';
-import * as constants from '../utils/constants.js';
+// import * as constants from '../utils/constants.js';
 
 const defaultPopulateItems = [
   'avatar',
@@ -35,81 +35,31 @@ const getOneById = async ({ logger, cameraId, populateItems = defaultPopulateIte
   return camera;
 };
 
-const createOne = async ({ logger, user, ...payload }) => {
+const createOne = async ({ logger, userId, ...payload }) => {
   logger && logger(`cameraService.createOne payload.name: ${payload.name}`);
 
-  const camera = new Camera({ user, ...payload });
+  const camera = new Camera({ user: userId, ...payload });
   await camera.save();
 
   // create default folders
 
-  const mainFolder = await cameraFileService.createFolder({
+  const defaultFolders = await cameraFileService.createDefaultFolders({
     logger,
-    user,
-    camera: camera._id,
-    parent: null,
-    path: [],
-    type: constants.FOLDER,
-    removable: false,
-    name: camera._id.toString(),
+    userId,
+    cameraId: camera._id,
   });
 
-  const foldersPayload = {
-    logger,
-    user,
-    camera: camera._id,
-    parent: mainFolder._id,
-    path: [mainFolder.name],
-    type: constants.FOLDER,
-    removable: false,
-  };
-
-  const screenshotsFolder = await cameraFileService.createFolder({
-    ...foldersPayload,
-    name: constants.SCREENSHOTS,
-  });
-
-  const screenshotsByTimeFolder = await cameraFileService.createFolder({
-    ...foldersPayload,
-    name: constants.SCREENSHOTS_BY_TIME,
-  });
-
-  const videosFolder = await cameraFileService.createFolder({
-    ...foldersPayload,
-    name: constants.VIDEOS,
-  });
-
-  const videosByTimeFolder = await cameraFileService.createFolder({
-    ...foldersPayload,
-    name: constants.VIDEOS_BY_TIME,
-  });
+  const { mainFolder, screenshotsFolder, screenshotsByTimeFolder, videosFolder, videosByTimeFolder } = defaultFolders;
 
   // create defaul task (tasksBytime)
-
-  const screenshotsByTimeTask = await cameraTaskService.createOne({
+  
+  const defaultTasks = await cameraTaskService.createDefaultTasks({
     logger,
-    user,
+    userId,
     cameraId: camera._id,
-    type: 'screenshotsByTime',
-    screenshotsByTimeTotalFiles: 0,
-    screenshotsByTimeSettings: {
-      startTime: '08:00',
-      stopTime: '20:00',
-      interval: 60,
-    },
   });
 
-  const videosByTimeTask = await cameraTaskService.createOne({
-    logger,
-    user,
-    cameraId: camera._id,
-    type: 'videosByTime',
-    videosByTimeTotalFiles: 0,
-    screenshotsByTimeSettings: {
-      startTime: '08:00',
-      length: 60,
-    },
-  });
+  const { screenshotsByTimeTask, videosByTimeTask } = defaultTasks;
 
   await camera.updateOne({
     mainFolder: mainFolder._id,
@@ -140,11 +90,7 @@ const deleteOneById = async ({ logger, cameraId }) => {
   await cameraFileService.deleteCameraFiles({ cameraId, logger });
   await cameraTaskService.deleteCameraTasks({ cameraId, logger });
 
-  const camera = await Camera.findOne({ _id: cameraId });
-  const deleted = await camera.remove();
-
-  // console.log(1111111111111, deleted);
-
+  const deleted = await Camera.findOneAndDelete({ _id: cameraId });
   return deleted;
 };
 

@@ -2,6 +2,7 @@ import _ from 'lodash';
 import CameraFile from '../models/CameraFile.js';
 import { promisifyUploadStream } from '../utils/index.js';
 import storageService from './storage.service.js';
+import * as constants from '../utils/constants.js';
 
 const getQueryForFiles = (cameraId, query) => {
   const { parentId, type, startDateTime, endDateTime } = query;
@@ -32,13 +33,22 @@ const getOneById = async ({ logger, fileId }) => {
   return file;
 };
 
+const getOne = async ({ logger, ...query }) => {
+  logger && logger(`cameraFileService.getOne`);
+
+  const file = await CameraFile.findOne({ ...query });
+  return file;
+};
+
+//
+
 const createFolder = async ({ logger, ...payload }) => {
   logger && logger(`cameraFileService.createFolder`);
 
   await storageService.createFolder({
     logger,
-    folderPath: payload.path,
-    folderName: payload.name,
+    folderPath: payload.pathOnDisk,
+    folderName: payload.nameOnDisk,
   });
 
   const folder = new CameraFile({ ...payload });
@@ -52,8 +62,8 @@ const createFile = async ({ logger, data, ...payload }) => {
 
   await storageService.writeFile({
     logger,
-    filePath: payload.path,
-    fileName: payload.name,
+    filePath: payload.pathOnDisk,
+    fileName: payload.nameOnDisk,
     data,
   });
 
@@ -92,10 +102,10 @@ const deleteFolder = async ({ logger, folder }) => {
   }
 
   // delete folder and files from db
-  const deletedFiles = await CameraFile.deleteMany({ parent: folder._id });
+  const deletedChildren = await CameraFile.deleteMany({ parent: folder._id });
   const deletedFolder = await CameraFile.findOneAndDelete({ _id: folder._id });
 
-  console.log(2222, deletedFiles);
+  console.log(2222, deletedChildren);
   console.log(3333, deletedFolder);
 
   return deletedFolder;
@@ -116,6 +126,68 @@ const deleteFile = async ({ logger, file }) => {
   return deleted;
 };
 
+const deleteManyByIds = async ({ logger, filesIds }) => {
+  logger && logger(`cameraFileService.deleteManyByIds`);
+
+  // console.log('ids', ids);
+
+  const deleted = await CameraFile.deleteMany({ _id: { $in: filesIds } });
+  return deleted;
+};
+
+// camera
+const createDefaultFolders = async ({ logger, userId, cameraId }) => {
+  logger && logger(`cameraFileService.createDefaultFolders`);
+
+  const mainFolder = await createFolder({
+    logger,
+    user: userId,
+    camera: cameraId,
+    parent: null,
+    pathOnDisk: [],
+    nameOnDisk: cameraId.toString(),
+    name: constants.MAIN,
+    type: 'folder',
+    removable: false,
+  });
+
+  const defaultFolderPayload = {
+    logger,
+    user: userId,
+    camera: cameraId,
+    parent: mainFolder._id,
+    pathOnDisk: [...mainFolder.pathOnDisk, mainFolder.nameOnDisk],
+    type: 'folder',
+    removable: false,
+  };
+
+  const screenshotsFolder = await createFolder({
+    ...defaultFolderPayload,
+    nameOnDisk: 'Screenshots',
+    name: 'Screenshots',
+  });
+
+  const screenshotsByTimeFolder = await createFolder({
+    ...defaultFolderPayload,
+    nameOnDisk: 'ScreenshotsByTime',
+    name: 'ScreenshotsByTime',
+  });
+
+  const videosFolder = await createFolder({
+    ...defaultFolderPayload,
+    nameOnDisk: 'Videos',
+    name: 'Videos',
+  });
+
+  const videosByTimeFolder = await createFolder({
+    ...defaultFolderPayload,
+    nameOnDisk: 'VideosByTime',
+    name: 'VideosByTime',
+  });
+
+  return { mainFolder, screenshotsFolder, screenshotsByTimeFolder, videosFolder, videosByTimeFolder };
+};
+
 const deleteCameraFiles = async ({ logger, cameraId }) => {
   logger && logger(`cameraFileService.deleteCameraFiles`);
 
@@ -133,24 +205,20 @@ const deleteCameraFiles = async ({ logger, cameraId }) => {
   return deleted;
 };
 
-const deleteManyByIds = async ({ logger, filesIds }) => {
-  logger && logger(`cameraFileService.deleteManyByIds`);
-
-  // console.log('ids', ids);
-
-  const deleted = await CameraFile.deleteMany({ _id: { $in: filesIds } });
-  return deleted;
-};
-
 export default {
   getManyByQuery,
   getCountByQuery,
   getOneById,
+  getOne,
+
   createFolder,
   createFile,
   createFileByStream,
+
   deleteFolder,
   deleteFile,
-  deleteCameraFiles,
   deleteManyByIds,
+
+  createDefaultFolders,
+  deleteCameraFiles,
 };

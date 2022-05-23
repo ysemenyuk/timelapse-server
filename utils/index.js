@@ -98,9 +98,14 @@ export const makeMonthName = (time) => {
   return `${year}-${dd(month + 1)}`;
 };
 
-export const makeFileName = (time) => {
+export const makeFileNameOnDisk = (time) => {
   const { year, month, date, hh, mm, ss } = parseTime(time);
   return `img--${year}-${dd(month + 1)}-${dd(date)}--${dd(hh)}-${dd(mm)}-${dd(ss)}.jpg`;
+};
+
+export const makeFileName = (time) => {
+  const { year, month, date, hh, mm, ss } = parseTime(time);
+  return `${year}-${dd(month + 1)}-${dd(date)} ${dd(hh)}:${dd(mm)}:${dd(ss)}`;
 };
 
 export const makeNum = (num) => {

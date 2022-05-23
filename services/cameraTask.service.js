@@ -37,12 +37,7 @@ const deleteOneById = async ({ logger, taskId }) => {
   return deleted;
 };
 
-const deleteCameraTasks = async ({ cameraId, logger }) => {
-  logger && logger(`cameraFileService.deleteCameraTasks`);
-
-  const deleted = await CameraTask.deleteMany({ camera: cameraId });
-  return deleted;
-};
+// screenshot
 
 const createScreenshotTask = async ({ userId, cameraId, worker, logger }) => {
   logger && logger(`cameraTaskService.createScreenshot`);
@@ -92,6 +87,8 @@ const updateScreenshotsByTimeTask = async ({ userId, cameraId, taskId, payload, 
 
   return updatedTask;
 };
+
+// video
 
 const createVideoTask = async ({ userId, cameraId, payload, worker, logger }) => {
   logger && logger(`cameraTaskService.createVideoTask`);
@@ -150,15 +147,59 @@ const updateVideosByTimeTask = async ({ userId, cameraId, taskId, payload, worke
   return updatedTask;
 };
 
+// camera
+
+const createDefaultTasks = async ({ logger, userId, cameraId }) => {
+  logger && logger(`cameraFileService.createDefaultTasks`);
+
+  const screenshotsByTimeTask = await createOne({
+    logger,
+    user: userId,
+    camera: cameraId,
+    type: 'screenshotsByTime',
+    screenshotsByTimeSettings: {
+      startTime: '08:00',
+      stopTime: '20:00',
+      interval: 60,
+    },
+  });
+
+  const videosByTimeTask = await createOne({
+    logger,
+    user: userId,
+    camera: cameraId,
+    type: 'videosByTime',
+    videosByTimeSettings: {
+      startTime: '22:00',
+      duration: 60,
+      fps: 25,
+    },
+  });
+
+  return { screenshotsByTimeTask, videosByTimeTask };
+};
+
+const deleteCameraTasks = async ({ cameraId, logger }) => {
+  logger && logger(`cameraFileService.deleteCameraTasks`);
+
+  const deleted = await CameraTask.deleteMany({ camera: cameraId });
+  return deleted;
+};
+
 export default {
   getAll,
   getOneById,
+
   createOne,
   updateOneById,
   deleteOneById,
+
+  createDefaultTasks,
   deleteCameraTasks,
+
   createScreenshotTask,
   updateScreenshotsByTimeTask,
+
   createVideoTask,
   updateVideosByTimeTask,
 };

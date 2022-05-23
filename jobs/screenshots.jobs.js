@@ -3,7 +3,7 @@ import cameraFileService from '../services/cameraFile.service.js';
 import cameraTaskService from '../services/cameraTask.service.js';
 import screenshotService from '../services/screenshot.service.js';
 import { dd, makeTodayName, parseTime } from '../utils/index.js';
-import * as constants from '../utils/constants.js';
+// import * as constants from '../utils/constants.js';
 
 export default (agenda, io, logger) => {
   agenda.define('createScreenshot', async (job) => {
@@ -15,15 +15,13 @@ export default (agenda, io, logger) => {
     const { cameraId, userId, taskId } = job.attrs.data;
 
     const camera = await cameraService.getOneById({ cameraId, populateItems: ['screenshotsFolder'] });
-    const parent = camera.screenshotsFolder;
-    // console.log(2222, 'camera', camera);
 
     const screenshot = await screenshotService.createScreenshot({
       logger: logg,
       userId,
       camera,
-      parent,
-      type: 'Screenshot',
+      parent: camera.screenshotsFolder,
+      type: 'screenshot',
     });
 
     console.log(3333, 'createScreenshot screenshot', screenshot);
@@ -76,10 +74,17 @@ export default (agenda, io, logger) => {
     // console.log(2222, 'camera', camera);
 
     const todayFolderName = makeTodayName(time);
+
     // console.log(9999, 'folderName:', todayFolderName);
 
-    let parent = await cameraFileService.getOne({ logger: logg, camera: cameraId, name: todayFolderName });
-    // console.log(9999, 'parent:', parent);
+    let parent = await cameraFileService.getOne({
+      logger: logg,
+      camera: cameraId,
+      parent: camera.screenshotsByTimeFolder._id,
+      name: todayFolderName,
+    });
+
+    // console.log(99991, 'parent:', parent);
 
     // TODO: check folder on disk?
 
@@ -88,24 +93,25 @@ export default (agenda, io, logger) => {
         logger: logg,
         user: userId,
         camera: camera._id,
-        name: todayFolderName,
         parent: camera.screenshotsByTimeFolder._id,
-        path: [...camera.screenshotsByTimeFolder.path, camera.screenshotsByTimeFolder.name],
-        type: constants.FOLDER,
+        name: todayFolderName,
+        nameOnDisk: todayFolderName,
+        pathOnDisk: [...camera.screenshotsByTimeFolder.pathOnDisk, camera.screenshotsByTimeFolder.nameOnDisk],
+        type: 'folder',
       });
     }
 
-    // console.log(9999, 'parent:', parent);
+    // console.log(99992, 'parent:', parent);
 
     const screenshot = await screenshotService.createScreenshot({
       logger: logg,
       userId,
       camera,
       parent,
-      type: 'ScreenshotByTime',
+      type: 'screenshotByTime',
     });
 
-    console.log(3333, 'createScreenshot screenshot', screenshot);
+    console.log(3333, 'createScreenshotsByTime screenshot', screenshot);
 
     // socket emit screenshot
 
