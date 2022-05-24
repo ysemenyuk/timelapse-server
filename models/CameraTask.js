@@ -9,8 +9,10 @@ const CameraTaskSchema = mongoose.Schema({
   stoppedAt: { type: Date },
   finishedAt: { type: Date },
 
-  type: { type: String }, // Screenshot, ScreenshotsByTask, Video, VideosByTask,
-  status: { type: String, default: 'Created' }, // Created, Running, Stopped, Finished, Failed
+  default: { type: Boolean, default: false },
+  name: { type: String }, // CreateScreenshot, CreateVideo, // Screenshots, ScreenshotsByTime, Videos, VideosByTime,
+  type: { type: String }, // Simple, Periodic,
+  status: { type: String, default: 'Created' }, // Created, Ready, Running, Stopped, Successed, Failed, Canceled
 
   screenshotsByTimeSettings: {
     interval: { type: Number },

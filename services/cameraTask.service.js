@@ -45,7 +45,8 @@ const createScreenshotTask = async ({ userId, cameraId, worker, logger }) => {
   const task = new CameraTask({
     user: userId,
     camera: cameraId,
-    type: 'createScreenshot',
+    name: 'CreateScreenshot',
+    type: 'Simple',
     createdAt: new Date(),
     startedAt: new Date(),
     status: 'Running',
@@ -58,6 +59,22 @@ const createScreenshotTask = async ({ userId, cameraId, worker, logger }) => {
 
   return task;
 };
+
+const updateScreenshotsTask = async ({ userId, cameraId, taskId, payload, worker, logger }) => {
+  logger && logger(`cameraTaskService.updateScreenshotTask`);
+
+  const { status } = payload;
+  const updatedTask = await CameraTask.findOneAndUpdate({ _id: taskId }, { status }, { new: true });
+
+  if (status === 'Running') {
+    const job = worker.create('createScreenshot', { userId, cameraId, taskId });
+    await job.save();
+  }
+
+  return updatedTask;
+};
+
+// screenshot by time
 
 const updateScreenshotsByTimeTask = async ({ userId, cameraId, taskId, payload, worker, logger }) => {
   logger && logger(`cameraTaskService.updateScreenshotsByTime`);
@@ -98,7 +115,8 @@ const createVideoTask = async ({ userId, cameraId, payload, worker, logger }) =>
   const task = new CameraTask({
     user: userId,
     camera: cameraId,
-    type: 'createVideo',
+    name: 'CreateVideo',
+    type: 'Simple',
     createdAt: new Date(),
     startedAt: new Date(),
     status: 'Running',
@@ -118,8 +136,28 @@ const createVideoTask = async ({ userId, cameraId, payload, worker, logger }) =>
   return task;
 };
 
+const updateVideosTask = async ({ userId, cameraId, taskId, payload, worker, logger }) => {
+  logger && logger(`cameraTaskService.updateVideoTask`);
+
+  const { status, videoSettings } = payload;
+  const updatedTask = await CameraTask.findOneAndUpdate({ _id: taskId }, { status, videoSettings }, { new: true });
+
+  if (status === 'Running') {
+    const job = worker.create('createVideoFile', { userId, cameraId, taskId });
+    await job.save();
+  }
+
+  if (status === 'Canceled') {
+    //
+  }
+
+  return updatedTask;
+};
+
+// video by time
+
 const updateVideosByTimeTask = async ({ userId, cameraId, taskId, payload, worker, logger }) => {
-  logger && logger(`cameraTaskService.updateScreenshotsByTime`);
+  logger && logger(`cameraTaskService.updateVideosByTimeTask`);
 
   const { status, videosByTimeSettings } = payload;
 
@@ -147,16 +185,42 @@ const updateVideosByTimeTask = async ({ userId, cameraId, taskId, payload, worke
   return updatedTask;
 };
 
-// camera
+// camera default
 
 const createDefaultTasks = async ({ logger, userId, cameraId }) => {
-  logger && logger(`cameraFileService.createDefaultTasks`);
+  logger && logger(`cameraTaskService.createDefaultTasks`);
+
+  const screenshotsTask = await createOne({
+    logger,
+    user: userId,
+    camera: cameraId,
+    name: 'Screenshots',
+    type: 'Simple',
+    default: true,
+  });
+
+  const videosTask = await createOne({
+    logger,
+    user: userId,
+    camera: cameraId,
+    name: 'Videos',
+    type: 'Simple',
+    default: true,
+    videoSettings: {
+      startDateTime: '2022-01-01',
+      endDateTime: '2022-10-10',
+      duration: 60,
+      fps: 20,
+    },
+  });
 
   const screenshotsByTimeTask = await createOne({
     logger,
     user: userId,
     camera: cameraId,
-    type: 'screenshotsByTime',
+    name: 'ScreenshotsByTime',
+    type: 'Periodic',
+    default: true,
     screenshotsByTimeSettings: {
       startTime: '08:00',
       stopTime: '20:00',
@@ -168,15 +232,17 @@ const createDefaultTasks = async ({ logger, userId, cameraId }) => {
     logger,
     user: userId,
     camera: cameraId,
-    type: 'videosByTime',
+    name: 'VideosByTime',
+    type: 'Periodic',
+    default: true,
     videosByTimeSettings: {
       startTime: '22:00',
       duration: 60,
-      fps: 25,
+      fps: 20,
     },
   });
 
-  return { screenshotsByTimeTask, videosByTimeTask };
+  return { screenshotsTask, videosTask, screenshotsByTimeTask, videosByTimeTask };
 };
 
 const deleteCameraTasks = async ({ cameraId, logger }) => {
@@ -198,8 +264,10 @@ export default {
   deleteCameraTasks,
 
   createScreenshotTask,
+  updateScreenshotsTask,
   updateScreenshotsByTimeTask,
 
   createVideoTask,
+  updateVideosTask,
   updateVideosByTimeTask,
 };

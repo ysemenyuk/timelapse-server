@@ -29,7 +29,7 @@ export default (agenda, io, logger) => {
     const updatedTask = await cameraTaskService.updateOneById({
       logger: logg,
       taskId,
-      payload: { status: 'Finished', finishedAt: new Date() },
+      payload: { status: 'Successed', finishedAt: new Date() },
     });
 
     console.log(4444, 'createScreenshot updatedTask', updatedTask);

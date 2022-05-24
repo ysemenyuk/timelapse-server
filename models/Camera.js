@@ -16,6 +16,8 @@ const CameraSchema = mongoose.Schema({
   videosFolder: { type: mongoose.ObjectId, ref: 'CameraFile' },
   videosByTimeFolder: { type: mongoose.ObjectId, ref: 'CameraFile' },
 
+  screenshotsTask: { type: mongoose.ObjectId, ref: 'CameraTask' },
+  videosTask: { type: mongoose.ObjectId, ref: 'CameraTask' },
   screenshotsByTimeTask: { type: mongoose.ObjectId, ref: 'CameraTask' },
   videosByTimeTask: { type: mongoose.ObjectId, ref: 'CameraTask' },
 });

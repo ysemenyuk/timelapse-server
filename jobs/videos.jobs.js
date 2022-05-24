@@ -1,4 +1,8 @@
 import cameraTaskService from '../services/cameraTask.service.js';
+const sleep = (time, message = 'Hello') =>
+  new Promise((resolve) => {
+    setTimeout(() => resolve(message), time);
+  });
 
 export default (agenda, io, logger) => {
   agenda.define('createVideoFile', async (job) => {
@@ -18,11 +22,12 @@ export default (agenda, io, logger) => {
     console.log(3333, 'createVideoFile task', task);
 
     // crete video file
+    await sleep(10 * 1000);
 
     const updatedTask = await cameraTaskService.updateOneById({
       logger: logg,
       taskId,
-      payload: { status: 'Finished', finishedAt: new Date() },
+      payload: { status: 'Successed', finishedAt: new Date() },
     });
 
     console.log(4444, 'createVideoFile updatedTask', updatedTask);

@@ -4,6 +4,7 @@ import path from 'path';
 export const getDirsNames = (camera) => {
   const cameraDir = camera._id.toString();
   console.log('getCameraNames cameraDir-', cameraDir);
+
   return {
     cameraDir,
     screenshotsDir: 'screenshots',
@@ -17,6 +18,7 @@ export const getDirsPaths = (names) => {
   const { cameraDir, screenshotsDir, imagesDir, videosDir, logFile } = names;
   const pathToCameraDir = path.join(cameraDir);
   console.log('getCameraPaths pathToCameraDir -', pathToCameraDir);
+
   return {
     pathToCameraDir,
     pathToScreenshotsDir: path.join(pathToCameraDir, screenshotsDir),

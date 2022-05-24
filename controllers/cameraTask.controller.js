@@ -69,6 +69,8 @@ const deleteOneById = async (req, res) => {
   req.logResp(req);
 };
 
+// screenshot
+
 const createScreenshotTask = async (req, res) => {
   req.logger(`cameraTask.controller createScreenshot`);
 
@@ -83,8 +85,27 @@ const createScreenshotTask = async (req, res) => {
   req.logResp(req);
 };
 
+const updateScreenshotsTask = async (req, res) => {
+  req.logger(`cameraTask.controller updateScreenshotsTask`);
+
+  // TODO: check req.body take fields by schema!
+  const payload = req.body;
+
+  const task = await cameraTaskService.updateScreenshotsTask({
+    worker: req.app.worker,
+    logger: req.logger,
+    userId: req.userId,
+    cameraId: req.params.cameraId,
+    taskId: req.params.taskId,
+    payload,
+  });
+
+  res.status(201).send(task);
+  req.logResp(req);
+};
+
 const updateScreenshotsByTimeTask = async (req, res) => {
-  req.logger(`cameraTask.controller createScreenshotsByTime`);
+  req.logger(`cameraTask.controller updateScreenshotsByTimeTask`);
 
   // TODO: check req.body take fields by schema!
   const payload = req.body;
@@ -102,6 +123,8 @@ const updateScreenshotsByTimeTask = async (req, res) => {
   req.logResp(req);
 };
 
+// video
+
 const createVideoTask = async (req, res) => {
   req.logger(`cameraTask.controller createVideoTask`);
 
@@ -113,6 +136,25 @@ const createVideoTask = async (req, res) => {
     logger: req.logger,
     userId: req.userId,
     cameraId: req.cameraId,
+    payload,
+  });
+
+  res.status(201).send(task);
+  req.logResp(req);
+};
+
+const updateVideosTask = async (req, res) => {
+  req.logger(`cameraTask.controller updateVideoTask`);
+
+  // TODO: check req.body take fields by schema!
+  const payload = req.body;
+
+  const task = await cameraTaskService.updateVideosTask({
+    worker: req.app.worker,
+    logger: req.logger,
+    userId: req.userId,
+    cameraId: req.params.cameraId,
+    taskId: req.params.taskId,
     payload,
   });
 
@@ -145,8 +187,12 @@ export default {
   createOne,
   updateOneById,
   deleteOneById,
+
   createScreenshotTask,
+  updateScreenshotsTask,
   updateScreenshotsByTimeTask,
+
   createVideoTask,
+  updateVideosTask,
   updateVideosByTimeTask,
 };
