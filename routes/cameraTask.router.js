@@ -9,13 +9,12 @@ const router = express.Router({ mergeParams: true });
 router.use(authMiddleware);
 router.use(userCameraMiddleware);
 
-router.get('/:taskId', asyncHandler(cameraTaskController.getOne));
 router.get('/', asyncHandler(cameraTaskController.getAll));
-
-router.post('/screenshot', asyncHandler(cameraTaskController.createScreenshotTask));
-router.post('/video', asyncHandler(cameraTaskController.createVideoTask));
+router.get('/:taskId', asyncHandler(cameraTaskController.getOne));
 
 router.post('/', asyncHandler(cameraTaskController.createOne));
+router.post('/screenshot', asyncHandler(cameraTaskController.createScreenshotTask));
+router.post('/video', asyncHandler(cameraTaskController.createVideoTask));
 
 router.put('/:taskId/screenshots', asyncHandler(cameraTaskController.updateScreenshotsTask));
 router.put('/:taskId/videos', asyncHandler(cameraTaskController.updateVideosTask));
