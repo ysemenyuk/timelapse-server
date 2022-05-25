@@ -135,7 +135,8 @@ const deleteManyByIds = async ({ logger, filesIds }) => {
   return deleted;
 };
 
-// camera
+// camera default
+
 const createDefaultFolders = async ({ logger, userId, cameraId }) => {
   logger && logger(`cameraFileService.createDefaultFolders`);
 
@@ -163,14 +164,14 @@ const createDefaultFolders = async ({ logger, userId, cameraId }) => {
 
   const screenshotsFolder = await createFolder({
     ...defaultFolderPayload,
-    nameOnDisk: 'Screenshots',
-    name: 'Screenshots',
+    nameOnDisk: 'Photos',
+    name: 'Photos',
   });
 
   const screenshotsByTimeFolder = await createFolder({
     ...defaultFolderPayload,
-    nameOnDisk: 'ScreenshotsByTime',
-    name: 'ScreenshotsByTime',
+    nameOnDisk: 'PhotosByTime',
+    name: 'PhotosByTime',
   });
 
   const videosFolder = await createFolder({

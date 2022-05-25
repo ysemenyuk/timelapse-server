@@ -8,9 +8,11 @@ const defaultPopulateItems = [
   'mainFolder',
   'screenshotsFolder',
   'screenshotsByTimeFolder',
-  // 'screenshotsByTimeTask',
   'videosFolder',
   'videosByTimeFolder',
+  // 'screenshotsTask',
+  // 'videosTask',
+  // 'screenshotsByTimeTask',
   // 'videosByTimeTask',
 ];
 
@@ -83,7 +85,6 @@ const updateOneById = async ({ logger, cameraId, payload }) => {
   logger && logger(`cameraService.updateOne cameraId: ${cameraId}`);
 
   await Camera.updateOne({ _id: cameraId }, payload);
-
   const updated = await Camera.findOne({ _id: cameraId }).populate(defaultPopulateItems);
   return updated;
 };
