@@ -85,13 +85,13 @@ const createScreenshotTask = async (req, res) => {
   req.logResp(req);
 };
 
-const updateScreenshotsTask = async (req, res) => {
-  req.logger(`cameraTask.controller updateScreenshotsTask`);
+const updateScreenshotTask = async (req, res) => {
+  req.logger(`cameraTask.controller updateScreenshotTask`);
 
   // TODO: check req.body take fields by schema!
   const payload = req.body;
 
-  const task = await cameraTaskService.updateScreenshotsTask({
+  const task = await cameraTaskService.updateScreenshotTask({
     worker: req.app.worker,
     logger: req.logger,
     userId: req.userId,
@@ -143,13 +143,13 @@ const createVideoTask = async (req, res) => {
   req.logResp(req);
 };
 
-const updateVideosTask = async (req, res) => {
+const updateVideoTask = async (req, res) => {
   req.logger(`cameraTask.controller updateVideoTask`);
 
   // TODO: check req.body take fields by schema!
   const payload = req.body;
 
-  const task = await cameraTaskService.updateVideosTask({
+  const task = await cameraTaskService.updateVideoTask({
     worker: req.app.worker,
     logger: req.logger,
     userId: req.userId,
@@ -189,10 +189,10 @@ export default {
   deleteOneById,
 
   createScreenshotTask,
-  updateScreenshotsTask,
+  updateScreenshotTask,
   updateScreenshotsByTimeTask,
 
   createVideoTask,
-  updateVideosTask,
+  updateVideoTask,
   updateVideosByTimeTask,
 };

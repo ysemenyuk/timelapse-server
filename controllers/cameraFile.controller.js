@@ -3,18 +3,6 @@ import cameraFileService from '../services/cameraFile.service.js';
 const getAll = async (req, res) => {
   req.logger(`cameraFileController.getAll api/cameras/:cameraId/files`);
 
-  if (req.query.count) {
-    const count = await cameraFileService.getCountByQuery({
-      logger: req.logger,
-      cameraId: req.cameraId,
-      query: req.query,
-    });
-
-    res.status(200).send({ count });
-    req.logResp(req);
-    return;
-  }
-
   const files = await cameraFileService.getManyByQuery({
     logger: req.logger,
     cameraId: req.cameraId,
@@ -22,6 +10,19 @@ const getAll = async (req, res) => {
   });
 
   res.status(200).send(files);
+  req.logResp(req);
+};
+
+const getCount = async (req, res) => {
+  req.logger(`cameraFileController.getCount api/cameras/:cameraId/files`);
+
+  const count = await cameraFileService.getCountByQuery({
+    logger: req.logger,
+    cameraId: req.cameraId,
+    query: req.query,
+  });
+
+  res.status(200).send({ count });
   req.logResp(req);
 };
 
@@ -83,4 +84,4 @@ const deleteMany = async (req, res) => {
   req.logResp(req);
 };
 
-export default { getAll, getOne, createOne, deleteOne, deleteMany };
+export default { getAll, getCount, getOne, createOne, deleteOne, deleteMany };

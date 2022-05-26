@@ -3,36 +3,70 @@ import mongodb from 'mongodb';
 import jobs from './jobs/index.js';
 import debug from 'debug';
 
-const logger = debug('worker');
+// const logger = debug('worker');
 
 const dbUri = process.env.MONGO_URI;
 const dbName = process.env.MONGO_DB_NAME;
 const jobTypes = ['screenshotsJobs', 'videosJobs'];
 
-export default async (io) => {
-  const { MongoClient } = mongodb;
+class Worker {
+  constructor() {
+    this.agenda;
+    this.socket;
+    this.logger = debug('worker');
+  }
 
-  const mongoClient = new MongoClient(dbUri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+  async start(socket) {
+    this.socket = socket;
 
-  await mongoClient.connect();
+    const { MongoClient } = mongodb;
 
-  logger(`mongoClient successfully connect`);
+    const mongoClient = new MongoClient(dbUri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
 
-  const agenda = new Agenda({ mongo: mongoClient.db(dbName) });
+    await mongoClient.connect();
 
-  jobTypes.forEach((type) => {
-    jobs[type](agenda, io, logger);
-  });
+    this.logger(`mongoClient successfully connect`);
 
-  await agenda.start();
+    this.agenda = new Agenda({ mongo: mongoClient.db(dbName) });
 
-  logger(`agenda successfully started`);
+    jobTypes.forEach((type) => {
+      jobs[type](this.agenda, this.socket, this.logger);
+    });
 
-  // const jobs = await agenda.jobs();
-  // console.log('agenda jobs', jobs);
+    await this.agenda.start();
 
-  return agenda;
-};
+    this.logger(`agenda successfully started`);
+
+    // const jobs = await agenda.jobs();
+    // console.log('agenda jobs', jobs);
+  }
+
+  async removeAll(name, cameraId) {
+    const jobs = await this.agenda.jobs({ name, 'data.cameraId': cameraId });
+    if (jobs.length) {
+      await Promise.all(jobs.map((job) => job.remove()));
+    }
+  }
+
+  async oneTime(name, data) {
+    const job = this.agenda.create(name, data);
+    await job.save();
+  }
+
+  async repeatEvery(name, interval, data) {
+    const job = this.agenda.create(name, data);
+    job.repeatEvery(`${interval} seconds`);
+    await job.save();
+  }
+
+  async repeatAt(name, startTime, data) {
+    const job = this.agenda.create(name, data);
+    job.repeatAt(startTime); //ex "3:30pm"
+    await job.save();
+  }
+}
+
+export default new Worker();

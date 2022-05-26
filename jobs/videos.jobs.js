@@ -4,9 +4,9 @@ const sleep = (time, message = 'Hello') =>
     setTimeout(() => resolve(message), time);
   });
 
-export default (agenda, io, logger) => {
-  agenda.define('createVideoFile', async (job) => {
-    const logg = logger.extend('createVideoFile');
+export default (agenda, socket, logger) => {
+  agenda.define('CreateVideo', async (job) => {
+    const logg = logger.extend('CreateVideo');
 
     logg('start createVideoFile job');
 
@@ -21,7 +21,7 @@ export default (agenda, io, logger) => {
 
     console.log(3333, 'createVideoFile task', task);
 
-    // crete video file
+    // create video file
     await sleep(10 * 1000);
 
     const updatedTask = await cameraTaskService.updateOneById({
@@ -35,17 +35,18 @@ export default (agenda, io, logger) => {
     logg('finish createVideoFile job');
   });
 
-  agenda.define('createVideoFilesByTime', async (job) => {
-    const logg = logger.extend('createVideoFilesByTime');
+  agenda.define('CreateVideosByTime', async (job) => {
+    const logg = logger.extend('CreateVideosByTime');
 
-    logg('start createVideoFilesByTime job');
+    logg('start CreateVideosByTime job');
 
     const { cameraId, userId, taskId } = job.attrs.data;
 
-    console.log(1111, 'createVideoFilesByTime job.attrs:', { cameraId, userId, taskId });
+    console.log(1111, 'CreateVideosByTime job.attrs:', { cameraId, userId, taskId });
 
-    // crete video file
+    // create video file
+    await sleep(10 * 1000);
 
-    logg('finish createVideoFilesByTime job');
+    logg('finish CreateVideosByTime job');
   });
 };

@@ -3,18 +3,25 @@ import debug from 'debug';
 
 const logger = debug('socket');
 
-export default (httpServer) => {
-  const io = new Server(httpServer, {
-    cors: { origin: '*' },
-  });
+class Socket {
+  constructor() {
+    this.io;
+    this.logger = debug('worker');
+  }
 
-  io.on('connection', (socket) => {
-    logger('user connected');
-
-    socket.on('disconnect', () => {
-      logger('user disconnected');
+  start(httpServer) {
+    this.io = new Server(httpServer, {
+      cors: { origin: '*' },
     });
-  });
 
-  return io;
-};
+    this.io.on('connection', (socket) => {
+      logger('user connected');
+
+      socket.on('disconnect', () => {
+        logger('user disconnected');
+      });
+    });
+  }
+}
+
+export default new Socket();

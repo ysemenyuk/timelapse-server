@@ -1,4 +1,5 @@
 import CameraTask from '../models/CameraTask.js';
+import { validateCreateVideoTaskPayload } from '../validators/task.validators.yup.js';
 
 const getAll = async ({ cameraId, logger }) => {
   logger && logger(`cameraTaskService.getAll cameraId: ${cameraId}`);
@@ -37,7 +38,11 @@ const deleteOneById = async ({ logger, taskId }) => {
   return deleted;
 };
 
-// screenshot
+//
+// create
+//
+
+// createScreenshotTask
 
 const createScreenshotTask = async ({ userId, cameraId, worker, logger }) => {
   logger && logger(`cameraTaskService.createScreenshot`);
@@ -46,79 +51,34 @@ const createScreenshotTask = async ({ userId, cameraId, worker, logger }) => {
     user: userId,
     camera: cameraId,
     name: 'CreateScreenshot',
+    // payload
     type: 'Simple',
-    createdAt: new Date(),
-    startedAt: new Date(),
     status: 'Running',
   });
 
-  const job = worker.create('createScreenshot', { userId, cameraId, taskId: task._id });
-
   await task.save();
-  await job.save();
+  await task.updateOne({ startedAt: new Date() });
+  await worker.oneTime('CreateScreenshot', { userId, cameraId, taskId: task._id });
 
   return task;
 };
 
-const updateScreenshotsTask = async ({ userId, cameraId, taskId, payload, worker, logger }) => {
-  logger && logger(`cameraTaskService.updateScreenshotTask`);
-
-  const { status } = payload;
-  const updatedTask = await CameraTask.findOneAndUpdate({ _id: taskId }, { status }, { new: true });
-
-  if (status === 'Running') {
-    const job = worker.create('createScreenshot', { userId, cameraId, taskId });
-    await job.save();
-  }
-
-  return updatedTask;
-};
-
-// screenshot by time
-
-const updateScreenshotsByTimeTask = async ({ userId, cameraId, taskId, payload, worker, logger }) => {
-  logger && logger(`cameraTaskService.updateScreenshotsByTime`);
-
-  const { status, screenshotsByTimeSettings } = payload;
-
-  const jobs = await worker.jobs({ name: 'createScreenshotsByTime', 'data.cameraId': cameraId });
-
-  if (jobs.length) {
-    await Promise.all(jobs.map((job) => job.remove()));
-  }
-
-  if (status === 'Running') {
-    const { interval } = screenshotsByTimeSettings;
-
-    const job = worker.create('createScreenshotsByTime', { userId, cameraId, taskId });
-    job.repeatEvery(`${interval} seconds`);
-
-    await job.save();
-  }
-
-  const updatedTask = await CameraTask.findOneAndUpdate(
-    { _id: taskId },
-    { status, screenshotsByTimeSettings },
-    { new: true }
-  );
-
-  return updatedTask;
-};
-
-// video
+// createVideoTask
 
 const createVideoTask = async ({ userId, cameraId, payload, worker, logger }) => {
   logger && logger(`cameraTaskService.createVideoTask`);
 
-  const { startDateTime, endDateTime, duration, fps } = payload;
+  await validateCreateVideoTaskPayload(payload);
+
+  const { videoSettings } = payload;
+  const { startDateTime, endDateTime, duration, fps } = videoSettings;
 
   const task = new CameraTask({
     user: userId,
     camera: cameraId,
+    // payload
     name: 'CreateVideo',
     type: 'Simple',
-    createdAt: new Date(),
-    startedAt: new Date(),
     status: 'Running',
     videoSettings: {
       startDateTime,
@@ -128,91 +88,185 @@ const createVideoTask = async ({ userId, cameraId, payload, worker, logger }) =>
     },
   });
 
-  const job = worker.create('createVideoFile', { userId, cameraId, taskId: task._id });
-
   await task.save();
-  await job.save();
+  await task.updateOne({ startedAt: new Date() });
+  await worker.oneTime('CreateVideo', { userId, cameraId, taskId: task._id });
 
   return task;
 };
 
-const updateVideosTask = async ({ userId, cameraId, taskId, payload, worker, logger }) => {
+// createScreenshotsByTimeTask
+
+const createScreenshotsByTimeTask = async ({ userId, cameraId, payload, worker, logger }) => {
+  logger && logger(`cameraTaskService.createScreenshotsByTimeTask`);
+
+  // if exists error
+
+  const { status, screenshotsByTimeSettings } = payload;
+  const { startTime, stopTime, interval } = screenshotsByTimeSettings;
+
+  const task = new CameraTask({
+    user: userId,
+    camera: cameraId,
+    // payload
+    name: 'CreateScreenshotsByTime',
+    type: 'Periodic',
+    status,
+    screenshotsByTimeSettings: {
+      startTime,
+      stopTime,
+      interval,
+    },
+  });
+
+  await task.save();
+
+  if (status === 'Running') {
+    await task.updateOne({ startedAt: new Date() });
+    await worker.repeatEvery('CreateScreenshotsByTime', interval, { userId, cameraId, taskId: task._id });
+  }
+
+  return task;
+};
+
+// createVideosByTimeTask
+
+const createVideosByTimeTask = async ({ userId, cameraId, payload, worker, logger }) => {
+  logger && logger(`cameraTaskService.createVideosByTimeTask`);
+
+  const { status, videosByTimeSettings } = payload;
+  const { startTime, duration, fps } = videosByTimeSettings;
+
+  const task = new CameraTask({
+    user: userId,
+    camera: cameraId,
+    // payload
+    name: 'CreateVideosByTime',
+    type: 'Periodic',
+    status,
+    videosByTimeSettings: {
+      startTime,
+      duration,
+      fps,
+    },
+  });
+
+  await task.save();
+
+  if (status === 'Running') {
+    await task.updateOne({ startedAt: new Date() });
+    await worker.repeatAt('CreateVideosByTime', startTime, { userId, cameraId, taskId: task._id });
+  }
+
+  return task;
+};
+
+//
+// update
+//
+
+// updateScreenshotTask
+
+const updateScreenshotTask = async ({ userId, cameraId, taskId, payload, worker, logger }) => {
+  logger && logger(`cameraTaskService.updateScreenshotTask`);
+
+  const { status } = payload;
+  const task = await CameraTask.findOneAndUpdate({ _id: taskId }, { status }, { new: true });
+
+  if (status === 'Running') {
+    await task.updateOne({ startedAt: new Date() });
+    await worker.oneTime('CreateScreenshot', { userId, cameraId, taskId: task._id });
+  }
+
+  return task;
+};
+
+// updateVideoTask
+
+const updateVideoTask = async ({ userId, cameraId, taskId, payload, worker, logger }) => {
   logger && logger(`cameraTaskService.updateVideoTask`);
 
   const { status, videoSettings } = payload;
-  const updatedTask = await CameraTask.findOneAndUpdate({ _id: taskId }, { status, videoSettings }, { new: true });
+  const task = await CameraTask.findOneAndUpdate({ _id: taskId }, { status, videoSettings }, { new: true });
 
   if (status === 'Running') {
-    const job = worker.create('createVideoFile', { userId, cameraId, taskId });
-    await job.save();
+    await worker.oneTime('CreateVideo', { userId, cameraId, taskId });
+    await task.updateOne({ startedAt: new Date() });
   }
 
   if (status === 'Canceled') {
-    //
+    // remove job
   }
 
-  return updatedTask;
+  return task;
 };
 
-// video by time
+// updateScreenshotsByTimeTask
+
+const updateScreenshotsByTimeTask = async ({ userId, cameraId, taskId, payload, worker, logger }) => {
+  logger && logger(`cameraTaskService.updateScreenshotsByTime`);
+
+  const { status, screenshotsByTimeSettings } = payload;
+  const { startTime, stopTime, interval } = screenshotsByTimeSettings;
+
+  const task = await CameraTask.findOneAndUpdate(
+    { _id: taskId },
+    {
+      status,
+      screenshotsByTimeSettings: {
+        startTime,
+        stopTime,
+        interval,
+      },
+    },
+    { new: true }
+  );
+
+  await worker.removeAll('CreateScreenshotsByTime', cameraId);
+
+  if (status === 'Running') {
+    await task.updateOne({ startedAt: new Date() });
+    await worker.repeatEvery('CreateScreenshotsByTime', interval, { userId, cameraId, taskId: task._id });
+  }
+
+  return task;
+};
+
+// updateVideosByTimeTask
 
 const updateVideosByTimeTask = async ({ userId, cameraId, taskId, payload, worker, logger }) => {
   logger && logger(`cameraTaskService.updateVideosByTimeTask`);
 
   const { status, videosByTimeSettings } = payload;
+  const { startTime, duration, fps } = videosByTimeSettings;
 
-  const jobs = await worker.jobs({ name: 'createVideoFilesByTime', 'data.cameraId': cameraId });
-
-  if (jobs.length) {
-    await Promise.all(jobs.map((job) => job.remove()));
-  }
-
-  if (status === 'Running') {
-    const { startTime } = videosByTimeSettings;
-
-    const job = worker.create('createVideoFilesByTime', { userId, cameraId, taskId });
-    job.repeatAt(startTime); //ex "3:30pm"
-
-    await job.save();
-  }
-
-  const updatedTask = await CameraTask.findOneAndUpdate(
+  const task = await CameraTask.findOneAndUpdate(
     { _id: taskId },
-    { status, videosByTimeSettings },
+    {
+      status,
+      videosByTimeSettings: {
+        startTime,
+        duration,
+        fps,
+      },
+    },
     { new: true }
   );
 
-  return updatedTask;
+  await worker.removeAll('CreateVideosByTime', cameraId);
+
+  if (status === 'Running') {
+    await task.updateOne({ startedAt: new Date() });
+    await worker.repeatAt('CreateVideosByTime', startTime, { userId, cameraId, taskId: task._id });
+  }
+
+  return task;
 };
 
 // camera default
 
 const createDefaultTasks = async ({ logger, userId, cameraId }) => {
   logger && logger(`cameraTaskService.createDefaultTasks`);
-
-  const screenshotsTask = await createOne({
-    logger,
-    user: userId,
-    camera: cameraId,
-    name: 'Screenshots',
-    type: 'Simple',
-    default: true,
-  });
-
-  const videosTask = await createOne({
-    logger,
-    user: userId,
-    camera: cameraId,
-    name: 'Videos',
-    type: 'Simple',
-    default: true,
-    videoSettings: {
-      startDateTime: '2022-01-01',
-      endDateTime: '2022-10-10',
-      duration: 60,
-      fps: 20,
-    },
-  });
 
   const screenshotsByTimeTask = await createOne({
     logger,
@@ -242,7 +296,7 @@ const createDefaultTasks = async ({ logger, userId, cameraId }) => {
     },
   });
 
-  return { screenshotsTask, videosTask, screenshotsByTimeTask, videosByTimeTask };
+  return { screenshotsByTimeTask, videosByTimeTask };
 };
 
 const deleteCameraTasks = async ({ cameraId, logger }) => {
@@ -264,10 +318,14 @@ export default {
   deleteCameraTasks,
 
   createScreenshotTask,
-  updateScreenshotsTask,
+  updateScreenshotTask,
+
+  createScreenshotsByTimeTask,
   updateScreenshotsByTimeTask,
 
   createVideoTask,
-  updateVideosTask,
+  updateVideoTask,
+
+  createVideosByTimeTask,
   updateVideosByTimeTask,
 };

@@ -13,11 +13,15 @@ router.get('/', asyncHandler(cameraTaskController.getAll));
 router.get('/:taskId', asyncHandler(cameraTaskController.getOne));
 
 router.post('/', asyncHandler(cameraTaskController.createOne));
+
 router.post('/screenshot', asyncHandler(cameraTaskController.createScreenshotTask));
 router.post('/video', asyncHandler(cameraTaskController.createVideoTask));
 
-router.put('/:taskId/screenshots', asyncHandler(cameraTaskController.updateScreenshotsTask));
-router.put('/:taskId/videos', asyncHandler(cameraTaskController.updateVideosTask));
+router.post('/screenshotsByTime', asyncHandler(cameraTaskController.createScreenshotsByTimeTask));
+router.post('/videosByTime', asyncHandler(cameraTaskController.createVideosByTimeTask));
+
+router.put('/:taskId/screenshot', asyncHandler(cameraTaskController.updateScreenshotTask));
+router.put('/:taskId/video', asyncHandler(cameraTaskController.updateVideoTask));
 
 router.put('/:taskId/screenshotsByTime', asyncHandler(cameraTaskController.updateScreenshotsByTimeTask));
 router.put('/:taskId/videosByTime', asyncHandler(cameraTaskController.updateVideosByTimeTask));

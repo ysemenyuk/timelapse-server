@@ -4,7 +4,7 @@ import { promisifyUploadStream } from '../utils/index.js';
 import storageService from './storage.service.js';
 import * as constants from '../utils/constants.js';
 
-const getQueryForFiles = (cameraId, query) => {
+const createQuery = (cameraId, query) => {
   const { parentId, type, startDateTime, endDateTime } = query;
   const date = startDateTime && endDateTime && { $gte: new Date(startDateTime), $lt: new Date(endDateTime) };
   return _.pickBy({ camera: cameraId, parent: parentId, type, date }, _.identity);
@@ -13,7 +13,7 @@ const getQueryForFiles = (cameraId, query) => {
 const getManyByQuery = async ({ logger, cameraId, query }) => {
   logger && logger(`cameraFileService.getManyByQuery`);
 
-  const queryObject = getQueryForFiles(cameraId, query);
+  const queryObject = createQuery(cameraId, query);
   const files = await CameraFile.find(queryObject);
   return files;
 };
@@ -21,7 +21,7 @@ const getManyByQuery = async ({ logger, cameraId, query }) => {
 const getCountByQuery = async ({ logger, cameraId, query }) => {
   logger && logger(`cameraFileService.getCountByQuery`);
 
-  const queryObject = getQueryForFiles(cameraId, query);
+  const queryObject = createQuery(cameraId, query);
   const count = await CameraFile.countDocuments(queryObject);
   return count;
 };
@@ -131,6 +131,7 @@ const deleteManyByIds = async ({ logger, filesIds }) => {
 
   // console.log('ids', ids);
 
+  // delete files from db
   const deleted = await CameraFile.deleteMany({ _id: { $in: filesIds } });
   return deleted;
 };
@@ -192,11 +193,14 @@ const createDefaultFolders = async ({ logger, userId, cameraId }) => {
 const deleteCameraFiles = async ({ logger, cameraId }) => {
   logger && logger(`cameraFileService.deleteCameraFiles`);
 
+  const mainCameraFolder = await CameraFile.findOne({ camera: cameraId, parent: null });
+
+  // delete main folder from disk
   try {
     await storageService.removeFolder({
       logger,
       folderPath: [],
-      folderName: cameraId.toString(),
+      folderName: mainCameraFolder.nameOnDisk,
     });
   } catch (error) {
     console.log('storageService error message -', error.message);

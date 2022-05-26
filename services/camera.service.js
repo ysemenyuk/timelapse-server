@@ -10,8 +10,6 @@ const defaultPopulateItems = [
   'screenshotsByTimeFolder',
   'videosFolder',
   'videosByTimeFolder',
-  // 'screenshotsTask',
-  // 'videosTask',
   // 'screenshotsByTimeTask',
   // 'videosByTimeTask',
 ];
@@ -61,7 +59,7 @@ const createOne = async ({ logger, userId, ...payload }) => {
     cameraId: camera._id,
   });
 
-  const { screenshotsTask, videosTask, screenshotsByTimeTask, videosByTimeTask } = defaultTasks;
+  const { screenshotsByTimeTask, videosByTimeTask } = defaultTasks;
 
   await camera.updateOne({
     // defaul folders
@@ -71,8 +69,6 @@ const createOne = async ({ logger, userId, ...payload }) => {
     videosFolder: videosFolder._id,
     videosByTimeFolder: videosByTimeFolder._id,
     // defaul tasks
-    screenshotsTask: screenshotsTask._id,
-    videosTask: videosTask._id,
     screenshotsByTimeTask: screenshotsByTimeTask._id,
     videosByTimeTask: videosByTimeTask._id,
   });

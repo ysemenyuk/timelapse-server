@@ -5,9 +5,9 @@ import screenshotService from '../services/screenshot.service.js';
 import { dd, makeTodayName, parseTime } from '../utils/index.js';
 // import * as constants from '../utils/constants.js';
 
-export default (agenda, io, logger) => {
-  agenda.define('createScreenshot', async (job) => {
-    const logg = logger.extend('createScreenshot');
+export default (agenda, socket, logger) => {
+  agenda.define('CreateScreenshot', async (job) => {
+    const logg = logger.extend('CreateScreenshot');
 
     logg('start createScreenshot job');
     // console.log('createScreenshot job.attrs:', job.attrs);
@@ -39,8 +39,8 @@ export default (agenda, io, logger) => {
     logg('finish createScreenshot job');
   });
 
-  agenda.define('createScreenshotsByTime', async (job) => {
-    const logg = logger.extend('createScreenshotsByTime');
+  agenda.define('CreateScreenshotsByTime', async (job) => {
+    const logg = logger.extend('CreateScreenshotsByTime');
 
     logg('start  createScreenshotsByTime job');
     // console.log('createScreenshotsByTime job.attrs:', job.attrs);
