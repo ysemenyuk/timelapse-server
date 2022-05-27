@@ -1,12 +1,19 @@
 import cameraService from '../services/camera.service.js';
 
 const getAll = async (req, res) => {
-  req.logger('cameraController GET /api/cameras/');
+  req.logger('cameraController.getAll /api/cameras/');
 
   const cameras = await cameraService.getAll({
     logger: req.logger,
     userId: req.userId,
   });
+
+  const socket = req.app.socket;
+  // console.log(555555, sockets[0] && sockets[0].username);
+
+  const userSocket = await socket.getUserSocket(req.userId);
+  console.log(555555, 'cameraController.getAll userSocket', userSocket && userSocket.id);
+  userSocket && userSocket.emit('cameras', cameras);
 
   res.status(200).send(cameras);
   req.logResp(req);

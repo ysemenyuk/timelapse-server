@@ -69,4 +69,4 @@ class Worker {
   }
 }
 
-export default new Worker();
+export default Worker;

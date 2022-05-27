@@ -7,8 +7,8 @@ import cors from 'cors';
 import fileUpload from 'express-fileupload';
 import debugMiddleware from './middleware/debugMiddleware.js';
 import { errorHandlerMiddleware } from './middleware/errorHandlerMiddleware.js';
-import worker from './worker.js';
-import socket from './socket.js';
+import Worker from './worker.js';
+import Socket from './socket.js';
 import cameraRouter from './routes/camera.router.js';
 import cameraFileRouter from './routes/cameraFile.router.js';
 import cameraTaskRouter from './routes/cameraTask.router.js';
@@ -43,7 +43,14 @@ const startServer = async () => {
 
     logger(`Mongoose successfully Connected`);
 
-    socket.start(httpServer);
+    const socket = new Socket();
+    await socket.start(httpServer);
+
+    // socket.aaa.emit('hahaha');
+    // const sockets = await socket.aaa.fetchSockets();
+    // console.log(555555, sockets);
+
+    const worker = new Worker();
     await worker.start(socket);
 
     app.socket = socket;
