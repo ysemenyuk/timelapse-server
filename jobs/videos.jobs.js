@@ -18,6 +18,8 @@ export default (agenda, socket, workerLogger) => {
     const task = await cameraTaskService.getOneById({ taskId });
 
     try {
+      await task.updateOne({ status: taskStatus.RUNNING, startedAt: new Date() });
+
       const video = {
         name: 'video',
         type: fileType.VIDEO,

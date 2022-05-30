@@ -59,6 +59,8 @@ const deleteOneById = async ({ taskId, logger }) => {
   logger && logger(`cameraTaskService.deleteOne`);
 
   const deleted = await CameraTask.findOneAndRemove({ _id: taskId });
+
+  console.log(11111, deleted);
   return deleted;
 };
 

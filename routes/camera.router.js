@@ -1,7 +1,7 @@
 import express from 'express';
 import authMiddleware from '../middleware/authMiddleware.js';
 import userCameraMiddleware from '../middleware/userCameraMiddleware.js';
-import cameraValidator from '../validators/camera.validators.yup.js';
+import cameraValidator from '../validators/camera.validator.yup.js';
 import { asyncHandler } from '../middleware/errorHandlerMiddleware.js';
 import cameraController from '../controllers/camera.controller.js';
 

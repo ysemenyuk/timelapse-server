@@ -3,7 +3,7 @@ import authMiddleware from '../middleware/authMiddleware.js';
 import userCameraMiddleware from '../middleware/userCameraMiddleware.js';
 import { asyncHandler } from '../middleware/errorHandlerMiddleware.js';
 import cameraTaskController from '../controllers/cameraTask.controller.js';
-import cameraTaskValidator from '../validators/task.validators.yup.js';
+import cameraTaskValidator from '../validators/task.validator.yup.js';
 
 const router = express.Router({ mergeParams: true });
 

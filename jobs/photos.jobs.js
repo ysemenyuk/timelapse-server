@@ -14,12 +14,10 @@ export default (agenda, socket, workerLogger) => {
     const { cameraId, userId, taskId } = job.attrs.data;
     const userSocket = socket.getUserSocket(userId);
 
+    const task = await cameraTaskService.getOneById({ taskId });
+
     try {
-      await cameraTaskService.updateOneById({
-        logger,
-        taskId,
-        payload: { stardedAt: new Date() },
-      });
+      await task.updateOne({ status: taskStatus.RUNNING, startedAt: new Date() });
 
       const { photosFolder, ...camera } = await cameraService.getOneById({
         cameraId,
@@ -48,26 +46,18 @@ export default (agenda, socket, workerLogger) => {
         data: fileData,
       });
 
-      const updatedTask = await cameraTaskService.updateOneById({
-        logger,
-        taskId,
-        payload: { status: taskStatus.SUCCESSED, finishedAt: new Date() },
-      });
+      await task.updateOne({ status: taskStatus.SUCCESSED, finishedAt: new Date() });
 
       // socket emit update-task, add-file
-      userSocket && userSocket.emit('update-task', updatedTask);
+      userSocket && userSocket.emit('update-task', task);
       userSocket && userSocket.emit('add-file', photo);
     } catch (error) {
       console.log('-- error CreatePhoto job --', error);
 
-      const updatedTask = await cameraTaskService.updateOneById({
-        logger,
-        taskId,
-        payload: { status: taskStatus.FAILED, finishedAt: new Date() },
-      });
+      await task.updateOne({ status: taskStatus.FAILED, finishedAt: new Date() });
 
       // socket emit update-task
-      userSocket && userSocket.emit('update-task', updatedTask);
+      userSocket && userSocket.emit('update-task', task);
     }
 
     logger(`finish ${taskName.CREATE_PHOTO} job`);

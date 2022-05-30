@@ -14,19 +14,21 @@ const jobTypes = ['photosJobs', 'videosJobs'];
 class Worker {
   constructor(socket) {
     this.socket = socket;
+    this.mongoClient;
+    this.agenda;
+  }
 
+  async start() {
     this.mongoClient = new MongoClient(dbUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
 
-    this.agenda = new Agenda({ mongo: this.mongoClient.db(dbName) });
-  }
-
-  async start() {
     await this.mongoClient.connect();
 
     logger(`mongoClient successfully connect`);
+
+    this.agenda = new Agenda({ mongo: this.mongoClient.db(dbName) });
 
     jobTypes.forEach((type) => {
       jobs[type](this.agenda, this.socket, logger);
