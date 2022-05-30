@@ -43,15 +43,11 @@ const startServer = async () => {
 
     logger(`Mongoose successfully Connected`);
 
-    const socket = new Socket();
-    await socket.start(httpServer);
+    const socket = new Socket(httpServer);
+    await socket.start();
 
-    // socket.aaa.emit('hahaha');
-    // const sockets = await socket.aaa.fetchSockets();
-    // console.log(555555, sockets);
-
-    const worker = new Worker();
-    await worker.start(socket);
+    const worker = new Worker(socket);
+    await worker.start();
 
     app.socket = socket;
     app.worker = worker;

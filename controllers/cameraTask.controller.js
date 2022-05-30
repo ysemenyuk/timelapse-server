@@ -31,10 +31,11 @@ const createOne = async (req, res) => {
   const payload = req.body;
 
   const task = await cameraTaskService.createOne({
+    userId: req.userId,
+    cameraId: req.params.cameraId,
+    payload,
+    worker: req.app.worker,
     logger: req.logger,
-    user: req.userId,
-    camera: req.params.cameraId,
-    ...payload,
   });
 
   res.status(201).send(task);
@@ -47,10 +48,11 @@ const updateOneById = async (req, res) => {
   // TODO: check req.body take fields by schema!
   const payload = req.body;
 
-  const updated = await cameraTaskService.updateOne({
-    logger: req.logger,
+  const updated = await cameraTaskService.updateOneById({
     taskId: req.params.taskId,
     payload,
+    worker: req.app.worker,
+    logger: req.logger,
   });
 
   res.status(201).send(updated);
@@ -62,122 +64,11 @@ const deleteOneById = async (req, res) => {
 
   const deleted = await cameraTaskService.deleteOne({
     taskId: req.params.taskId,
+    worker: req.app.worker,
     logger: req.logger,
   });
 
   res.status(204).send(deleted);
-  req.logResp(req);
-};
-
-// screenshot
-
-const createScreenshotTask = async (req, res) => {
-  req.logger(`cameraTask.controller createScreenshot`);
-
-  const task = await cameraTaskService.createScreenshotTask({
-    worker: req.app.worker,
-    logger: req.logger,
-    userId: req.userId,
-    cameraId: req.cameraId,
-  });
-
-  res.status(201).send(task);
-  req.logResp(req);
-};
-
-const updateScreenshotTask = async (req, res) => {
-  req.logger(`cameraTask.controller updateScreenshotTask`);
-
-  // TODO: check req.body take fields by schema!
-  const payload = req.body;
-
-  const task = await cameraTaskService.updateScreenshotTask({
-    worker: req.app.worker,
-    logger: req.logger,
-    userId: req.userId,
-    cameraId: req.params.cameraId,
-    taskId: req.params.taskId,
-    payload,
-  });
-
-  res.status(201).send(task);
-  req.logResp(req);
-};
-
-const updateScreenshotsByTimeTask = async (req, res) => {
-  req.logger(`cameraTask.controller updateScreenshotsByTimeTask`);
-
-  // TODO: check req.body take fields by schema!
-  const payload = req.body;
-
-  const task = await cameraTaskService.updateScreenshotsByTimeTask({
-    worker: req.app.worker,
-    logger: req.logger,
-    userId: req.userId,
-    cameraId: req.params.cameraId,
-    taskId: req.params.taskId,
-    payload,
-  });
-
-  res.status(201).send(task);
-  req.logResp(req);
-};
-
-// video
-
-const createVideoTask = async (req, res) => {
-  req.logger(`cameraTask.controller createVideoTask`);
-
-  // TODO: check req.body take fields by schema!
-  const payload = req.body;
-
-  const task = await cameraTaskService.createVideoTask({
-    worker: req.app.worker,
-    logger: req.logger,
-    userId: req.userId,
-    cameraId: req.cameraId,
-    payload,
-  });
-
-  res.status(201).send(task);
-  req.logResp(req);
-};
-
-const updateVideoTask = async (req, res) => {
-  req.logger(`cameraTask.controller updateVideoTask`);
-
-  // TODO: check req.body take fields by schema!
-  const payload = req.body;
-
-  const task = await cameraTaskService.updateVideoTask({
-    worker: req.app.worker,
-    logger: req.logger,
-    userId: req.userId,
-    cameraId: req.params.cameraId,
-    taskId: req.params.taskId,
-    payload,
-  });
-
-  res.status(201).send(task);
-  req.logResp(req);
-};
-
-const updateVideosByTimeTask = async (req, res) => {
-  req.logger(`cameraTask.controller updateVideosByTimeTask`);
-
-  // TODO: check req.body take fields by schema!
-  const payload = req.body;
-
-  const task = await cameraTaskService.updateVideosByTimeTask({
-    worker: req.app.worker,
-    logger: req.logger,
-    userId: req.userId,
-    cameraId: req.params.cameraId,
-    taskId: req.params.taskId,
-    payload,
-  });
-
-  res.status(201).send(task);
   req.logResp(req);
 };
 
@@ -187,12 +78,4 @@ export default {
   createOne,
   updateOneById,
   deleteOneById,
-
-  createScreenshotTask,
-  updateScreenshotTask,
-  updateScreenshotsByTimeTask,
-
-  createVideoTask,
-  updateVideoTask,
-  updateVideosByTimeTask,
 };

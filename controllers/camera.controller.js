@@ -8,13 +8,6 @@ const getAll = async (req, res) => {
     userId: req.userId,
   });
 
-  const socket = req.app.socket;
-  // console.log(555555, sockets[0] && sockets[0].username);
-
-  const userSocket = await socket.getUserSocket(req.userId);
-  console.log(555555, 'cameraController.getAll userSocket', userSocket && userSocket.id);
-  userSocket && userSocket.emit('cameras', cameras);
-
   res.status(200).send(cameras);
   req.logResp(req);
 };
@@ -73,8 +66,6 @@ const deleteOne = async (req, res) => {
     userId: req.userId,
     cameraId: req.cameraId,
   });
-
-  console.log(2222, deleted);
 
   res.status(204).send(deleted);
   req.logResp(req);

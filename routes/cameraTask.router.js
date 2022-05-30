@@ -3,6 +3,7 @@ import authMiddleware from '../middleware/authMiddleware.js';
 import userCameraMiddleware from '../middleware/userCameraMiddleware.js';
 import { asyncHandler } from '../middleware/errorHandlerMiddleware.js';
 import cameraTaskController from '../controllers/cameraTask.controller.js';
+import cameraTaskValidator from '../validators/task.validators.yup.js';
 
 const router = express.Router({ mergeParams: true });
 
@@ -12,21 +13,9 @@ router.use(userCameraMiddleware);
 router.get('/', asyncHandler(cameraTaskController.getAll));
 router.get('/:taskId', asyncHandler(cameraTaskController.getOne));
 
-router.post('/', asyncHandler(cameraTaskController.createOne));
+router.post('/', cameraTaskValidator.validateTask, asyncHandler(cameraTaskController.createOne));
 
-router.post('/screenshot', asyncHandler(cameraTaskController.createScreenshotTask));
-router.post('/video', asyncHandler(cameraTaskController.createVideoTask));
-
-router.post('/screenshotsByTime', asyncHandler(cameraTaskController.createScreenshotsByTimeTask));
-router.post('/videosByTime', asyncHandler(cameraTaskController.createVideosByTimeTask));
-
-router.put('/:taskId/screenshot', asyncHandler(cameraTaskController.updateScreenshotTask));
-router.put('/:taskId/video', asyncHandler(cameraTaskController.updateVideoTask));
-
-router.put('/:taskId/screenshotsByTime', asyncHandler(cameraTaskController.updateScreenshotsByTimeTask));
-router.put('/:taskId/videosByTime', asyncHandler(cameraTaskController.updateVideosByTimeTask));
-
-router.put('/:taskId', asyncHandler(cameraTaskController.updateOne));
+router.put('/:taskId', cameraTaskValidator.validateTask, asyncHandler(cameraTaskController.updateOne));
 
 router.delete('/:taskId', asyncHandler(cameraTaskController.deleteOne));
 

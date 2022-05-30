@@ -1,33 +1,70 @@
 import * as yup from 'yup';
-import _ from 'lodash';
 import { ValidateError } from '../middleware/errorHandlerMiddleware.js';
 
-// const { videoSettings } = payload;
-// const { startDateTime, endDateTime, duration, fps } = videoSettings;
+const validateTaskSchema = yup.object().shape({
+  name: yup.mixed().oneOf(['CreatePhoto', 'CreateVideo', 'CreatePhotosByTime', 'CreateVideosByTime']).required(),
+  type: yup.mixed().oneOf(['OneTime', 'RepeatEvery', 'RepeatAt']).required(),
+});
+
+const createPhotoTaskSchema = yup.object().shape({
+  name: yup.mixed().oneOf(['CreatePhoto']).required(),
+  type: yup.mixed().oneOf(['OneTime']).required(),
+  settings: yup.object().shape({
+    photoUrl: yup.string().url(),
+  }),
+});
 
 const createVideoTaskSchema = yup.object().shape({
-  name: yup.string().required(),
-  type: yup.string().required(),
-  videoSettings: yup.object().shape({
-    startDateTime: yup.string().required(),
-    endDateTime: yup.string().required(),
+  name: yup.mixed().oneOf(['CreateVideo']).required(),
+  type: yup.mixed().oneOf(['OneTime']).required(),
+  settings: yup.object().shape({
+    startDate: yup.date().required(),
+    endDate: yup.date().required(),
     duration: yup.number().required().positive().integer(),
     fps: yup.number().required().positive().integer(),
   }),
 });
 
-export const validateCreateVideoTaskPayload = async (payload) => {
-  // console.log('- validator createOne req.body -', req.body);
+const createPhotosByTimeTaskSchema = yup.object().shape({
+  name: yup.mixed().oneOf(['CreatePhoto']).required(),
+  type: yup.mixed().oneOf(['OneTime']).required(),
+  settings: yup.object().shape({
+    interval: yup.number().required().positive().integer(),
+    startTime: yup.date().required(),
+    stopTime: yup.date().required(),
+  }),
+});
 
-  console.log(9999999999, _.pick(payload, ['videoSettings.startDateTime']));
+const createVideosByTimeTaskSchema = yup.object().shape({
+  name: yup.mixed().oneOf(['CreatePhoto']).required(),
+  type: yup.mixed().oneOf(['OneTime']).required(),
+  settings: yup.object().shape({
+    startTime: yup.date().required(),
+    duration: yup.number().required().positive().integer(),
+    fps: yup.number().required().positive().integer(),
+  }),
+});
 
-  try {
-    const ok = await createVideoTaskSchema.validate(payload);
-    console.log(7777, ok);
-  } catch (error) {
-    console.log(8888, error);
-    throw new ValidateError('not valid request', error.message);
-  }
+const mapping = {
+  CreatePhoto: createPhotoTaskSchema,
+  CreateVideo: createVideoTaskSchema,
+  CreatePhotosByTime: createPhotosByTimeTaskSchema,
+  CreateVideosByTime: createVideosByTimeTaskSchema,
 };
 
-// export default { validateCreateVideoTaskPayload };
+const validateTask = async (req, res, next) => {
+  // console.log('- validator createOne req.body -', req.body);
+  try {
+    await validateTaskSchema.validate(req.body.name);
+    await mapping[req.body.name].validate(req.body);
+  } catch (error) {
+    console.log('- validateTask error -', error);
+
+    next(new ValidateError('not valid payload', error.message));
+    return;
+  }
+
+  next();
+};
+
+export default { validateTask };

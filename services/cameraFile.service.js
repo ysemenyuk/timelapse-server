@@ -163,13 +163,13 @@ const createDefaultFolders = async ({ logger, userId, cameraId }) => {
     removable: false,
   };
 
-  const screenshotsFolder = await createFolder({
+  const photosFolder = await createFolder({
     ...defaultFolderPayload,
     nameOnDisk: 'Photos',
     name: 'Photos',
   });
 
-  const screenshotsByTimeFolder = await createFolder({
+  const photosByTimeFolder = await createFolder({
     ...defaultFolderPayload,
     nameOnDisk: 'PhotosByTime',
     name: 'PhotosByTime',
@@ -187,7 +187,7 @@ const createDefaultFolders = async ({ logger, userId, cameraId }) => {
     name: 'VideosByTime',
   });
 
-  return { mainFolder, screenshotsFolder, screenshotsByTimeFolder, videosFolder, videosByTimeFolder };
+  return { mainFolder, photosFolder, photosByTimeFolder, videosFolder, videosByTimeFolder };
 };
 
 const deleteCameraFiles = async ({ logger, cameraId }) => {

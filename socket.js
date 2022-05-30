@@ -4,9 +4,11 @@ import debug from 'debug';
 const logger = debug('socket');
 
 class Socket {
-  constructor() {
-    this.io = null;
-    this.logger = debug('socket');
+  constructor(httpServer) {
+    this.io = new Server(httpServer, {
+      cors: { origin: '*' },
+    });
+
     this.sessions = new Map();
   }
 
@@ -18,37 +20,30 @@ class Socket {
     return this.sessions.get(username);
   }
 
-  async start(httpServer) {
-    this.io = new Server(httpServer, {
-      cors: { origin: '*' },
+  async start() {
+    this.io.use((socket, next) => {
+      const userId = socket.handshake.auth.userId;
+
+      if (!userId) {
+        return next(new Error('invalid userId'));
+      }
+
+      socket.userId = userId;
+
+      // TODO: check token
+
+      next();
     });
 
-    // this.io.use((socket, next) => {
-    //   const username = socket.handshake.auth.username;
-    //   console.log(1111111, 'user connected', socket.handshake.auth);
-
-    //   if (!username) {
-    //     return next(new Error('invalid username'));
-    //   }
-
-    //   socket.username = username;
-    //   next();
-    // });
-
-    this.io.on('connection', async (socket) => {
-      // logger('user connected');
-
-      console.log(1111111, 'user connected', socket.handshake.auth);
-
-      const userId = socket.handshake.auth.userId;
-      socket.userId = userId;
+    this.io.on('connection', (socket) => {
+      logger('user connected', socket.handshake.auth.userId);
 
       this.sessions.set(socket.userId, socket);
 
       socket.emit('hello', socket.userId);
 
       socket.on('disconnect', () => {
-        console.log(2222222, 'user disconnect');
+        logger('user disconnect', socket.userId);
 
         this.sessions.delete(socket.userId);
       });

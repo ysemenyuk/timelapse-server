@@ -4,49 +4,66 @@ const sleep = (time, message = 'Hello') =>
     setTimeout(() => resolve(message), time);
   });
 
-export default (agenda, socket, logger) => {
+export default (agenda, socket, workerLogger) => {
   agenda.define('CreateVideo', async (job) => {
-    const logg = logger.extend('CreateVideo');
+    const logger = workerLogger.extend('CreateVideo');
 
-    logg('start createVideoFile job');
+    logger('start createVideoFile job');
 
     const { cameraId, userId, taskId } = job.attrs.data;
+    const userSocket = socket.getUserSocket(userId);
 
-    console.log(1111, 'createVideoFile job.attrs:', { cameraId, userId, taskId });
+    console.log('createVideoFile job.attrs:', { cameraId, userId, taskId });
 
-    const task = await cameraTaskService.getOneById({
-      logger: logg,
-      taskId,
-    });
+    try {
+      const task = await cameraTaskService.getOneById({
+        logger,
+        taskId,
+      });
 
-    console.log(3333, 'createVideoFile task', task);
+      console.log('createVideoFile task', task);
 
-    // create video file
-    await sleep(10 * 1000);
+      // create video file
+      await sleep(10 * 1000);
 
-    const updatedTask = await cameraTaskService.updateOneById({
-      logger: logg,
-      taskId,
-      payload: { status: 'Successed', finishedAt: new Date() },
-    });
+      const updatedTask = await cameraTaskService.updateOneById({
+        logger,
+        taskId,
+        payload: { status: 'Successed', finishedAt: new Date() },
+      });
 
-    console.log(4444, 'createVideoFile updatedTask', updatedTask);
+      console.log('createVideoFile updatedTask', updatedTask);
 
-    logg('finish createVideoFile job');
+      // socket emit updatedTask
+      userSocket && userSocket.emit('updateTask', updatedTask);
+    } catch (error) {
+      console.log('-- error createScreenshot job --', error);
+
+      const updatedTask = await cameraTaskService.updateOneById({
+        logger,
+        taskId,
+        payload: { status: 'Failed', finishedAt: new Date() },
+      });
+
+      // socket emit updatedTask
+      userSocket && userSocket.emit('updateTask', updatedTask);
+    }
+
+    logger('finish createVideoFile job');
   });
 
   agenda.define('CreateVideosByTime', async (job) => {
-    const logg = logger.extend('CreateVideosByTime');
+    const logger = workerLogger.extend('CreateVideosByTime');
 
-    logg('start CreateVideosByTime job');
+    logger('start CreateVideosByTime job');
 
     const { cameraId, userId, taskId } = job.attrs.data;
 
-    console.log(1111, 'CreateVideosByTime job.attrs:', { cameraId, userId, taskId });
+    console.log('CreateVideosByTime job.attrs:', { cameraId, userId, taskId });
 
     // create video file
     await sleep(10 * 1000);
 
-    logg('finish CreateVideosByTime job');
+    logger('finish CreateVideosByTime job');
   });
 };

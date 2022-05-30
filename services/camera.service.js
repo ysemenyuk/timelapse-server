@@ -6,8 +6,8 @@ import cameraTaskService from './cameraTask.service.js';
 const defaultPopulateItems = [
   'avatar',
   'mainFolder',
-  'screenshotsFolder',
-  'screenshotsByTimeFolder',
+  'photosFolder',
+  'photosByTimeFolder',
   'videosFolder',
   'videosByTimeFolder',
   // 'screenshotsByTimeTask',
@@ -49,7 +49,7 @@ const createOne = async ({ logger, userId, ...payload }) => {
     cameraId: camera._id,
   });
 
-  const { mainFolder, screenshotsFolder, screenshotsByTimeFolder, videosFolder, videosByTimeFolder } = defaultFolders;
+  const { mainFolder, photosFolder, photosByTimeFolder, videosFolder, videosByTimeFolder } = defaultFolders;
 
   // create defaul task (tasksBytime)
 
@@ -59,18 +59,17 @@ const createOne = async ({ logger, userId, ...payload }) => {
     cameraId: camera._id,
   });
 
-  const { screenshotsByTimeTask, videosByTimeTask } = defaultTasks;
+  const { photosByTimeTask } = defaultTasks;
 
   await camera.updateOne({
     // defaul folders
     mainFolder: mainFolder._id,
-    screenshotsFolder: screenshotsFolder._id,
-    screenshotsByTimeFolder: screenshotsByTimeFolder._id,
+    photosFolder: photosFolder._id,
+    photosByTimeFolder: photosByTimeFolder._id,
     videosFolder: videosFolder._id,
     videosByTimeFolder: videosByTimeFolder._id,
     // defaul tasks
-    screenshotsByTimeTask: screenshotsByTimeTask._id,
-    videosByTimeTask: videosByTimeTask._id,
+    photosByTimeTask: photosByTimeTask._id,
   });
 
   const createdCamera = await Camera.findOne({ _id: camera._id }).populate(defaultPopulateItems);
