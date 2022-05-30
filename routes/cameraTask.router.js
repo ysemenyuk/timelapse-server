@@ -10,6 +10,8 @@ const router = express.Router({ mergeParams: true });
 router.use(authMiddleware);
 router.use(userCameraMiddleware);
 
+// /api/cameras/:cameraId/tasks
+
 router.get('/', asyncHandler(cameraTaskController.getAll));
 router.get('/:taskId', asyncHandler(cameraTaskController.getOne));
 

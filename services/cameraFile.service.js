@@ -2,7 +2,7 @@ import _ from 'lodash';
 import CameraFile from '../models/CameraFile.js';
 import { promisifyUploadStream } from '../utils/index.js';
 import storageService from './storage.service.js';
-import * as constants from '../utils/constants.js';
+import { fileType, folderName } from '../utils/constants.js';
 
 const createQuery = (cameraId, query) => {
   const { parentId, type, startDateTime, endDateTime } = query;
@@ -27,7 +27,7 @@ const getCountByQuery = async ({ logger, cameraId, query }) => {
 };
 
 const getOneById = async ({ logger, fileId }) => {
-  logger && logger(`cameraFileService.getOneById fileId: ${fileId}`);
+  logger && logger(`cameraFileService.getOneById`);
 
   const file = await CameraFile.findOne({ _id: fileId });
   return file;
@@ -40,7 +40,7 @@ const getOne = async ({ logger, ...query }) => {
   return file;
 };
 
-//
+// create
 
 const createFolder = async ({ logger, ...payload }) => {
   logger && logger(`cameraFileService.createFolder`);
@@ -74,7 +74,7 @@ const createFile = async ({ logger, data, ...payload }) => {
 };
 
 const createFileByStream = async ({ logger, stream, ...payload }) => {
-  logger && logger(`cameraFileService.createFile`);
+  logger && logger(`cameraFileService.createFileByStream`);
 
   const uploadStream = storageService.openUploadStream({
     logger,
@@ -91,6 +91,17 @@ const createFileByStream = async ({ logger, stream, ...payload }) => {
   return file;
 };
 
+// update
+
+const updateOneById = async ({ fileId, payload, logger }) => {
+  logger && logger(`cameraFileService.updateOneById`);
+
+  const updated = await CameraFile.findOneAndUpdate({ _id: fileId }, payload, { new: true });
+  return updated;
+};
+
+// delete
+
 const deleteFolder = async ({ logger, folder }) => {
   logger && logger(`cameraFileService.deleteFolder`);
 
@@ -98,7 +109,7 @@ const deleteFolder = async ({ logger, folder }) => {
   try {
     await storageService.removeFolder({ logger, folderPath: folder.path, folderName: folder.name });
   } catch (error) {
-    console.log('storageService error message -', error.message);
+    console.log('- storageService error -', error);
   }
 
   // delete folder and files from db
@@ -118,11 +129,26 @@ const deleteFile = async ({ logger, file }) => {
   try {
     await storageService.removeFile({ logger, filePath: file.path, fileName: file.name });
   } catch (error) {
-    console.log('storageService error message -', error.message);
+    console.log('- storageService error -', error);
   }
 
   // delete file from db
   const deleted = await CameraFile.findOneAndDelete({ _id: file._id });
+  return deleted;
+};
+
+const deleteOneById = async ({ logger, fileId }) => {
+  logger && logger(`cameraFileService.deleteOneById`);
+
+  const item = await CameraFile.findOne({ _id: fileId });
+  let deleted;
+
+  if (item.type === 'folder') {
+    deleted = await deleteFolder({ logger, folder: item });
+  } else {
+    deleted = await deleteFile({ logger, file: item });
+  }
+
   return deleted;
 };
 
@@ -148,8 +174,8 @@ const createDefaultFolders = async ({ logger, userId, cameraId }) => {
     parent: null,
     pathOnDisk: [],
     nameOnDisk: cameraId.toString(),
-    name: constants.MAIN,
-    type: 'folder',
+    name: folderName.MAIN,
+    type: fileType.FOLDER,
     removable: false,
   });
 
@@ -159,32 +185,32 @@ const createDefaultFolders = async ({ logger, userId, cameraId }) => {
     camera: cameraId,
     parent: mainFolder._id,
     pathOnDisk: [...mainFolder.pathOnDisk, mainFolder.nameOnDisk],
-    type: 'folder',
+    type: fileType.FOLDER,
     removable: false,
   };
 
   const photosFolder = await createFolder({
     ...defaultFolderPayload,
-    nameOnDisk: 'Photos',
-    name: 'Photos',
+    nameOnDisk: folderName.PHOTOS,
+    name: folderName.PHOTOS,
   });
 
   const photosByTimeFolder = await createFolder({
     ...defaultFolderPayload,
-    nameOnDisk: 'PhotosByTime',
-    name: 'PhotosByTime',
+    nameOnDisk: folderName.PHOTOS_BY_TIME,
+    name: folderName.PHOTOS_BY_TIME,
   });
 
   const videosFolder = await createFolder({
     ...defaultFolderPayload,
-    nameOnDisk: 'Videos',
-    name: 'Videos',
+    nameOnDisk: folderName.VIDEOS,
+    name: folderName.VIDEOS,
   });
 
   const videosByTimeFolder = await createFolder({
     ...defaultFolderPayload,
-    nameOnDisk: 'VideosByTime',
-    name: 'VideosByTime',
+    nameOnDisk: folderName.VIDEOS_BY_TIME,
+    name: folderName.VIDEOS_BY_TIME,
   });
 
   return { mainFolder, photosFolder, photosByTimeFolder, videosFolder, videosByTimeFolder };
@@ -203,7 +229,7 @@ const deleteCameraFiles = async ({ logger, cameraId }) => {
       folderName: mainCameraFolder.nameOnDisk,
     });
   } catch (error) {
-    console.log('storageService error message -', error.message);
+    console.log('- storageService error -', error);
   }
 
   const deleted = await CameraFile.deleteMany({ camera: cameraId });
@@ -220,8 +246,11 @@ export default {
   createFile,
   createFileByStream,
 
+  updateOneById,
+
   deleteFolder,
   deleteFile,
+  deleteOneById,
   deleteManyByIds,
 
   createDefaultFolders,

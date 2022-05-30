@@ -9,6 +9,8 @@ const router = express.Router({ mergeParams: true });
 
 router.use(authMiddleware);
 
+// /api/cameras
+
 router.get('/', asyncHandler(cameraController.getAll));
 router.get('/:cameraId', userCameraMiddleware, asyncHandler(cameraController.getOne));
 

@@ -2,6 +2,7 @@ import { Agenda } from 'agenda/es.js';
 import mongodb from 'mongodb';
 import jobs from './jobs/index.js';
 import debug from 'debug';
+import { taskType } from './utils/constants.js';
 
 const { MongoClient } = mongodb;
 const logger = debug('worker');
@@ -43,9 +44,9 @@ class Worker {
     const { type } = task;
 
     const mapping = {
-      OneTime: this.oneTime,
-      RepeatEvery: this.repeatEvery,
-      RepeatAt: this.repeatAt,
+      [taskType.ONE_TIME]: this.oneTime,
+      [taskType.REPEAT_EVERY]: this.repeatEvery,
+      [taskType.REPEAT_AT]: this.repeatAt,
     };
 
     await mapping[type](task);

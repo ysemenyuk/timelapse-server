@@ -8,8 +8,8 @@ const CameraFileSchema = mongoose.Schema({
   pathOnDisk: { type: [{ type: String }], required: true },
   nameOnDisk: { type: String, required: true },
   name: { type: String, required: true },
-  type: { type: String }, // folder, screenshot, screenshotByTime, video, videoByTime
-  fileType: { type: String }, // image, video, ...
+  type: { type: String }, // folder, photo, photoByTime, video, videoByTime
+  fileType: { type: String }, // image/jpg, video/mpeg, ...
   removable: { type: Boolean, default: true },
 });
 

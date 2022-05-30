@@ -17,6 +17,8 @@ router.get('/:fileId', asyncHandler(cameraFileController.getOne));
 
 router.post('/', asyncHandler(cameraFileController.createOne));
 
+router.put('/:fileId', asyncHandler(cameraFileController.updateOne));
+
 router.delete('/:fileId', asyncHandler(cameraFileController.deleteOne));
 
 export default router;

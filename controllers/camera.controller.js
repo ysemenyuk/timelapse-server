@@ -1,9 +1,9 @@
 import cameraService from '../services/camera.service.js';
 
 const getAll = async (req, res) => {
-  req.logger('cameraController.getAll /api/cameras/');
+  req.logger('cameraController.getAll');
 
-  const cameras = await cameraService.getAll({
+  const cameras = await cameraService.getAllByUser({
     logger: req.logger,
     userId: req.userId,
   });
@@ -13,11 +13,10 @@ const getAll = async (req, res) => {
 };
 
 const getOne = async (req, res) => {
-  req.logger(`cameraController.get /api/cameras/${req.params.cameraId}`);
+  req.logger(`cameraController.getOne`);
 
-  const camera = await cameraService.getOne({
+  const camera = await cameraService.getOneById({
     logger: req.logger,
-    userId: req.userId,
     cameraId: req.cameraId,
   });
 
@@ -26,7 +25,7 @@ const getOne = async (req, res) => {
 };
 
 const createOne = async (req, res) => {
-  req.logger('cameraController.post /api/cameras');
+  req.logger('cameraController.createOne');
 
   // TODO: check req.body take fields by schema!
   const payload = req.body;
@@ -34,7 +33,7 @@ const createOne = async (req, res) => {
   const camera = await cameraService.createOne({
     logger: req.logger,
     userId: req.userId,
-    ...payload,
+    payload,
   });
 
   res.status(201).send(camera);
@@ -42,14 +41,13 @@ const createOne = async (req, res) => {
 };
 
 const updateOne = async (req, res) => {
-  req.logger(`cameraController.updateOne /api/cameras/${req.cameraId}`);
+  req.logger(`cameraController.updateOne`);
 
   // TODO: check req.body take fields by schema!
   const payload = req.body;
 
   const updated = await cameraService.updateOneById({
     logger: req.logger,
-    userId: req.userId,
     cameraId: req.cameraId,
     payload,
   });
@@ -59,11 +57,10 @@ const updateOne = async (req, res) => {
 };
 
 const deleteOne = async (req, res) => {
-  req.logger(`cameraController.deleteOne /api/cameras/${req.cameraId}`);
+  req.logger(`cameraController.deleteOne`);
 
   const deleted = await cameraService.deleteOneById({
     logger: req.logger,
-    userId: req.userId,
     cameraId: req.cameraId,
   });
 

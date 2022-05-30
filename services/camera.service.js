@@ -1,7 +1,6 @@
 import Camera from '../models/Camera.js';
 import cameraFileService from './cameraFile.service.js';
 import cameraTaskService from './cameraTask.service.js';
-// import * as constants from '../utils/constants.js';
 
 const defaultPopulateItems = [
   'avatar',
@@ -10,33 +9,26 @@ const defaultPopulateItems = [
   'photosByTimeFolder',
   'videosFolder',
   'videosByTimeFolder',
-  // 'screenshotsByTimeTask',
+  // 'photosByTimeTask',
   // 'videosByTimeTask',
 ];
 
-const getAll = async ({ userId, logger, populateItems = defaultPopulateItems }) => {
-  logger && logger(`cameraService.getAll userId: ${userId}`);
+const getAllByUser = async ({ userId, logger, populateItems = defaultPopulateItems }) => {
+  logger && logger(`cameraService.getAllByUser`);
 
   const cameras = await Camera.find({ user: userId }).populate(populateItems);
   return cameras;
 };
 
-const getOne = async ({ cameraId, logger, populateItems = defaultPopulateItems }) => {
-  logger && logger(`cameraService.getOne cameraId: ${cameraId}`);
-
-  const camera = await Camera.findOne({ _id: cameraId }).populate(populateItems);
-  return camera;
-};
-
 const getOneById = async ({ logger, cameraId, populateItems = defaultPopulateItems }) => {
-  logger && logger(`cameraService.getOneById cameraId: ${cameraId}`);
+  logger && logger(`cameraService.getOneById`);
 
   const camera = await Camera.findOne({ _id: cameraId }).populate(populateItems);
   return camera;
 };
 
-const createOne = async ({ logger, userId, ...payload }) => {
-  logger && logger(`cameraService.createOne payload.name: ${payload.name}`);
+const createOne = async ({ logger, userId, payload }) => {
+  logger && logger(`cameraService.createOne`);
 
   const camera = new Camera({ user: userId, ...payload });
   await camera.save();
@@ -51,7 +43,7 @@ const createOne = async ({ logger, userId, ...payload }) => {
 
   const { mainFolder, photosFolder, photosByTimeFolder, videosFolder, videosByTimeFolder } = defaultFolders;
 
-  // create defaul task (tasksBytime)
+  // create defaul tasks (tasksBytime)
 
   const defaultTasks = await cameraTaskService.createDefaultTasks({
     logger,
@@ -77,7 +69,7 @@ const createOne = async ({ logger, userId, ...payload }) => {
 };
 
 const updateOneById = async ({ logger, cameraId, payload }) => {
-  logger && logger(`cameraService.updateOne cameraId: ${cameraId}`);
+  logger && logger(`cameraService.updateOne`);
 
   await Camera.updateOne({ _id: cameraId }, payload);
   const updated = await Camera.findOne({ _id: cameraId }).populate(defaultPopulateItems);
@@ -85,7 +77,7 @@ const updateOneById = async ({ logger, cameraId, payload }) => {
 };
 
 const deleteOneById = async ({ logger, cameraId }) => {
-  logger && logger(`cameraService.deleteOne cameraId: ${cameraId}`);
+  logger && logger(`cameraService.deleteOne`);
 
   await cameraFileService.deleteCameraFiles({ cameraId, logger });
   await cameraTaskService.deleteCameraTasks({ cameraId, logger });
@@ -94,4 +86,4 @@ const deleteOneById = async ({ logger, cameraId }) => {
   return deleted;
 };
 
-export default { getAll, getOne, getOneById, createOne, updateOneById, deleteOneById };
+export default { getAllByUser, getOneById, createOne, updateOneById, deleteOneById };

@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import _ from 'lodash';
 import jwt from '../libs/token.js';
+import { BadRequestError } from '../middleware/errorHandlerMiddleware.js';
 import User from '../models/User.js';
 
 const singUp = async ({ email, password, logger }) => {
@@ -9,7 +10,7 @@ const singUp = async ({ email, password, logger }) => {
   const user = await User.findOne({ email });
 
   if (user) {
-    req.logger(`userService.singUp email ${email} - already exist`);
+    logger(`userService.singUp email ${email} - already exist`);
     throw new BadRequestError(`User with email ${email} already exist`);
   }
 
@@ -29,14 +30,14 @@ const logIn = async ({ email, password, logger }) => {
   const user = await User.findOne({ email });
 
   if (!user) {
-    req.logger(`userService.logIn email ${email} - not found`);
+    logger(`userService.logIn email ${email} - User not found`);
     throw new BadRequestError(`Invalid email`);
   }
 
   const isPassValid = bcrypt.compareSync(password, user.password);
 
   if (!isPassValid) {
-    req.logger(`userService.logIn email ${email} Invalid password`);
+    logger(`userService.logIn email ${email} - Invalid password`);
     throw new BadRequestError(`Invalid password`);
   }
 
@@ -71,9 +72,8 @@ const getByEmail = async ({ email, logger }) => {
 const updateOne = async ({ userId, payload, logger }) => {
   logger(`userService.updateOne userId: ${userId}`);
 
-  // console.log(payload);
-
   const { name, email, password } = payload;
+
   const hashPassword = await bcrypt.hash(password, 8);
 
   const updated = await User.findOneAndUpdate({ _id: userId }, { name, email, password: hashPassword }, { new: true });

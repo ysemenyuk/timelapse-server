@@ -39,7 +39,7 @@ const auth = async (req, res) => {
 };
 
 const getOne = async (req, res) => {
-  req.logger(`userController.getOne userId: ${req.userId}`);
+  req.logger(`userController.getOne`);
 
   const user = await userService.getById({
     userId: req.userId,
@@ -51,7 +51,7 @@ const getOne = async (req, res) => {
 };
 
 const updateOne = async (req, res) => {
-  req.logger(`userController.updateOne userId: ${req.userId}`);
+  req.logger(`userController.updateOne`);
 
   const updated = await userService.updateOne({
     userId: req.userId,
@@ -64,7 +64,7 @@ const updateOne = async (req, res) => {
 };
 
 const deleteOne = async (req, res) => {
-  req.logger(`userController.deleteOne userId: ${req.userId}`);
+  req.logger(`userController.deleteOne`);
 
   const deleted = await userService.deleteOne({
     userId: req.userId,

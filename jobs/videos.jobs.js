@@ -1,69 +1,54 @@
 import cameraTaskService from '../services/cameraTask.service.js';
+import { taskName, taskStatus, fileType } from '../utils/constants.js';
+
 const sleep = (time, message = 'Hello') =>
   new Promise((resolve) => {
     setTimeout(() => resolve(message), time);
   });
 
 export default (agenda, socket, workerLogger) => {
-  agenda.define('CreateVideo', async (job) => {
-    const logger = workerLogger.extend('CreateVideo');
+  agenda.define(taskName.CREATE_VIDEO, async (job) => {
+    const logger = workerLogger.extend(taskName.CREATE_VIDEO);
 
-    logger('start createVideoFile job');
+    logger(`start ${taskName.CREATE_VIDEO} job`);
 
-    const { cameraId, userId, taskId } = job.attrs.data;
+    const { userId, taskId } = job.attrs.data;
     const userSocket = socket.getUserSocket(userId);
 
-    console.log('createVideoFile job.attrs:', { cameraId, userId, taskId });
+    const task = await cameraTaskService.getOneById({ taskId });
 
     try {
-      const task = await cameraTaskService.getOneById({
-        logger,
-        taskId,
-      });
+      const video = {
+        name: 'video',
+        type: fileType.VIDEO,
+      };
 
-      console.log('createVideoFile task', task);
-
-      // create video file
       await sleep(10 * 1000);
 
-      const updatedTask = await cameraTaskService.updateOneById({
-        logger,
-        taskId,
-        payload: { status: 'Successed', finishedAt: new Date() },
-      });
+      await task.updateOne({ status: taskStatus.SUCCESSED, finishedAt: new Date() });
 
-      console.log('createVideoFile updatedTask', updatedTask);
-
-      // socket emit updatedTask
-      userSocket && userSocket.emit('updateTask', updatedTask);
+      // socket emit update-task, add-file
+      userSocket && userSocket.emit('update-task', task);
+      userSocket && userSocket.emit('add-file', video);
     } catch (error) {
-      console.log('-- error createScreenshot job --', error);
+      console.log('-- error createVideoFile job --', error);
 
-      const updatedTask = await cameraTaskService.updateOneById({
-        logger,
-        taskId,
-        payload: { status: 'Failed', finishedAt: new Date() },
-      });
+      await task.updateOne({ status: taskStatus.FAILED, finishedAt: new Date() });
 
       // socket emit updatedTask
-      userSocket && userSocket.emit('updateTask', updatedTask);
+      userSocket && userSocket.emit('update-task', task);
     }
 
-    logger('finish createVideoFile job');
+    logger(`finish ${taskName.CREATE_VIDEO} job`);
   });
 
-  agenda.define('CreateVideosByTime', async (job) => {
-    const logger = workerLogger.extend('CreateVideosByTime');
+  agenda.define(taskName.CREATE_VIDEOS_BY_TIME, async () => {
+    const logger = workerLogger.extend(taskName.CREATE_VIDEOS_BY_TIME);
 
-    logger('start CreateVideosByTime job');
+    logger(`start ${taskName.CREATE_VIDEOS_BY_TIME} job`);
 
-    const { cameraId, userId, taskId } = job.attrs.data;
-
-    console.log('CreateVideosByTime job.attrs:', { cameraId, userId, taskId });
-
-    // create video file
     await sleep(10 * 1000);
 
-    logger('finish CreateVideosByTime job');
+    logger(`finish ${taskName.CREATE_VIDEOS_BY_TIME} job`);
   });
 };
