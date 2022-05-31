@@ -1,5 +1,5 @@
 import CameraTask from '../models/CameraTask.js';
-import { taskName, taskStatus, taskType } from '../utils/constants.js';
+import { taskName, taskType } from '../utils/constants.js';
 
 const getAll = async ({ cameraId, logger }) => {
   logger && logger(`cameraTaskService.getAll`);
@@ -20,8 +20,6 @@ const getOneById = async ({ logger, taskId }) => {
 const createOne = async ({ userId, cameraId, payload, worker, logger }) => {
   logger && logger(`cameraTaskService.createOne`);
 
-  const { status } = payload;
-
   const task = new CameraTask({
     user: userId,
     camera: cameraId,
@@ -29,10 +27,7 @@ const createOne = async ({ userId, cameraId, payload, worker, logger }) => {
   });
 
   await task.save();
-
-  if (status === taskStatus.RUNNING) {
-    await worker.create(task);
-  }
+  await worker.create(task);
 
   return task;
 };
@@ -42,13 +37,9 @@ const createOne = async ({ userId, cameraId, payload, worker, logger }) => {
 const updateOneById = async ({ taskId, payload, worker, logger }) => {
   logger && logger(`cameraTaskService.updateOne`);
 
-  const { status } = payload;
-
   const task = await CameraTask.findOneAndUpdate({ _id: taskId }, payload, { new: true });
 
-  if (status === taskStatus.RUNNING) {
-    await worker.create(task);
-  }
+  await worker.update(task);
 
   return task;
 };

@@ -2,7 +2,7 @@ import { Agenda } from 'agenda/es.js';
 import mongodb from 'mongodb';
 import jobs from './jobs/index.js';
 import debug from 'debug';
-import { taskType } from './utils/constants.js';
+import { taskName, taskStatus } from './utils/constants.js';
 
 const { MongoClient } = mongodb;
 const logger = debug('worker');
@@ -18,6 +18,10 @@ class Worker {
     this.agenda;
   }
 
+  get name() {
+    return this.agenda;
+  }
+
   async start() {
     this.mongoClient = new MongoClient(dbUri, {
       useNewUrlParser: true,
@@ -29,6 +33,8 @@ class Worker {
     logger(`mongoClient successfully connect`);
 
     this.agenda = new Agenda({ mongo: this.mongoClient.db(dbName) });
+
+    // console.log(111, this.agenda);
 
     jobTypes.forEach((type) => {
       jobs[type](this.agenda, this.socket, logger);
@@ -43,18 +49,34 @@ class Worker {
   }
 
   async create(task) {
-    const { type } = task;
+    const { name } = task;
+
+    // await this.oneTimeJob(task);
 
     const mapping = {
-      [taskType.ONE_TIME]: this.oneTime,
-      [taskType.REPEAT_EVERY]: this.repeatEvery,
-      [taskType.REPEAT_AT]: this.repeatAt,
+      [taskName.CREATE_PHOTO]: this.oneTimeJob.bind(this),
+      [taskName.CREATE_VIDEO]: this.oneTimeJob.bind(this),
+      [taskName.CREATE_PHOTOS_BY_TIME]: this.repeatEveryJob.bind(this),
+      [taskName.CREATE_VIDEOS_BY_TIME]: this.repeatAtJob.bind(this),
     };
 
-    await mapping[type](task);
+    await mapping[name](task);
   }
 
-  async removeAll(task) {
+  async update(task) {
+    const { name } = task;
+
+    const mapping = {
+      [taskName.CREATE_PHOTO]: this.oneTimeJob.bind(this),
+      [taskName.CREATE_VIDEO]: this.oneTimeJob.bind(this),
+      [taskName.CREATE_PHOTOS_BY_TIME]: this.repeatEveryJob.bind(this),
+      [taskName.CREATE_VIDEOS_BY_TIME]: this.repeatAtJob.bind(this),
+    };
+
+    await mapping[name](task);
+  }
+
+  async removeJobs(task) {
     const jobs = await this.agenda.jobs({ name: task.name, 'data.cameraId': task.camera });
 
     if (jobs.length) {
@@ -62,7 +84,7 @@ class Worker {
     }
   }
 
-  async oneTime(task) {
+  async oneTimeJob(task) {
     const job = this.agenda.create(task.name, {
       userId: task.user,
       cameraId: task.camera,
@@ -72,8 +94,12 @@ class Worker {
     await job.save();
   }
 
-  async repeatEvery(task) {
-    const { settings } = task;
+  async repeatEveryJob(task) {
+    const { status, settings } = task;
+
+    if (status !== taskStatus.RUNNING) {
+      return;
+    }
 
     const job = this.agenda.create(task.name, {
       userId: task.user,
@@ -86,8 +112,12 @@ class Worker {
     await job.save();
   }
 
-  async repeatAt(task) {
-    const { settings } = task;
+  async repeatAtJob(task) {
+    const { status, settings } = task;
+
+    if (status !== taskStatus.RUNNING) {
+      return;
+    }
 
     const job = this.agenda.create(task.name, {
       userId: task.user,

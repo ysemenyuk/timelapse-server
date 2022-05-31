@@ -19,10 +19,11 @@ export default (agenda, socket, workerLogger) => {
     try {
       await task.updateOne({ status: taskStatus.RUNNING, startedAt: new Date() });
 
-      const { photosFolder, ...camera } = await cameraService.getOneById({
-        cameraId,
-        populateItems: [folderName.PHOTOS],
-      });
+      const camera = await cameraService.getOneById({ cameraId });
+
+      const { photosFolder } = camera;
+
+      console.log(6666, camera);
 
       const date = new Date();
 
@@ -39,8 +40,8 @@ export default (agenda, socket, workerLogger) => {
         parent: photosFolder._id,
         date,
         name: fileName,
-        pathOnDisk: fileNameOnDisk,
-        nameOnDisk: filePathOnDisk,
+        pathOnDisk: filePathOnDisk,
+        nameOnDisk: fileNameOnDisk,
         type: fileType.PHOTO,
         fileType: 'image/jpg',
         data: fileData,

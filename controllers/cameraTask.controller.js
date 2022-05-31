@@ -38,6 +38,8 @@ const createOne = async (req, res) => {
     logger: req.logger,
   });
 
+  console.log(333, task);
+
   res.status(201).send(task);
   req.logResp(req);
 };
