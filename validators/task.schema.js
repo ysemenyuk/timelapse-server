@@ -4,10 +4,10 @@ import { taskName, taskType } from '../utils/constants.js';
 const { CREATE_PHOTO, CREATE_PHOTOS_BY_TIME, CREATE_VIDEO, CREATE_VIDEOS_BY_TIME } = taskName;
 const { ONE_TIME, REPEAT_EVERY, REPEAT_AT } = taskType;
 
-export const taskSchema = yup.object().shape({
-  name: yup.mixed().oneOf([CREATE_PHOTO, CREATE_PHOTOS_BY_TIME, CREATE_VIDEO, CREATE_VIDEOS_BY_TIME]).required(),
-  type: yup.mixed().oneOf([ONE_TIME, REPEAT_EVERY, REPEAT_AT]).required(),
-});
+export const taskNameSchema = yup
+  .mixed()
+  .oneOf([CREATE_PHOTO, CREATE_PHOTOS_BY_TIME, CREATE_VIDEO, CREATE_VIDEOS_BY_TIME])
+  .required();
 
 const createPhotoTaskSchema = yup.object().shape({
   name: yup.mixed().oneOf([CREATE_PHOTO]).required(),
