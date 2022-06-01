@@ -16,8 +16,8 @@ class Socket {
     return this.io;
   }
 
-  getUserSocket(username) {
-    return this.sessions.get(username);
+  getUserSocket(userId) {
+    return this.sessions.get(userId.toString());
   }
 
   async start() {
@@ -41,6 +41,8 @@ class Socket {
       this.sessions.set(socket.userId, socket);
 
       socket.emit('hello', socket.userId);
+
+      console.log(111, this.sessions.has(socket.userId), socket.userId);
 
       socket.on('disconnect', () => {
         logger('user disconnect', socket.userId);

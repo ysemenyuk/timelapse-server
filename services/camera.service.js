@@ -23,8 +23,6 @@ const getAllByUser = async ({ userId, logger, populateItems = defaultPopulateIte
 const getOneById = async ({ logger, cameraId, populateItems = defaultPopulateItems }) => {
   logger && logger(`cameraService.getOneById`);
 
-  console.log(7777, { populateItems });
-
   const camera = await Camera.findOne({ _id: cameraId }).populate(populateItems);
   return camera;
 };

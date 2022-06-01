@@ -21,8 +21,8 @@ const createVideoTaskSchema = yup.object().shape({
   name: yup.mixed().oneOf([CREATE_VIDEO]).required(),
   type: yup.mixed().oneOf([ONE_TIME]).required(),
   settings: yup.object().shape({
-    startDate: yup.date().required(),
-    endDate: yup.date().required(),
+    startDate: yup.string().required(),
+    endDate: yup.string().required(),
     duration: yup.number().required().positive().integer(),
     fps: yup.number().required().positive().integer(),
   }),
@@ -33,8 +33,8 @@ const createPhotosByTimeTaskSchema = yup.object().shape({
   type: yup.mixed().oneOf([REPEAT_EVERY]).required(),
   settings: yup.object().shape({
     interval: yup.number().required().positive().integer(),
-    startTime: yup.date().required(),
-    stopTime: yup.date().required(),
+    startTime: yup.string().required(),
+    stopTime: yup.string().required(),
   }),
 });
 
@@ -42,7 +42,7 @@ const createVideosByTimeTaskSchema = yup.object().shape({
   name: yup.mixed().oneOf([CREATE_VIDEOS_BY_TIME]).required(),
   type: yup.mixed().oneOf([REPEAT_AT]).required(),
   settings: yup.object().shape({
-    startTime: yup.date().required(),
+    startTime: yup.string().required(),
     duration: yup.number().required().positive().integer(),
     fps: yup.number().required().positive().integer(),
   }),

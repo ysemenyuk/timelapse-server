@@ -85,17 +85,33 @@ class Worker {
   }
 
   async oneTimeJob(task) {
-    const job = this.agenda.create(task.name, {
+    const jobs = await this.agenda.jobs({ 'data.taskId': task._id });
+
+    if (jobs.length) {
+      await Promise.all(jobs.map((job) => job.remove()));
+    }
+
+    const newJob = this.agenda.create(task.name, {
       userId: task.user,
       cameraId: task.camera,
       taskId: task._id,
     });
 
-    await job.save();
+    await newJob.save();
   }
 
   async repeatEveryJob(task) {
     const { status, settings } = task;
+
+    const jobs = await this.agenda.jobs({ 'data.taskId': task._id });
+    console.log(5555, jobs.length);
+
+    if (jobs.length) {
+      await Promise.all(jobs.map((job) => job.remove()));
+    }
+
+    const jobs2 = await this.agenda.jobs({ 'data.taskId': task._id });
+    console.log(6666, jobs2.length);
 
     if (status !== taskStatus.RUNNING) {
       return;

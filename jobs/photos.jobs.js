@@ -3,7 +3,12 @@ import cameraApiService from '../services/cameraApi.service.js';
 import cameraFileService from '../services/cameraFile.service.js';
 import cameraTaskService from '../services/cameraTask.service.js';
 import { dd, makeFileName, makeFileNameOnDisk, makeTodayName, parseTime } from '../utils/index.js';
-import { taskName, taskStatus, folderName, fileType } from '../utils/constants.js';
+import { taskName, taskStatus, fileType } from '../utils/constants.js';
+
+const sleep = (time, message = 'Hello') =>
+  new Promise((resolve) => {
+    setTimeout(() => resolve(message), time);
+  });
 
 export default (agenda, socket, workerLogger) => {
   agenda.define(taskName.CREATE_PHOTO, async (job) => {
@@ -14,16 +19,18 @@ export default (agenda, socket, workerLogger) => {
     const { cameraId, userId, taskId } = job.attrs.data;
     const userSocket = socket.getUserSocket(userId);
 
-    const task = await cameraTaskService.getOneById({ taskId });
+    let task;
 
     try {
+      task = await cameraTaskService.getOneById({ taskId });
       await task.updateOne({ status: taskStatus.RUNNING, startedAt: new Date() });
 
+      userSocket && userSocket.emit('update-task', { cameraId, userId, taskId });
+
+      await sleep(10 * 1000);
+
       const camera = await cameraService.getOneById({ cameraId });
-
       const { photosFolder } = camera;
-
-      console.log(6666, camera);
 
       const date = new Date();
 
@@ -47,18 +54,24 @@ export default (agenda, socket, workerLogger) => {
         data: fileData,
       });
 
-      await task.updateOne({ status: taskStatus.SUCCESSED, finishedAt: new Date() });
+      await task.updateOne({
+        status: taskStatus.SUCCESSED,
+        finishedAt: new Date(),
+        message: `Message: "File "${fileName}" successfully saved in "${photosFolder.name}" folder"`,
+      });
 
-      // socket emit update-task, add-file
-      userSocket && userSocket.emit('update-task', task);
-      userSocket && userSocket.emit('add-file', photo);
+      userSocket && userSocket.emit('update-task', { cameraId, userId, taskId });
+      userSocket && userSocket.emit('add-file', { cameraId, userId, fileId: photo._id, parentId: photo.parent });
     } catch (error) {
       console.log('-- error CreatePhoto job --', error);
 
-      await task.updateOne({ status: taskStatus.FAILED, finishedAt: new Date() });
+      await task.updateOne({
+        status: taskStatus.FAILED,
+        finishedAt: new Date(),
+        message: `Error: "${error.message}"`,
+      });
 
-      // socket emit update-task
-      userSocket && userSocket.emit('update-task', task);
+      userSocket && userSocket.emit('update-task', { cameraId, userId, taskId });
     }
 
     logger(`finish ${taskName.CREATE_PHOTO} job`);
@@ -72,80 +85,83 @@ export default (agenda, socket, workerLogger) => {
     const logger = workerLogger.extend(taskName.CREATE_PHOTOS_BY_TIME);
 
     logger(`start ${taskName.CREATE_PHOTOS_BY_TIME} job`);
-    // console.log('CreatePhotosByTime job.attrs:', job.attrs);
 
     const { cameraId, userId, taskId } = job.attrs.data;
+    const userSocket = socket.getUserSocket(userId);
 
-    const task = await cameraTaskService.getOneById({ logger, taskId });
+    let task;
 
-    const { settings } = task;
-    const { startTime, stopTime } = settings;
+    try {
+      task = await cameraTaskService.getOneById({ logger, taskId });
 
-    const time = new Date();
-    const { hh, mm } = parseTime(time);
-    const currentTime = `${dd(hh)}:${dd(mm)}`;
+      const { settings } = task;
+      const { startTime, stopTime } = settings;
 
-    if (currentTime < startTime || currentTime > stopTime) {
-      logger(`out of time - currentTime: ${currentTime}, startTime: ${startTime} stopTime: ${stopTime}`);
-      logger('cancel CreatePhotosByTime job');
-      return;
-    }
+      const time = new Date();
+      const { hh, mm } = parseTime(time);
+      const currentTime = `${dd(hh)}:${dd(mm)}`;
 
-    const { photosByTimeFolder, ...camera } = await cameraService.getOneById({
-      logger,
-      cameraId,
-      populateItems: [folderName.PHOTOS_BY_TIME],
-    });
+      if (currentTime < startTime || currentTime > stopTime) {
+        logger(`out of time - currentTime: ${currentTime}, startTime: ${startTime} stopTime: ${stopTime}`);
+        logger('cancel CreatePhotosByTime job');
+        return;
+      }
 
-    const todayFolderName = makeTodayName(time);
+      const camera = await cameraService.getOneById({ cameraId });
+      const { photosByTimeFolder } = camera;
 
-    let parent = await cameraFileService.getOne({
-      logger,
-      camera: cameraId,
-      parent: photosByTimeFolder._id,
-      name: todayFolderName,
-    });
+      const todayFolderName = makeTodayName(time);
 
-    // TODO: check folder on disk?
+      let parent = await cameraFileService.getOne({
+        logger,
+        camera: cameraId,
+        parent: photosByTimeFolder._id,
+        name: todayFolderName,
+      });
 
-    if (!parent) {
-      parent = await cameraFileService.createFolder({
+      // TODO: check folder on disk?
+
+      if (!parent) {
+        parent = await cameraFileService.createFolder({
+          logger,
+          user: userId,
+          camera: camera._id,
+          parent: photosByTimeFolder._id,
+          name: todayFolderName,
+          nameOnDisk: todayFolderName,
+          pathOnDisk: [...photosByTimeFolder.pathOnDisk, photosByTimeFolder.nameOnDisk],
+          type: fileType.FOLDER,
+        });
+      }
+
+      const date = new Date();
+
+      const fileName = makeFileName(date);
+      const fileNameOnDisk = makeFileNameOnDisk(date);
+      const filePathOnDisk = [...parent.pathOnDisk, parent.nameOnDisk];
+
+      const fileData = await cameraApiService.getScreenshot(camera.photoUrl, 'arraybuffer');
+
+      const photo = await cameraFileService.createFile({
         logger,
         user: userId,
         camera: camera._id,
-        parent: photosByTimeFolder._id,
-        name: todayFolderName,
-        nameOnDisk: todayFolderName,
-        pathOnDisk: [...photosByTimeFolder.pathOnDisk, photosByTimeFolder.nameOnDisk],
-        type: fileType.FOLDER,
+        parent: parent._id,
+        date,
+        name: fileName,
+        pathOnDisk: filePathOnDisk,
+        nameOnDisk: fileNameOnDisk,
+        type: fileType.PHOTO_BY_TIME,
+        fileType: 'image/jpg',
+        data: fileData,
       });
+
+      userSocket && userSocket.emit('add-file', { cameraId, userId, fileId: photo._id, parentId: photo.parent });
+    } catch (error) {
+      console.log(4444, 'CreatePhotosByTime error', error);
+
+      userSocket && userSocket.emit('error', { cameraId, userId, taskId, error });
     }
-
-    const date = new Date();
-
-    const fileName = makeFileName(date);
-    const fileNameOnDisk = makeFileNameOnDisk(date);
-    const filePathOnDisk = [...parent.pathOnDisk, parent.nameOnDisk];
-
-    const fileData = await cameraApiService.getScreenshot(camera.photoUrl, 'arraybuffer');
-
-    const photo = await cameraFileService.createFile({
-      logger,
-      user: userId,
-      camera: camera._id,
-      parent: parent._id,
-      date,
-      name: fileName,
-      pathOnDisk: fileNameOnDisk,
-      nameOnDisk: filePathOnDisk,
-      type: fileType.PHOTO_BY_TIME,
-      fileType: 'image/jpg',
-      data: fileData,
-    });
-
-    console.log(3333, 'CreatePhotosByTime photo', photo);
-
-    // socket emit add-file
 
     logger(`finish ${taskName.CREATE_PHOTOS_BY_TIME} job`);
   });

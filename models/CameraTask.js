@@ -12,6 +12,7 @@ const CameraTaskSchema = mongoose.Schema({
   name: { type: String }, // CreatePhoto, CreateVideo, CreatePhotosByTime, CreateVideosByTime,
   type: { type: String }, // OneTime, RepeatEvery, RepeatAt
   status: { type: String, default: 'Created' }, // Created, Ready, Running, Stopped, Successed, Failed, Canceled
+  message: { type: String },
 
   settings: {
     // CreatePhoto
