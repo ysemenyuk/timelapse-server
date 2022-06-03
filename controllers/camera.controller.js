@@ -3,7 +3,7 @@ import cameraService from '../services/camera.service.js';
 const getAll = async (req, res) => {
   req.logger('cameraController.getAll');
 
-  const cameras = await cameraService.getAllByUser({
+  const cameras = await cameraService.getAll({
     logger: req.logger,
     userId: req.userId,
   });

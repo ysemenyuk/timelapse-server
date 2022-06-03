@@ -13,8 +13,8 @@ const defaultPopulateItems = [
   // 'videosByTimeTask',
 ];
 
-const getAllByUser = async ({ userId, logger, populateItems = defaultPopulateItems }) => {
-  logger && logger(`cameraService.getAllByUser`);
+const getAll = async ({ userId, logger, populateItems = defaultPopulateItems }) => {
+  logger && logger(`cameraService.getAll`);
 
   const cameras = await Camera.find({ user: userId }).populate(populateItems);
   return cameras;
@@ -86,4 +86,4 @@ const deleteOneById = async ({ logger, cameraId }) => {
   return deleted;
 };
 
-export default { getAllByUser, getOneById, createOne, updateOneById, deleteOneById };
+export default { getAll, getOneById, createOne, updateOneById, deleteOneById };
