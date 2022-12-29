@@ -1,8 +1,11 @@
 import mongoose from 'mongoose';
 
 const CameraSchema = mongoose.Schema({
+  date: { type: Date, default: new Date() },
+
   name: { type: String, required: true },
   description: { type: String, required: true },
+  cameraModel: { type: String },
 
   photoUrl: { type: String, default: '' },
   rtspUrl: { type: String, default: '' },

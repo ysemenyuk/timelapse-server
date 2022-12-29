@@ -5,16 +5,22 @@ import storageService from './storage.service.js';
 import { fileType, folderName } from '../utils/constants.js';
 
 const createQuery = (cameraId, query) => {
-  const { parentId, type, startDate, endDate } = query;
+  const { parentId, fileType, startDate, endDate } = query;
   // console.log(1111, query);
-  const date = startDate && endDate && { $gte: new Date(startDate), $lt: new Date(endDate) };
+  const type = fileType && fileType.split(',');
+  const startD = new Date(startDate);
+  const endD = new Date(endDate);
+  endD.setDate(endD.getDate() + 1);
+  const date = startDate && endDate && { $gte: startD, $lt: endD };
   return _.pickBy({ camera: cameraId, parent: parentId, type, date }, _.identity);
 };
 
 const getManyByQuery = async ({ logger, cameraId, query }) => {
   logger && logger(`cameraFileService.getManyByQuery`);
-
+  console.log(1111, query);
   const queryObject = createQuery(cameraId, query);
+  console.log(2222, queryObject);
+
   const files = await CameraFile.find(queryObject);
   return files;
 };
@@ -23,7 +29,15 @@ const getCountByQuery = async ({ logger, cameraId, query }) => {
   logger && logger(`cameraFileService.getCountByQuery`);
 
   const queryObject = createQuery(cameraId, query);
+  // console.log(3333, queryObject);
+
   const count = await CameraFile.countDocuments(queryObject);
+  // const count2 = await CameraFile.aggregate([
+  //   { $match: queryObject },
+  //   { $group: { _id: '$type', count: { $sum: 1 } } },
+  // ]);
+
+  console.log(4444, count);
   return count;
 };
 
