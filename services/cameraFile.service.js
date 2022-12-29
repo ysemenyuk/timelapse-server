@@ -8,18 +8,20 @@ const createQuery = (cameraId, query) => {
   const { parentId, fileType, startDate, endDate } = query;
   // console.log(1111, query);
   const type = fileType && fileType.split(',');
-  const startD = new Date(startDate);
-  const endD = new Date(endDate);
-  endD.setDate(endD.getDate() + 1);
-  const date = startDate && endDate && { $gte: startD, $lt: endD };
+
+  const start = startDate && new Date(startDate);
+  const end = endDate ? new Date(endDate) : start;
+  end.setDate(end.getDate() + 1);
+  const date = { $gte: start, $lt: end };
+
   return _.pickBy({ camera: cameraId, parent: parentId, type, date }, _.identity);
 };
 
 const getManyByQuery = async ({ logger, cameraId, query }) => {
   logger && logger(`cameraFileService.getManyByQuery`);
-  console.log(1111, query);
+  // console.log(1111, query);
   const queryObject = createQuery(cameraId, query);
-  console.log(2222, queryObject);
+  // console.log(2222, queryObject);
 
   const files = await CameraFile.find(queryObject);
   return files;
