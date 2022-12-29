@@ -7,6 +7,8 @@ import * as consts from '../utils/constants.js';
 
 const router = express.Router();
 
+// /files
+
 router.get(
   '/:fileId',
   asyncHandler(async (req, res) => {

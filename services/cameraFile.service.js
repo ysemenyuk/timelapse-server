@@ -6,7 +6,7 @@ import { fileType, folderName } from '../utils/constants.js';
 
 const createQuery = (cameraId, query) => {
   const { parentId, type, startDate, endDate } = query;
-  console.log(1111, query);
+  // console.log(1111, query);
   const date = startDate && endDate && { $gte: new Date(startDate), $lt: new Date(endDate) };
   return _.pickBy({ camera: cameraId, parent: parentId, type, date }, _.identity);
 };
