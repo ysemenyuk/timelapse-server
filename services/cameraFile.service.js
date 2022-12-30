@@ -5,14 +5,38 @@ import storageService from './storage.service.js';
 import { fileType, folderName } from '../utils/constants.js';
 
 const createQuery = (cameraId, query) => {
-  const { parentId, fileType, startDate, endDate } = query;
-  // console.log(1111, query);
+  const { parentId, fileType, startDate, endDate, oneDate } = query;
+  console.log(1111, 'query', query);
+
   const type = fileType && fileType.split(',');
 
-  const start = startDate && new Date(startDate);
-  const end = endDate ? new Date(endDate) : start;
-  end.setDate(end.getDate() + 1);
-  const date = { $gte: start, $lt: end };
+  let date;
+
+  if (oneDate) {
+    const start = new Date(oneDate);
+    const end = new Date(oneDate);
+    end.setDate(end.getDate() + 1);
+    date = { $gte: start, $lt: end };
+  }
+
+  if (startDate && endDate) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    end.setDate(end.getDate() + 1);
+    date = { $gte: start, $lt: end };
+  }
+
+  if (startDate && !endDate) {
+    const start = new Date(startDate);
+    date = { $gte: start };
+  }
+
+  if (!startDate && endDate) {
+    const end = new Date(endDate);
+    date = { $lt: end };
+  }
+
+  console.log(1111, 'date', date);
 
   return _.pickBy({ camera: cameraId, parent: parentId, type, date }, _.identity);
 };

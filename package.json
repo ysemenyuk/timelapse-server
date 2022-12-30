@@ -29,11 +29,11 @@
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.21",
     "mime": "^3.0.0",
-    "moment": "^2.29.3",
+    "moment": "^2.29.4",
     "mongodb": "^3.6.9",
     "mongoose": "^5.12.7",
     "prettier": "^2.6.2",
-    "sharp": "^0.28.3",
+    "sharp": "^0.31.3",
     "socket.io": "^4.4.1",
     "uuid": "^8.3.2",
     "winston": "^3.3.3",
@@ -45,12 +45,12 @@
     "concurrently": "^6.0.2",
     "dotenv": "^8.6.0",
     "eslint": "^8.7.0",
-    "eslint-config-prettier": "^8.5.0",
     "eslint-config-airbnb": "^19.0.2",
+    "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-import": "^2.25.3",
     "eslint-plugin-json": "^3.1.0",
     "morgan": "^1.10.0",
-    "nodemon": "^2.0.7"
+    "nodemon": "^2.0.20"
   },
   "packageManager": "yarn@3.2.0"
 }
