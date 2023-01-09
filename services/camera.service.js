@@ -4,13 +4,16 @@ import cameraTaskService from './cameraTask.service.js';
 
 const defaultPopulateItems = [
   'avatar',
+  'firstPhoto',
+  'lastPhoto',
+  'photosCount',
   'mainFolder',
   'photosFolder',
   'photosByTimeFolder',
   'videosFolder',
   'videosByTimeFolder',
-  // 'photosByTimeTask',
-  // 'videosByTimeTask',
+  'photosByTimeTask',
+  'videosByTimeTask',
 ];
 
 const getAll = async ({ userId, logger, populateItems = defaultPopulateItems }) => {

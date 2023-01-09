@@ -41,10 +41,12 @@ const getOne = async (req, res) => {
 const createOne = async (req, res) => {
   req.logger('cameraFileController.createOne');
 
+  console.log(777, req.body);
+
   // TODO: check req.body take fields by schema!
   const payload = req.body;
 
-  const file = await cameraFileService.createOne({
+  const file = await cameraFileService.createFile({
     logger: req.logger,
     user: req.userId,
     camera: req.cameraId,

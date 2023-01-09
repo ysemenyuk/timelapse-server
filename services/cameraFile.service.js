@@ -48,6 +48,7 @@ const getManyByQuery = async ({ logger, cameraId, query }) => {
   // console.log(2222, queryObject);
 
   const files = await CameraFile.find(queryObject);
+
   return files;
 };
 
@@ -108,8 +109,12 @@ const createFile = async ({ logger, data, ...payload }) => {
     data,
   });
 
+  // console.log(777, payload);
+
   const file = new CameraFile({ ...payload });
   await file.save();
+
+  // console.log(777, file);
 
   return file;
 };

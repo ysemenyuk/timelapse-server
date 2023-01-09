@@ -3,9 +3,9 @@ export const THUMBNAIL_SIZE = 200;
 // file type
 export const fileType = {
   FOLDER: 'folder',
-  PHOTO: 'photo',
+  PHOTO_BY_HAND: 'photoByHand',
   PHOTO_BY_TIME: 'photoByTime',
-  VIDEO: 'video',
+  VIDEO_BY_HAND: 'videoByHand',
   VIDEO_BY_TIME: 'videoByTime',
 };
 

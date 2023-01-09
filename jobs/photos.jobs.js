@@ -49,7 +49,7 @@ export default (agenda, socket, workerLogger) => {
         name: fileName,
         pathOnDisk: filePathOnDisk,
         nameOnDisk: fileNameOnDisk,
-        type: fileType.PHOTO,
+        type: fileType.PHOTO_BY_HAND,
         fileType: 'image/jpg',
         data: fileData,
       });
@@ -57,7 +57,7 @@ export default (agenda, socket, workerLogger) => {
       await task.updateOne({
         status: taskStatus.SUCCESSED,
         finishedAt: new Date(),
-        message: `Message: "File "${fileName}" successfully saved in "${photosFolder.name}" folder"`,
+        message: `Message: "File "${fileName}" successfully saved"`,
       });
 
       userSocket && userSocket.emit('update-task', { cameraId, userId, taskId });
