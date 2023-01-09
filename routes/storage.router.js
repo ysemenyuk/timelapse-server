@@ -36,7 +36,7 @@ router.get(
     if (isThumbnail) {
       stream.pipe(imageService.resize(consts.THUMBNAIL_SIZE)).pipe(res);
     } else {
-      stream.pipe();
+      stream.pipe(res);
     }
 
     stream.on('error', () => {
