@@ -14,25 +14,24 @@ const CameraTaskSchema = mongoose.Schema({
   status: { type: String, default: 'Created' }, // Created, Ready, Running, Stopped, Successed, Failed, Canceled
   message: { type: String },
 
-  settings: {
-    // CreatePhoto
-    photoUrl: { type: String },
-
-    // CreateVideo
-    startDate: { type: String },
-    endDate: { type: String },
-    duration: { type: Number }, // video duration seconds
-    fps: { type: Number },
-
+  photoSettings: {
+    // CreateOnePhoto
+    photoUrl: { type: String }, // url
     // CreatePhotosByTime
-    interval: { type: Number },
+    interval: { type: Number }, // seconds
     startTime: { type: String },
     stopTime: { type: String },
+  },
 
+  videoSettings: {
+    // CreateOneVideo
+    startDate: { type: String },
+    endDate: { type: String },
+    duration: { type: Number }, // seconds
+    fps: { type: Number }, // frame per second
     // CreateVideosByTime
-    // startTime: { type: String }, // time for start make video file
-    // duration: { type: Number }, // video duration seconds
-    // fps: { type: Number },
+    periodicity: { type: String }, // everyDay, everyWeek
+    createTime: { type: String }, // time for make video file
   },
 });
 

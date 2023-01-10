@@ -5,7 +5,7 @@ export const readFilesAndFolders = (
   pathToStorage,
   startPath,
   startParent,
-  fileType = 'imageByTime',
+  fileType = 'photo',
   folderType = 'folder'
 ) => {
   const fullPath = path.join(pathToStorage, ...startPath);

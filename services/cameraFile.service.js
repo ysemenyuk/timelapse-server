@@ -1,14 +1,14 @@
 import _ from 'lodash';
 import CameraFile from '../models/CameraFile.js';
-import { promisifyUploadStream } from '../utils/index.js';
+// import { promisifyUploadStream } from '../utils/index.js';
 import storageService from './storage.service.js';
 import { fileType, folderName } from '../utils/constants.js';
 
 const createQuery = (cameraId, query) => {
-  const { parentId, fileType, startDate, endDate, oneDate } = query;
+  const { type, createType, startDate, endDate, oneDate } = query;
   console.log(1111, 'query', query);
 
-  const type = fileType && fileType.split(',');
+  const createdBy = createType && createType.split(',');
 
   let date;
 
@@ -38,7 +38,7 @@ const createQuery = (cameraId, query) => {
 
   console.log(1111, 'date', date);
 
-  return _.pickBy({ camera: cameraId, parent: parentId, type, date }, _.identity);
+  return _.pickBy({ camera: cameraId, type, createdType: createdBy, date }, _.identity);
 };
 
 const getManyByQuery = async ({ logger, cameraId, query }) => {
@@ -64,7 +64,7 @@ const getCountByQuery = async ({ logger, cameraId, query }) => {
   //   { $group: { _id: '$type', count: { $sum: 1 } } },
   // ]);
 
-  console.log(4444, count);
+  console.log(4444, 'count', count);
   return count;
 };
 
@@ -119,23 +119,23 @@ const createFile = async ({ logger, data, ...payload }) => {
   return file;
 };
 
-const createFileByStream = async ({ logger, stream, ...payload }) => {
-  logger && logger(`cameraFileService.createFileByStream`);
+// const createFileByStream = async ({ logger, stream, ...payload }) => {
+//   logger && logger(`cameraFileService.createFileByStream`);
 
-  const uploadStream = storageService.openUploadStream({
-    logger,
-    filePath: payload.path,
-    fileName: payload.name,
-  });
+//   const uploadStream = storageService.openUploadStream({
+//     logger,
+//     filePath: payload.path,
+//     fileName: payload.name,
+//   });
 
-  stream.pipe(uploadStream);
-  await promisifyUploadStream(uploadStream);
+//   stream.pipe(uploadStream);
+//   await promisifyUploadStream(uploadStream);
 
-  const file = new CameraFile({ ...payload });
-  await file.save();
+//   const file = new CameraFile({ ...payload });
+//   await file.save();
 
-  return file;
-};
+//   return file;
+// };
 
 // update
 
@@ -290,7 +290,7 @@ export default {
 
   createFolder,
   createFile,
-  createFileByStream,
+  // createFileByStream,
 
   updateOneById,
 

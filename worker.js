@@ -54,8 +54,8 @@ class Worker {
     // await this.oneTimeJob(task);
 
     const mapping = {
-      [taskName.CREATE_PHOTO]: this.oneTimeJob.bind(this),
-      [taskName.CREATE_VIDEO]: this.oneTimeJob.bind(this),
+      [taskName.CREATE_PHOTO_BY_HAND]: this.oneTimeJob.bind(this),
+      [taskName.CREATE_VIDEO_BY_HAND]: this.oneTimeJob.bind(this),
       [taskName.CREATE_PHOTOS_BY_TIME]: this.repeatEveryJob.bind(this),
       [taskName.CREATE_VIDEOS_BY_TIME]: this.repeatAtJob.bind(this),
     };
@@ -67,8 +67,8 @@ class Worker {
     const { name } = task;
 
     const mapping = {
-      [taskName.CREATE_PHOTO]: this.oneTimeJob.bind(this),
-      [taskName.CREATE_VIDEO]: this.oneTimeJob.bind(this),
+      [taskName.CREATE_PHOTO_BY_HAND]: this.oneTimeJob.bind(this),
+      [taskName.CREATE_VIDEO_BY_HAND]: this.oneTimeJob.bind(this),
       [taskName.CREATE_PHOTOS_BY_TIME]: this.repeatEveryJob.bind(this),
       [taskName.CREATE_VIDEOS_BY_TIME]: this.repeatAtJob.bind(this),
     };
@@ -101,7 +101,7 @@ class Worker {
   }
 
   async repeatEveryJob(task) {
-    const { status, settings } = task;
+    const { status, photoSettings } = task;
 
     const jobs = await this.agenda.jobs({ 'data.taskId': task._id });
     console.log(5555, jobs.length);
@@ -123,7 +123,7 @@ class Worker {
       taskId: task._id,
     });
 
-    job.repeatEvery(`${settings.interval} seconds`);
+    job.repeatEvery(`${photoSettings.interval} seconds`);
 
     await job.save();
   }
