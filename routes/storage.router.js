@@ -25,6 +25,18 @@ router.get(
       return;
     }
 
+    // const range = req.headers.range;
+    // console.log(111111, 'range', range);
+
+    // console.log(22222, file);
+
+    // const head = {
+    //   'Content-Length': file.videoData.size,
+    //   'Content-Type': file.fileType,
+    // };
+
+    // res.writeHead(200, head);
+
     const stream = storageService.openDownloadStream({
       filePath: file.pathOnDisk,
       fileName: file.nameOnDisk,

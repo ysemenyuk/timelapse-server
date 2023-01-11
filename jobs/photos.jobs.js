@@ -23,21 +23,17 @@ export default (agenda, socket, workerLogger) => {
 
     try {
       task = await cameraTaskService.getOneById({ taskId });
-
-      // console.log(9999, task);
+      const { photoSettings } = task;
 
       await task.updateOne({ status: taskStatus.RUNNING, startedAt: new Date() });
-
       userSocket && userSocket.emit('update-task', { cameraId, userId, taskId });
-
-      await sleep(5 * 1000);
 
       const camera = await cameraService.getOneById({ cameraId });
       const { photosByHandFolder, photoUrl } = camera;
 
-      // console.log(444444, camera);
-
-      const fileData = await cameraApiService.getScreenshot(photoUrl, 'arraybuffer');
+      await sleep(5 * 1000);
+      const url = photoSettings.photoUrl || photoUrl;
+      const fileData = await cameraApiService.getScreenshot(url, 'arraybuffer');
 
       const date = new Date();
       const fileName = makeFileName(date);
@@ -113,7 +109,7 @@ export default (agenda, socket, workerLogger) => {
       }
 
       const camera = await cameraService.getOneById({ cameraId });
-      const { photosByTimeFolder } = camera;
+      const { photosByTimeFolder, photoUrl } = camera;
 
       const todayFolderName = makeTodayName(time);
 
@@ -139,7 +135,7 @@ export default (agenda, socket, workerLogger) => {
         });
       }
 
-      const fileData = await cameraApiService.getScreenshot(camera.photoUrl, 'arraybuffer');
+      const fileData = await cameraApiService.getScreenshot(photoUrl, 'arraybuffer');
 
       const date = new Date();
       const fileName = makeFileName(date);

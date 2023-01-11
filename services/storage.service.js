@@ -62,6 +62,14 @@ const openDownloadStream = ({ logger, filePath, fileName }) => {
   return stream;
 };
 
+const fileStat = ({ logger, filePath, fileName }) => {
+  const fullPath = creteFullPath(filePath, fileName);
+  logger && logger(`disk.storage.fileStat fileName: ${fullPath}`);
+
+  const stat = fsp.stat(fullPath);
+  return stat;
+};
+
 export default {
   createFolder,
   writeFile,
@@ -70,4 +78,5 @@ export default {
   removeFile,
   openUploadStream,
   openDownloadStream,
+  fileStat,
 };

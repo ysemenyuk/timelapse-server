@@ -102,20 +102,17 @@ const createFolder = async ({ logger, ...payload }) => {
 const createFile = async ({ logger, data, ...payload }) => {
   logger && logger(`cameraFileService.createFile`);
 
-  await storageService.writeFile({
-    logger,
-    filePath: payload.pathOnDisk,
-    fileName: payload.nameOnDisk,
-    data,
-  });
-
-  // console.log(777, payload);
+  if (data) {
+    await storageService.writeFile({
+      logger,
+      filePath: payload.pathOnDisk,
+      fileName: payload.nameOnDisk,
+      data,
+    });
+  }
 
   const file = new CameraFile({ ...payload });
   await file.save();
-
-  // console.log(777, file);
-
   return file;
 };
 
