@@ -71,6 +71,7 @@ const fileStat = ({ logger, filePath, fileName }) => {
 };
 
 export default {
+  creteFullPath,
   createFolder,
   writeFile,
   readFile,

@@ -78,7 +78,7 @@ export default (agenda, socket, workerLogger) => {
 
       // socket emit update-task, add-file
       userSocket && userSocket.emit('update-task', { cameraId, userId, taskId });
-      userSocket && userSocket.emit('add-file', { cameraId, userId, fileId: video._id });
+      userSocket && userSocket.emit('add-file', { cameraId, userId, file: video });
     } catch (error) {
       console.log('-- error createVideo job --', error);
 

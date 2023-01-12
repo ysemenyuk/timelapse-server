@@ -62,7 +62,7 @@ export default (agenda, socket, workerLogger) => {
       });
 
       userSocket && userSocket.emit('update-task', { cameraId, userId, taskId });
-      userSocket && userSocket.emit('add-file', { cameraId, userId, fileId: photo._id });
+      userSocket && userSocket.emit('add-file', { cameraId, userId, file: photo });
     } catch (error) {
       console.log('-- error CreatePhoto job --', error);
 
@@ -157,7 +157,7 @@ export default (agenda, socket, workerLogger) => {
         data: fileData,
       });
 
-      userSocket && userSocket.emit('add-file', { cameraId, userId, fileId: photo._id });
+      userSocket && userSocket.emit('add-file', { cameraId, userId, file: photo });
     } catch (error) {
       console.log(4444, 'CreatePhotosByTime error', error);
 

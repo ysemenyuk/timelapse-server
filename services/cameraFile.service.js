@@ -170,7 +170,7 @@ const deleteFile = async ({ logger, file }) => {
 
   // delete file from disk
   try {
-    await storageService.removeFile({ logger, filePath: file.path, fileName: file.name });
+    await storageService.removeFile({ logger, filePath: file.pathOnDisk, fileName: file.nameOnDisk });
   } catch (error) {
     console.log('- storageService error -', error);
   }
