@@ -234,8 +234,8 @@ const createDefaultFolders = async ({ logger, userId, cameraId }) => {
 
   const photosFolder = await createFolder({
     ...defaultFolderPayload,
-    nameOnDisk: folderName.PHOTOS,
-    name: folderName.PHOTOS,
+    nameOnDisk: folderName.PHOTOS_BY_HAND,
+    name: folderName.PHOTOS_BY_HAND,
   });
 
   const photosByTimeFolder = await createFolder({
@@ -246,8 +246,8 @@ const createDefaultFolders = async ({ logger, userId, cameraId }) => {
 
   const videosFolder = await createFolder({
     ...defaultFolderPayload,
-    nameOnDisk: folderName.VIDEOS,
-    name: folderName.VIDEOS,
+    nameOnDisk: folderName.VIDEOS_BY_HAND,
+    name: folderName.VIDEOS_BY_HAND,
   });
 
   const videosByTimeFolder = await createFolder({

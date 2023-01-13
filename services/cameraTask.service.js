@@ -49,9 +49,9 @@ const updateOneById = async ({ taskId, payload, worker, logger }) => {
 const deleteOneById = async ({ taskId, logger }) => {
   logger && logger(`cameraTaskService.deleteOne`);
 
-  const deleted = await CameraTask.findOneAndRemove({ _id: taskId });
+  // TODO: if not removable return error
 
-  console.log(11111, deleted);
+  const deleted = await CameraTask.findOneAndRemove({ _id: taskId });
   return deleted;
 };
 
@@ -65,7 +65,8 @@ const createDefaultTasks = async ({ logger, userId, cameraId }) => {
     camera: cameraId,
     name: taskName.CREATE_PHOTOS_BY_TIME,
     type: taskType.REPEAT_EVERY,
-    settings: {
+    removable: false,
+    photoSettings: {
       startTime: '08:00',
       stopTime: '20:00',
       interval: 60,

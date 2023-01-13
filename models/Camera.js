@@ -46,7 +46,7 @@ CameraSchema.virtual('firstPhoto', {
   options: { sort: { _id: 1 } },
 });
 
-CameraSchema.virtual('photosCount', {
+CameraSchema.virtual('totalPhotos', {
   ref: 'CameraFile',
   localField: '_id',
   foreignField: 'camera',
@@ -73,13 +73,21 @@ CameraSchema.virtual('firstVideo', {
   options: { sort: { _id: 1 } },
 });
 
-CameraSchema.virtual('videosCount', {
+CameraSchema.virtual('totalVideos', {
   ref: 'CameraFile',
   localField: '_id',
   foreignField: 'camera',
   count: true,
   justOne: false,
   match: { type: ['video'], createType: { $in: ['byHand', 'byTime'] } },
+});
+
+CameraSchema.virtual('createPhotosByTimeTask', {
+  ref: 'CameraTask',
+  localField: '_id',
+  foreignField: 'camera',
+  justOne: true,
+  match: { name: ['CreatePhotosByTime'] },
 });
 
 const Camera = mongoose.model('Camera', CameraSchema);

@@ -6,10 +6,10 @@ const defaultPopulateItems = [
   'avatar',
   'firstPhoto',
   'lastPhoto',
-  'photosCount',
+  'totalPhotos',
   'firstVideo',
   'lastVideo',
-  'videosCount',
+  'totalVideos',
   'mainFolder',
   'photosByHandFolder',
   'photosByTimeFolder',
@@ -17,6 +17,7 @@ const defaultPopulateItems = [
   'videosByTimeFolder',
   'photosByTimeTask',
   'videosByTimeTask',
+  'createPhotosByTimeTask',
 ];
 
 const getAll = async ({ userId, logger, populateItems = defaultPopulateItems }) => {

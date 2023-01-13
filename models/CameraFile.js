@@ -17,7 +17,7 @@ const CameraFileSchema = mongoose.Schema({
   removable: { type: Boolean, default: true },
 
   folderData: {
-    // folderData (dateData) Weather?
+    // folderData (dateData)
   },
 
   photoData: {
@@ -28,7 +28,7 @@ const CameraFileSchema = mongoose.Schema({
   videoData: {
     startDate: { type: Date },
     endDate: { type: Date },
-    duration: { type: Number }, // video duration seconds
+    duration: { type: Number },
     fps: { type: Number },
     poster: { type: mongoose.ObjectId, ref: 'CameraFile' }, // photo
     size: { type: Number }, // ??

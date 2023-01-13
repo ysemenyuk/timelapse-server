@@ -2,9 +2,9 @@ import * as fsp from 'fs/promises';
 import { createReadStream, createWriteStream } from 'fs';
 import path from 'path';
 
-const pathToFiles = process.env.PATH_TO_STORAGE;
+const pathToStorage = process.env.PATH_TO_STORAGE;
 
-const creteFullPath = (itemPath, itemName) => path.join(pathToFiles, ...itemPath, itemName);
+const creteFullPath = (itemPath, itemName) => path.join(pathToStorage, ...itemPath, itemName);
 
 const createFolder = async ({ logger, folderPath, folderName }) => {
   const fullPath = creteFullPath(folderPath, folderName);

@@ -80,7 +80,7 @@ export const makeFileNameOnDisk = (time) => {
 
 export const makeFileName = (time) => {
   const { year, month, date, hh, mm, ss } = parseTime(time);
-  return `${year}-${dd(month + 1)}-${dd(date)} ${dd(hh)}:${dd(mm)}:${dd(ss)}`;
+  return `${year}.${dd(month + 1)}.${dd(date)} ${dd(hh)}:${dd(mm)}:${dd(ss)}`;
 };
 
 export const makeNum = (num) => {
