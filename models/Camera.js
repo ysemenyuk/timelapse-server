@@ -13,7 +13,7 @@ const CameraSchema = mongoose.Schema(
     user: { type: mongoose.ObjectId, ref: 'User' },
     avatar: { type: mongoose.ObjectId, ref: 'CameraFile' },
 
-    mainFolder: { type: mongoose.ObjectId, ref: 'CameraFile' },
+    cameraFolder: { type: mongoose.ObjectId, ref: 'CameraFile' },
     photosByHandFolder: { type: mongoose.ObjectId, ref: 'CameraFile' },
     photosByTimeFolder: { type: mongoose.ObjectId, ref: 'CameraFile' },
     videosByHandFolder: { type: mongoose.ObjectId, ref: 'CameraFile' },
@@ -82,13 +82,13 @@ CameraSchema.virtual('totalVideos', {
   match: { type: ['video'], createType: { $in: ['byHand', 'byTime'] } },
 });
 
-CameraSchema.virtual('createPhotosByTimeTask', {
-  ref: 'CameraTask',
-  localField: '_id',
-  foreignField: 'camera',
-  justOne: true,
-  match: { name: ['CreatePhotosByTime'] },
-});
+// CameraSchema.virtual('createPhotosByTimeTask', {
+//   ref: 'CameraTask',
+//   localField: '_id',
+//   foreignField: 'camera',
+//   justOne: true,
+//   match: { name: ['CreatePhotosByTime'] },
+// });
 
 const Camera = mongoose.model('Camera', CameraSchema);
 

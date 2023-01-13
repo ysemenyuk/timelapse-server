@@ -10,6 +10,29 @@ const sleep = (time, message = 'Hello') =>
     setTimeout(() => resolve(message), time);
   });
 
+const savePhoto = async ({ logger, userId, cameraId, parent, create, fileData }) => {
+  const date = new Date();
+  const fileName = makeFileName(date);
+  const fileNameOnDisk = makeFileNameOnDisk(date);
+  const filePathOnDisk = [...parent.pathOnDisk, fileNameOnDisk];
+
+  const file = await cameraFileService.createFile({
+    logger,
+    date,
+    user: userId,
+    camera: cameraId,
+    parent: parent._id,
+    pathOnDisk: filePathOnDisk,
+    name: fileName,
+    type: 'photo',
+    fileType: 'image/jpg',
+    createType: create,
+    data: fileData,
+  });
+
+  return file;
+};
+
 export default (agenda, socket, workerLogger) => {
   agenda.define(taskName.CREATE_PHOTO_BY_HAND, async (job) => {
     const logger = workerLogger.extend(taskName.CREATE_PHOTO_BY_HAND);
@@ -35,34 +58,23 @@ export default (agenda, socket, workerLogger) => {
       const url = photoSettings.photoUrl || photoUrl;
       const fileData = await cameraApiService.getScreenshot(url, 'arraybuffer');
 
-      const date = new Date();
-      const fileName = makeFileName(date);
-      const fileNameOnDisk = makeFileNameOnDisk(date);
-      const filePathOnDisk = [...photosByHandFolder.pathOnDisk, photosByHandFolder.nameOnDisk];
-
-      const photo = await cameraFileService.createFile({
+      const file = await savePhoto({
         logger,
-        date,
-        user: userId,
-        camera: camera._id,
-        parent: photosByHandFolder._id,
-        pathOnDisk: filePathOnDisk,
-        nameOnDisk: fileNameOnDisk,
-        name: fileName,
-        type: 'photo',
-        fileType: 'image/jpg',
-        createType: 'byHand',
-        data: fileData,
+        userId,
+        cameraId,
+        parent: photosByHandFolder,
+        create: 'byHand',
+        fileData,
       });
 
       await task.updateOne({
         status: taskStatus.SUCCESSED,
         finishedAt: new Date(),
-        message: `File "${fileName}" successfully saved.`,
+        message: `File "${file.name}" successfully saved.`,
       });
 
       userSocket && userSocket.emit('update-task', { cameraId, userId, taskId });
-      userSocket && userSocket.emit('add-file', { cameraId, userId, file: photo });
+      userSocket && userSocket.emit('add-file', { cameraId, userId, file });
     } catch (error) {
       console.log('-- error CreatePhoto job --', error);
 
@@ -129,37 +141,27 @@ export default (agenda, socket, workerLogger) => {
           camera: camera._id,
           parent: photosByTimeFolder._id,
           name: todayFolderName,
-          nameOnDisk: todayFolderName,
-          pathOnDisk: [...photosByTimeFolder.pathOnDisk, photosByTimeFolder.nameOnDisk],
+          pathOnDisk: [...photosByTimeFolder.pathOnDisk, todayFolderName],
           type: 'folder',
         });
       }
 
       const fileData = await cameraApiService.getScreenshot(photoUrl, 'arraybuffer');
 
-      const date = new Date();
-      const fileName = makeFileName(date);
-      const fileNameOnDisk = makeFileNameOnDisk(date);
-      const filePathOnDisk = [...parent.pathOnDisk, parent.nameOnDisk];
-
-      const photo = await cameraFileService.createFile({
+      const file = await savePhoto({
         logger,
-        date,
-        user: userId,
-        camera: camera._id,
-        parent: parent._id,
-        name: fileName,
-        pathOnDisk: filePathOnDisk,
-        nameOnDisk: fileNameOnDisk,
-        type: 'photo',
-        fileType: 'image/jpg',
-        createType: 'byTime',
-        data: fileData,
+        userId,
+        cameraId,
+        parent,
+        create: 'byTime',
+        fileData,
       });
 
-      userSocket && userSocket.emit('add-file', { cameraId, userId, file: photo });
+      userSocket && userSocket.emit('add-file', { cameraId, userId, file });
     } catch (error) {
-      console.log(4444, 'CreatePhotosByTime error', error);
+      console.log('CreatePhotosByTime error', error);
+
+      // updateTask ??
 
       userSocket && userSocket.emit('error', { cameraId, userId, taskId, error });
     }

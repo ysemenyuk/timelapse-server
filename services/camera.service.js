@@ -10,14 +10,13 @@ const defaultPopulateItems = [
   'firstVideo',
   'lastVideo',
   'totalVideos',
-  'mainFolder',
+  'cameraFolder',
   'photosByHandFolder',
   'photosByTimeFolder',
   'videosByHandFolder',
   'videosByTimeFolder',
   'photosByTimeTask',
   'videosByTimeTask',
-  'createPhotosByTimeTask',
 ];
 
 const getAll = async ({ userId, logger, populateItems = defaultPopulateItems }) => {
@@ -34,6 +33,8 @@ const getOneById = async ({ logger, cameraId, populateItems = defaultPopulateIte
   return camera;
 };
 
+// create
+
 const createOne = async ({ logger, userId, payload }) => {
   logger && logger(`cameraService.createOne`);
 
@@ -48,9 +49,10 @@ const createOne = async ({ logger, userId, payload }) => {
     cameraId: camera._id,
   });
 
-  const { mainFolder, photosFolder, photosByTimeFolder, videosFolder, videosByTimeFolder } = defaultFolders;
+  const { cameraFolder, photosByHandFolder, photosByTimeFolder, videosByHandFolder, videosByTimeFolder } =
+    defaultFolders;
 
-  // create defaul tasks (tasksBytime)
+  // create defaul tasks
 
   const defaultTasks = await cameraTaskService.createDefaultTasks({
     logger,
@@ -61,19 +63,21 @@ const createOne = async ({ logger, userId, payload }) => {
   const { photosByTimeTask } = defaultTasks;
 
   await camera.updateOne({
-    // defaul folders
-    mainFolder: mainFolder._id,
-    photosFolder: photosFolder._id,
+    // default folders
+    cameraFolder: cameraFolder._id,
+    photosByHandFolder: photosByHandFolder._id,
     photosByTimeFolder: photosByTimeFolder._id,
-    videosFolder: videosFolder._id,
+    videosByHandFolder: videosByHandFolder._id,
     videosByTimeFolder: videosByTimeFolder._id,
-    // defaul tasks
+    // default tasks
     photosByTimeTask: photosByTimeTask._id,
   });
 
   const createdCamera = await Camera.findOne({ _id: camera._id }).populate(defaultPopulateItems);
   return createdCamera;
 };
+
+//
 
 const updateOneById = async ({ logger, cameraId, payload }) => {
   logger && logger(`cameraService.updateOne`);
@@ -82,6 +86,8 @@ const updateOneById = async ({ logger, cameraId, payload }) => {
   const updated = await Camera.findOne({ _id: cameraId }).populate(defaultPopulateItems);
   return updated;
 };
+
+//
 
 const deleteOneById = async ({ logger, cameraId }) => {
   logger && logger(`cameraService.deleteOne`);

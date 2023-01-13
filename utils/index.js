@@ -1,34 +1,3 @@
-import fs from 'fs';
-import path from 'path';
-
-export const readFilesAndFolders = (
-  pathToStorage,
-  startPath,
-  startParent,
-  fileType = 'photo',
-  folderType = 'folder'
-) => {
-  const fullPath = path.join(pathToStorage, ...startPath);
-  const items = fs.readdirSync(fullPath);
-
-  const result = [];
-
-  items.forEach((itemName) => {
-    const fullItemPath = path.join(fullPath, itemName);
-    const itemStat = fs.statSync(fullItemPath);
-    const itemType = itemStat.isDirectory() ? folderType : fileType;
-    const item = { name: itemName, path: startPath, parent: startParent, type: itemType };
-
-    if (itemStat.isDirectory()) {
-      result.push(item, ...readFilesAndFolders(pathToStorage, [...startPath, itemName], itemName));
-    } else {
-      result.push(item);
-    }
-  });
-
-  return result;
-};
-
 export const promisifyUploadStream = (uploadStream) => {
   return new Promise((resolve, reject) => {
     uploadStream.on('error', () => {
@@ -61,6 +30,14 @@ export const parseTime = (time) => {
     mm,
     ss,
   };
+};
+
+export const makeUserFolderName = (userId) => {
+  return `user_${userId.toString()}`;
+};
+
+export const makeCameraFolderName = (cameraId) => {
+  return `camera_${cameraId.toString()}`;
 };
 
 export const makeTodayName = (time) => {

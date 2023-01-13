@@ -22,32 +22,26 @@ router.get(
     req.logger(`storage.router.get /files/${req.params.fileId}/poster`);
 
     const file = await cameraFileService.getOneById({
-      fileId: req.params.fileId,
+      itemId: req.params.fileId,
       logger: req.logger,
     });
 
-    if (!file) {
+    if (!file || file.type != 'video') {
       res.sendStatus(404);
       req.logResp(req);
       return;
     }
 
-    if (file.type === 'video') {
-      const video = path.join(pathToStorage, ...file.pathOnDisk, file.nameOnDisk);
-      // const tmpDir = await mkdtemp(path.join(pathToStorage, 'tmp-'));
-      const tmpDir = path.join(pathToStorage, 'tmp');
-      const poster = path.join(tmpDir, `${file._id}.jpg`);
+    const video = path.join(pathToStorage, ...file.pathOnDisk);
+    // const tmpDir = await mkdtemp(path.join(pathToStorage, 'tmp-'));
+    const tmpDir = path.join(pathToStorage, 'tmp');
+    const poster = path.join(tmpDir, `${file._id}.jpg`);
 
-      if (!fs.existsSync(poster)) {
-        await execp(`ffmpeg -y -i ${video} -ss 00:00:1 -frames:v 1 ${poster}`);
-      }
-
-      res.sendFile(poster);
-      req.logResp(req);
-      return;
+    if (!fs.existsSync(poster)) {
+      await execp(`ffmpeg -y -i ${video} -ss 00:00:1 -frames:v 1 ${poster}`);
     }
 
-    res.sendStatus(404);
+    res.sendFile(poster);
     req.logResp(req);
   })
 );
@@ -60,7 +54,7 @@ router.get(
     req.logger(`storage.router.get /files/${req.params.fileId}`);
 
     const file = await cameraFileService.getOneById({
-      fileId: req.params.fileId,
+      itemId: req.params.fileId,
       logger: req.logger,
     });
 

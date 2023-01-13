@@ -1,8 +1,9 @@
 import moment from 'moment';
+import fs from 'fs';
+import path from 'path';
 import mongoose from 'mongoose';
 import 'dotenv/config';
 import CameraFile from '../models/CameraFile.js';
-import { readFilesAndFolders } from '../utils/index.js';
 
 const dbUri = process.env.MONGO_URI;
 const pathToStorage = process.env.PATH_TO_STORAGE;
@@ -13,6 +14,28 @@ const startParent = 'ScreenshotsByTime';
 const userId = '60db0585ad1d0c334ff80948';
 const cameraId = '627cbb044c4bb63594cc2bd2';
 const parentId = '627cbb054c4bb63594cc2bd8';
+
+const readFilesAndFolders = (pathToStorage, startPath, startParent, fileType = 'photo', folderType = 'folder') => {
+  const fullPath = path.join(pathToStorage, ...startPath);
+  const items = fs.readdirSync(fullPath);
+
+  const result = [];
+
+  items.forEach((itemName) => {
+    const fullItemPath = path.join(fullPath, itemName);
+    const itemStat = fs.statSync(fullItemPath);
+    const itemType = itemStat.isDirectory() ? folderType : fileType;
+    const item = { name: itemName, path: startPath, parent: startParent, type: itemType };
+
+    if (itemStat.isDirectory()) {
+      result.push(item, ...readFilesAndFolders(pathToStorage, [...startPath, itemName], itemName));
+    } else {
+      result.push(item);
+    }
+  });
+
+  return result;
+};
 
 const updateFolderInDb = async (folder) => {
   const folderInDb = await CameraFile.findOne({ camera: cameraId, parent: parentId, name: folder.name });

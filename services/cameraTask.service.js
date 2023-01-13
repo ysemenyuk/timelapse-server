@@ -55,7 +55,9 @@ const deleteOneById = async ({ taskId, logger }) => {
   return deleted;
 };
 
+//
 // camera default
+//
 
 const createDefaultTasks = async ({ logger, userId, cameraId }) => {
   logger && logger(`cameraTaskService.createDefaultTasks`);

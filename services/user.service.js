@@ -3,6 +3,9 @@ import _ from 'lodash';
 import jwt from '../libs/token.js';
 import { BadRequestError } from '../middleware/errorHandlerMiddleware.js';
 import User from '../models/User.js';
+import { fileType } from '../utils/constants.js';
+import { makeUserFolderName } from '../utils/index.js';
+import cameraFileService from './cameraFile.service.js';
 
 const singUp = async ({ email, password, logger }) => {
   logger(`userService.singUp email: ${email}`);
@@ -19,7 +22,22 @@ const singUp = async ({ email, password, logger }) => {
   const newUser = new User({ email, password: hashPassword });
   await newUser.save();
 
-  const token = jwt.sign(user._id);
+  // crete user folder
+  const userFolderName = makeUserFolderName(newUser._id);
+  const userFolder = await cameraFileService.createFolder({
+    logger,
+    pathOnDisk: [userFolderName],
+    user: newUser._id,
+    camera: null,
+    parent: null,
+    name: userFolderName,
+    type: fileType.FOLDER,
+    removable: false,
+  });
+
+  await newUser.updateOne({ userFolder: userFolder._id });
+
+  const token = jwt.sign(newUser._id);
 
   return { token, user: _.pick(newUser, ['_id', 'name', 'email', 'avatar']) };
 };
@@ -74,14 +92,19 @@ const updateOne = async ({ userId, payload, logger }) => {
 
   const { name, email, password } = payload;
 
-  const hashPassword = await bcrypt.hash(password, 8);
+  // TODO: check email if exist
 
-  const updated = await User.findOneAndUpdate({ _id: userId }, { name, email, password: hashPassword }, { new: true });
+  const hashPassword = password && (await bcrypt.hash(password, 8));
+  const fields = _.pickBy({ name, email, password: hashPassword }, _.identity);
+
+  const updated = await User.findOneAndUpdate({ _id: userId }, fields, { new: true });
   return updated;
 };
 
 const deleteOne = async ({ userId, logger }) => {
   logger(`userService.deleteOne userId: ${userId}`);
+
+  // TODO: delete all files
 
   const user = await User.findById(userId);
   const deleted = await user.remove();

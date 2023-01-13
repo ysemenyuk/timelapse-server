@@ -41,7 +41,7 @@ const getOne = async (req, res) => {
 const createOne = async (req, res) => {
   req.logger('cameraFileController.createOne');
 
-  console.log(777, req.body);
+  // console.log(777, req.body);
 
   // TODO: check req.body take fields by schema!
   const payload = req.body;
@@ -50,7 +50,7 @@ const createOne = async (req, res) => {
     logger: req.logger,
     user: req.userId,
     camera: req.cameraId,
-    payload,
+    ...payload,
   });
 
   res.status(201).send(file);
@@ -77,7 +77,7 @@ const deleteOne = async (req, res) => {
   req.logger(`cameraFileController.deleteOne`);
 
   const deleted = await cameraFileService.deleteOneById({
-    fileId: req.params.fileId,
+    itemId: req.params.fileId,
     logger: req.logger,
   });
 
@@ -88,9 +88,9 @@ const deleteOne = async (req, res) => {
 const deleteMany = async (req, res) => {
   req.logger(`fileController.deleteMany`);
 
-  const filesIds = []; // from query or body?
+  const itemsIds = []; // from query or body?
 
-  await cameraFileService.deleteManyByIds({ filesIds, logger: req.logger });
+  await cameraFileService.deleteManyByIds({ itemsIds, logger: req.logger });
 
   res.status(204).send();
   req.logResp(req);

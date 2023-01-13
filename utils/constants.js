@@ -11,7 +11,8 @@ export const fileType = {
 
 // folders
 export const folderName = {
-  MAIN: 'Main',
+  USER_FOLDER: 'UserFolder',
+  CAMERA_FOLDER: 'CameraFolder',
   PHOTOS_BY_HAND: 'PhotosByHand',
   PHOTOS_BY_TIME: 'PhotosByTime',
   VIDEOS_BY_HAND: 'VideosByHand',

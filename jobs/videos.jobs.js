@@ -25,27 +25,25 @@ export default (agenda, socket, workerLogger) => {
       task = await cameraTaskService.getOneById({ taskId });
       const { videoSettings } = task;
 
-      console.log('task', task);
+      // console.log('task', task);
 
       await task.updateOne({ status: taskStatus.RUNNING, startedAt: new Date() });
 
       userSocket && userSocket.emit('update-task', { cameraId, userId, taskId });
 
       //
-
       await sleep(10 * 1000); // doing job
-
       //
 
       const camera = await cameraService.getOneById({ cameraId });
       const { videosByHandFolder } = camera;
 
       const date = new Date();
-      const fileName = 'DJI_0225.mp4';
-      const fileNameOnDisk = 'DJI_0225.mp4';
-      const filePathOnDisk = [...videosByHandFolder.pathOnDisk, videosByHandFolder.nameOnDisk];
+      const fileName = 'timelapse.mp4';
+      const fileNameOnDisk = 'timelapse.mp4';
+      const filePathOnDisk = [...videosByHandFolder.pathOnDisk, fileNameOnDisk];
 
-      const stat = await storageService.fileStat({ logger, filePath: filePathOnDisk, fileName: fileNameOnDisk });
+      const stat = await storageService.fileStat({ logger, filePath: filePathOnDisk });
 
       const video = await cameraFileService.createFile({
         logger,
@@ -54,7 +52,6 @@ export default (agenda, socket, workerLogger) => {
         camera: camera._id,
         parent: videosByHandFolder._id,
         pathOnDisk: filePathOnDisk,
-        nameOnDisk: fileNameOnDisk,
         name: fileName,
         type: 'video',
         fileType: 'videp/mp4',
@@ -65,7 +62,7 @@ export default (agenda, socket, workerLogger) => {
           endDate: videoSettings.endDate,
           fps: videoSettings.fps,
           duration: videoSettings.duration,
-          // poster: '',  // photo id
+          poster: null, // photo id
           size: stat.size,
         },
       });
@@ -93,6 +90,10 @@ export default (agenda, socket, workerLogger) => {
 
     logger(`finish ${taskName.CREATE_VIDEO_BY_HAND} job`);
   });
+
+  //
+  //
+  //
 
   agenda.define(taskName.CREATE_VIDEOS_BY_TIME, async () => {
     const logger = workerLogger.extend(taskName.CREATE_VIDEOS_BY_TIME);
