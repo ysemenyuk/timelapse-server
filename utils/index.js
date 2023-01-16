@@ -38,11 +38,11 @@ export const getCurrentTime = (date) => {
   return format(date, 'hh:mm');
 };
 
-export const makeUserFolderName = (userId) => {
+export const makeUserDirName = (userId) => {
   return `user_${userId.toString()}`;
 };
 
-export const makeCameraFolderName = (cameraId) => {
+export const makeCameraDirName = (cameraId) => {
   return `camera_${cameraId.toString()}`;
 };
 

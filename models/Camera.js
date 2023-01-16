@@ -14,9 +14,9 @@ const CameraSchema = mongoose.Schema(
     user: { type: mongoose.ObjectId, ref: 'User' },
     avatar: { type: mongoose.ObjectId, ref: 'File' },
 
-    cameraFolder: { type: mongoose.ObjectId, ref: 'File' },
-    photosFolder: { type: mongoose.ObjectId, ref: 'File' },
-    videosFolder: { type: mongoose.ObjectId, ref: 'File' },
+    // cameraFolder: { type: mongoose.ObjectId, ref: 'File' },
+    // photosFolder: { type: mongoose.ObjectId, ref: 'File' },
+    // videosFolder: { type: mongoose.ObjectId, ref: 'File' },
   },
   {
     toJSON: { virtuals: true }, // So `res.json()` and other `JSON.stringify()` functions include virtuals

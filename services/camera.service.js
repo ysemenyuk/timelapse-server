@@ -1,5 +1,6 @@
 import Camera from '../models/Camera.js';
 import fileService from './file.service.js';
+// import storageService from './storage.service.js';
 import taskService from './task.service.js';
 
 const defaultPopulateItems = [
@@ -10,9 +11,6 @@ const defaultPopulateItems = [
   'firstVideo',
   'lastVideo',
   'totalVideos',
-  'cameraFolder',
-  'photosFolder',
-  'videosFolder',
   'photosByTimeTask',
 ];
 
@@ -37,37 +35,34 @@ const getOneById = async ({ logger, cameraId, populateItems = defaultPopulateIte
 const createOne = async ({ logger, userId, payload }) => {
   logger && logger(`cameraService.createOne`);
 
-  const camera = new Camera({ user: userId, ...payload });
+  const camera = new Camera({ user: userId, avatar: null, ...payload });
   await camera.save();
 
   // create default folders
-
-  const defaultFolders = await fileService.createDefaultCameraFolders({
+  await fileService.createDefaultCameraFiles({
     logger,
     userId,
     cameraId: camera._id,
   });
-
-  const { cameraFolder, photosFolder, videosFolder } = defaultFolders;
 
   // create defaul tasks
 
-  const defaultTasks = await taskService.createDefaultCameraTasks({
+  await taskService.createDefaultCameraTasks({
     logger,
     userId,
     cameraId: camera._id,
   });
 
-  const { photosByTimeTask } = defaultTasks;
+  // const { photosByTimeTask } = defaultTasks;
 
-  await camera.updateOne({
-    // default folders
-    cameraFolder: cameraFolder._id,
-    photosFolder: photosFolder._id,
-    videosFolder: videosFolder._id,
-    // default tasks
-    photosByTimeTask: photosByTimeTask._id,
-  });
+  // await camera.updateOne({
+  //   // default folders
+  //   // cameraFolder: cameraFolder._id,
+  //   // photosFolder: photosFolder._id,
+  //   // videosFolder: videosFolder._id,
+  //   // default tasks
+  //   photosByTimeTask: photosByTimeTask._id,
+  // });
 
   const createdCamera = await Camera.findOne({ _id: camera._id }).populate(defaultPopulateItems);
   return createdCamera;
@@ -92,6 +87,7 @@ const updateOneById = async ({ logger, cameraId, payload }) => {
 const deleteOneById = async ({ logger, userId, cameraId }) => {
   logger && logger(`cameraService.deleteOne`);
 
+  // await storageService.removeCameraDirs({ userId, cameraId, logger });
   await fileService.deleteCameraFiles({ userId, cameraId, logger });
   await taskService.deleteCameraTasks({ userId, cameraId, logger });
 

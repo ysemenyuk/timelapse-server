@@ -5,7 +5,7 @@ const UserSchema = mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
 
-  userFolder: { type: mongoose.ObjectId, ref: 'File' },
+  // userFolder: { type: mongoose.ObjectId, ref: 'File' },
 });
 
 const File = mongoose.model('User', UserSchema);

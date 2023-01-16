@@ -65,7 +65,8 @@ router.get(
     }
 
     if (file.type === 'video') {
-      const fullPath = storageService.creteFullPath(file.pathOnDisk, file.nameOnDisk);
+      const fullPath = storageService.creteFullPath(file.pathOnDisk);
+
       res.sendFile(fullPath);
       req.logResp(req);
       return;
@@ -73,7 +74,6 @@ router.get(
 
     const stream = storageService.openDownloadStream({
       filePath: file.pathOnDisk,
-      fileName: file.nameOnDisk,
       logger: req.logger,
     });
 

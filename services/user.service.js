@@ -3,7 +3,7 @@ import _ from 'lodash';
 import jwt from '../libs/token.js';
 import { BadRequestError } from '../middleware/errorHandlerMiddleware.js';
 import User from '../models/User.js';
-import fileService from './file.service.js';
+import storageService from './storage.service.js';
 
 const singUp = async ({ email, password, logger }) => {
   logger(`userService.singUp email: ${email}`);
@@ -21,12 +21,10 @@ const singUp = async ({ email, password, logger }) => {
   await newUser.save();
 
   // crete user folder
-  const userFolder = await fileService.createUserFolder({
+  await storageService.createUserDir({
     logger,
     userId: newUser._id,
   });
-
-  await newUser.updateOne({ userFolder: userFolder._id });
 
   const token = jwt.sign(newUser._id);
 
