@@ -34,8 +34,9 @@ export default (agenda, socket, workerLogger) => {
         logger,
         userId,
         cameraId,
+        taskId,
         create: fileCreateType.BY_HAND,
-        url: photoSettings.photoUrl,
+        photoSettings,
       });
 
       await task.updateOne({
@@ -92,7 +93,9 @@ export default (agenda, socket, workerLogger) => {
         logger,
         userId,
         cameraId,
+        taskId,
         create: fileCreateType.BY_TIME,
+        photoSettings,
       });
 
       userSocket && userSocket.emit('add-file', { cameraId, userId, file });

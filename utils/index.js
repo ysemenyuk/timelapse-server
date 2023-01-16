@@ -55,11 +55,11 @@ export const makeCurrentMonthName = (date) => {
 };
 
 export const makePhotoName = (date) => {
-  return format(date, 'yyyy.MM.dd hh:mm:ss');
+  return format(date, 'yyyy.MM.dd HH:mm:ss');
 };
 
 export const makePhotoNameOnDisk = (date) => {
-  return `img--${format(date, 'yyyy-MM-dd--hh-mm-ss')}.jpg`;
+  return `photo--${format(date, 'yyyy-MM-dd--HH-mm-ss')}.jpg`;
 };
 
 export const makeVideoName = (date) => {
@@ -68,6 +68,10 @@ export const makeVideoName = (date) => {
 
 export const makeVideoNameOnDisk = (date) => {
   return `video--${format(date, 'yyyy-MM-dd--hh-mm-ss')}.mp4`;
+};
+
+export const makeVideoPosterNameOnDisk = (date) => {
+  return `poster--${format(date, 'yyyy-MM-dd--hh-mm-ss')}.jpg`;
 };
 
 export const makeNum = (num) => {

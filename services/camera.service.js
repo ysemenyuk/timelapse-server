@@ -1,6 +1,5 @@
 import Camera from '../models/Camera.js';
 import fileService from './file.service.js';
-// import storageService from './storage.service.js';
 import taskService from './task.service.js';
 
 const defaultPopulateItems = [
@@ -36,7 +35,7 @@ const createOne = async ({ logger, userId, payload }) => {
   logger && logger(`cameraService.createOne`);
 
   const camera = new Camera({ user: userId, avatar: null, ...payload });
-  await camera.save();
+  console.log('camera', camera);
 
   // create default folders
   await fileService.createDefaultCameraFiles({
@@ -46,23 +45,13 @@ const createOne = async ({ logger, userId, payload }) => {
   });
 
   // create defaul tasks
-
   await taskService.createDefaultCameraTasks({
     logger,
     userId,
     cameraId: camera._id,
   });
 
-  // const { photosByTimeTask } = defaultTasks;
-
-  // await camera.updateOne({
-  //   // default folders
-  //   // cameraFolder: cameraFolder._id,
-  //   // photosFolder: photosFolder._id,
-  //   // videosFolder: videosFolder._id,
-  //   // default tasks
-  //   photosByTimeTask: photosByTimeTask._id,
-  // });
+  await camera.save();
 
   const createdCamera = await Camera.findOne({ _id: camera._id }).populate(defaultPopulateItems);
   return createdCamera;
@@ -87,7 +76,6 @@ const updateOneById = async ({ logger, cameraId, payload }) => {
 const deleteOneById = async ({ logger, userId, cameraId }) => {
   logger && logger(`cameraService.deleteOne`);
 
-  // await storageService.removeCameraDirs({ userId, cameraId, logger });
   await fileService.deleteCameraFiles({ userId, cameraId, logger });
   await taskService.deleteCameraTasks({ userId, cameraId, logger });
 

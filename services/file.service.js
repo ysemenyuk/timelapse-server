@@ -1,9 +1,6 @@
 import _ from 'lodash';
 import File from '../models/File.js';
 import storageService from './storage.service.js';
-// import { makeCameraFolderName, makeUserFolderName, promisifyUploadStream } from '../utils/index.js';
-// import storageService from './storage.service.js';
-// import { folderName, folderType, type } from '../utils/constants.js';
 
 const createQuery = (cameraId, query) => {
   const { type, createType, startDate, endDate, oneDate } = query;
@@ -37,7 +34,7 @@ const createQuery = (cameraId, query) => {
     date = { $lt: end };
   }
 
-  return _.pickBy({ camera: cameraId, type, createdType: createdBy, date }, _.identity);
+  return _.pickBy({ camera: cameraId, type, createType: createdBy, date }, _.identity);
 };
 
 const getManyByQuery = async ({ logger, cameraId, query }) => {
@@ -81,7 +78,7 @@ const createFile = async ({ logger, data, ...payload }) => {
   console.log('createFile', file);
 
   if (data) {
-    await storageService.writeFile({
+    await storageService.saveFile({
       logger,
       file,
       data,
@@ -96,7 +93,7 @@ const createFile = async ({ logger, data, ...payload }) => {
 // update
 //
 
-const updateOneById = async ({ itemId, payload, logger }) => {
+const updateOneById = async ({ logger, itemId, payload }) => {
   logger && logger(`fileService.updateOneById`);
 
   const updated = await File.findOneAndUpdate({ _id: itemId }, payload, { new: true });
@@ -111,13 +108,15 @@ const deleteFile = async ({ logger, file }) => {
   logger && logger(`fileService.deleteFile`);
 
   // delete file from storage
-  const deletedFromStorage = await storageService.removeFile({ logger, file });
-  console.log('deletedFromStorage', deletedFromStorage);
+  try {
+    await storageService.removeFile({ logger, file });
+  } catch (error) {
+    console.log('error deletedFromStorage', error);
+  }
 
   // delete file from db
   const deletedFromDb = await File.findOneAndDelete({ _id: file._id });
-  console.log('deletedFromDb', deletedFromDb);
-
+  // console.log('deletedFromDb', deletedFromDb);
   return deletedFromDb;
 };
 
@@ -129,51 +128,74 @@ const deleteOneById = async ({ logger, itemId }) => {
   return deleted;
 };
 
-const deleteManyByIds = async ({ logger, itemsIds }) => {
-  logger && logger(`fileService.deleteManyByIds`);
+// const deleteManyByIds = async ({ logger, itemsIds }) => {
+//   logger && logger(`fileService.deleteManyByIds`);
 
-  // console.log('itemsIds', itemsIds);
+//   // console.log('itemsIds', itemsIds);
 
-  // delete camera files from storage !!!
+//   // delete camera files from storage !!!
 
-  // delete items from db
-  const deletedFromDb = await File.deleteMany({ _id: { $in: itemsIds } });
+//   // delete items from db
+//   const deletedFromDb = await File.deleteMany({ _id: { $in: itemsIds } });
+//   return deletedFromDb;
+// };
+
+//
+// default
+//
+
+// user
+
+const createDefaultUserFiles = async ({ logger, userId }) => {
+  logger && logger(`fileService.createDefaultUserFiles`);
+
+  await storageService.createUserDir({
+    logger,
+    userId,
+  });
+};
+
+const deleteUserFiles = async ({ logger, userId }) => {
+  logger && logger(`fileService.deleteUserFiles`);
+
+  // delete camera files from storage
+  try {
+    await storageService.removeUserDir({ logger, userId });
+  } catch (error) {
+    console.log('error fileService.deleteUserFiles', error);
+  }
+
+  // delete camera files from DB
+  const deletedFromDb = await File.deleteMany({ user: userId });
+  // console.log('deletedFromDb', deletedFromDb);
   return deletedFromDb;
 };
 
-//
-// camera default
-//
-
-// create
+// camera
 
 const createDefaultCameraFiles = async ({ logger, userId, cameraId }) => {
   logger && logger(`fileService.createDefaultCameraFiles`);
 
-  const createdDirs = await storageService.createDefaultCameraDirs({
+  await storageService.createCameraDirs({
     logger,
     userId,
     cameraId,
   });
-
-  console.log('createdCameraDirs', createdDirs);
-
-  return createdDirs;
 };
-
-// delete
 
 const deleteCameraFiles = async ({ logger, userId, cameraId }) => {
   logger && logger(`fileService.deleteCameraFiles`);
 
   // delete camera files from storage
-  const deletedFromStorage = await storageService.removeCameraDirs({ userId, cameraId, logger });
-  console.log('deletedFromStorage', deletedFromStorage);
+  try {
+    await storageService.removeCameraDir({ logger, userId, cameraId });
+  } catch (error) {
+    console.log('error fileService.deleteCameraFiles', error);
+  }
 
   // delete camera files from DB
   const deletedFromDb = await File.deleteMany({ user: userId, camera: cameraId });
-  console.log('deletedFromDb', deletedFromDb);
-
+  // console.log('deletedFromDb', deletedFromDb.deletedCount);
   return deletedFromDb;
 };
 
@@ -189,9 +211,10 @@ export default {
 
   deleteFile,
   deleteOneById,
-  deleteManyByIds,
+  // deleteManyByIds,
 
-  // createDefaultUserFiles,
+  createDefaultUserFiles,
+  deleteUserFiles,
   createDefaultCameraFiles,
   deleteCameraFiles,
 };

@@ -5,11 +5,8 @@ import imageService from '../services/image.service.js';
 import storageService from '../services/storage.service.js';
 import * as consts from '../utils/constants.js';
 import fs from 'fs';
-import path from 'path';
 import util from 'util';
 import { exec } from 'child_process';
-
-const pathToStorage = process.env.PATH_TO_STORAGE;
 
 const router = express.Router();
 const execp = util.promisify(exec);
@@ -32,16 +29,14 @@ router.get(
       return;
     }
 
-    const video = path.join(pathToStorage, ...file.pathOnDisk);
-    // const tmpDir = await mkdtemp(path.join(pathToStorage, 'tmp-'));
-    const tmpDir = path.join(pathToStorage, 'tmp');
-    const poster = path.join(tmpDir, `${file._id}.jpg`);
+    const videoFilePath = storageService.createFilePath({ logger: req.logger, file });
+    const posterFilePath = storageService.createPosterPath({ logger: req.logger, file });
 
-    if (!fs.existsSync(poster)) {
-      await execp(`ffmpeg -y -i ${video} -ss 00:00:1 -frames:v 1 ${poster}`);
+    if (!fs.existsSync(posterFilePath)) {
+      await execp(`ffmpeg -y -i ${videoFilePath} -ss 00:00:1 -frames:v 1 ${posterFilePath}`);
     }
 
-    res.sendFile(poster);
+    res.sendFile(posterFilePath);
     req.logResp(req);
   })
 );
@@ -64,37 +59,42 @@ router.get(
       return;
     }
 
-    if (file.type === 'video') {
-      const fullPath = storageService.creteFullPath(file.pathOnDisk);
+    const filePath = storageService.createFilePath({ logger: req.logger, file });
+    const isThumbnail = req.query && req.query.size && req.query.size === 'thumbnail';
 
-      res.sendFile(fullPath);
+    if (isThumbnail) {
+      res.set('Content-Type', 'image/jpg');
+      const buffer = await imageService.resizeImage(filePath, consts.THUMBNAIL_SIZE);
+      res.send(buffer);
       req.logResp(req);
       return;
     }
 
-    const stream = storageService.openDownloadStream({
-      filePath: file.pathOnDisk,
-      logger: req.logger,
-    });
+    res.sendFile(filePath);
+    req.logResp(req);
+    return;
 
-    const isThumbnail = req.query && req.query.size && req.query.size === 'thumbnail';
+    //   const stream = storageService.openDownloadStream({
+    //     file,
+    //     logger: req.logger,
+    //   });
 
-    if (isThumbnail) {
-      stream.pipe(imageService.resize(consts.THUMBNAIL_SIZE)).pipe(res);
-    } else {
-      stream.pipe(res);
-    }
+    //   if (isThumbnail) {
+    //     stream.pipe(imageService.resize(consts.THUMBNAIL_SIZE)).pipe(res);
+    //   } else {
+    //     stream.pipe(res);
+    //   }
 
-    stream.on('error', () => {
-      // console.log('stream.on error', e);
-      res.sendStatus(500);
-      req.logResp(req);
-    });
+    //   stream.on('error', () => {
+    //     // console.log('stream.on error', e);
+    //     res.sendStatus(500);
+    //     req.logResp(req);
+    //   });
 
-    stream.on('end', () => {
-      // console.log('stream.on end');
-      req.logResp(req);
-    });
+    //   stream.on('end', () => {
+    //     // console.log('stream.on end');
+    //     req.logResp(req);
+    //   });
   })
 );
 

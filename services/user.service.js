@@ -3,7 +3,7 @@ import _ from 'lodash';
 import jwt from '../libs/token.js';
 import { BadRequestError } from '../middleware/errorHandlerMiddleware.js';
 import User from '../models/User.js';
-import storageService from './storage.service.js';
+import fileService from './file.service.js';
 
 const singUp = async ({ email, password, logger }) => {
   logger(`userService.singUp email: ${email}`);
@@ -18,16 +18,16 @@ const singUp = async ({ email, password, logger }) => {
   const hashPassword = await bcrypt.hash(password, 8);
 
   const newUser = new User({ email, password: hashPassword });
-  await newUser.save();
 
   // crete user folder
-  await storageService.createUserDir({
+  await fileService.createDefaultUserFiles({
     logger,
     userId: newUser._id,
   });
 
   const token = jwt.sign(newUser._id);
 
+  await newUser.save();
   return { token, user: _.pick(newUser, ['_id', 'name', 'email', 'avatar']) };
 };
 
@@ -93,7 +93,11 @@ const updateOne = async ({ userId, payload, logger }) => {
 const deleteOne = async ({ userId, logger }) => {
   logger(`userService.deleteOne userId: ${userId}`);
 
-  // TODO: delete all files
+  // delete user files
+  await fileService.deleteUserFiles({
+    logger,
+    userId,
+  });
 
   const user = await User.findById(userId);
   const deleted = await user.remove();

@@ -2,16 +2,21 @@ import * as fsp from 'fs/promises';
 import { existsSync, createReadStream, createWriteStream } from 'fs';
 import path from 'path';
 import {
+  makeUserDirName,
   makeCameraDirName,
   makeCurrentDateName,
   makePhotoNameOnDisk,
-  makeUserDirName,
   makeVideoNameOnDisk,
-} from '../utils';
+  makeVideoPosterNameOnDisk,
+} from '../utils/index.js';
 
 const pathToStorage = process.env.PATH_TO_STORAGE;
 
-const createFullPath = (itemPath) => path.join(pathToStorage, ...itemPath);
+const createFullPath = (filePath) => path.join(pathToStorage, ...filePath);
+
+//
+// dirs paths
+//
 
 const createUserDirPath = (userId) => {
   const userDirName = makeUserDirName(userId);
@@ -37,7 +42,7 @@ const createVideosDirPath = (userId, cameraId) => {
 };
 
 //
-// dirs
+// create dirs
 //
 
 const createDir = async ({ logger, dirPath }) => {
@@ -50,151 +55,159 @@ const createDir = async ({ logger, dirPath }) => {
 const createUserDir = async ({ logger, userId }) => {
   logger && logger(`disk.storage.createUserDir userId: ${userId}`);
   const userDirPath = createUserDirPath(userId);
-  const userDir = createDir({ logger, dirPath: userDirPath });
+  const userDir = await createDir({ logger, dirPath: userDirPath });
   return userDir;
 };
 
 const createCameraDirs = async ({ logger, userId, cameraId }) => {
   logger && logger(`disk.storage.createCameraDirs cameraId: ${cameraId}`);
   const cameraDirPath = createCameraDirPath(userId, cameraId);
-  const cameraDir = createDir({ logger, dirPath: cameraDirPath });
-  const cameraPhotosDir = createDir({ logger, dirPath: [...cameraDirPath, 'Photos'] });
-  const cameraVideosDir = createDir({ logger, dirPath: [...cameraDirPath, 'Videos'] });
+  const cameraDir = await createDir({ logger, dirPath: cameraDirPath });
+  const cameraPhotosDir = await createDir({ logger, dirPath: [...cameraDirPath, 'Photos'] });
+  const cameraVideosDir = await createDir({ logger, dirPath: [...cameraDirPath, 'Videos'] });
 
   return { cameraDir, cameraPhotosDir, cameraVideosDir };
 };
 
-const removeDir = async ({ logger, dirPath }) => {
-  logger && logger(`disk.storage.removeDir dirPath: ${dirPath}`);
+// remove dirs
+
+const removeUserDir = async ({ logger, userId }) => {
+  logger && logger(`disk.storage.removeUserDir userId: ${userId}`);
+  const userDirPath = createUserDirPath(userId);
+  const fullPath = createFullPath(userDirPath);
+  const deleted = await fsp.rmdir(fullPath, { recursive: true });
+  return deleted;
+};
+
+const removeCameraDir = async ({ logger, userId, cameraId }) => {
+  logger && logger(`disk.storage.removeCameraDir cameraId: ${cameraId}`);
+  const dirPath = createCameraDirPath(userId, cameraId);
   const fullPath = createFullPath(dirPath);
   const deleted = await fsp.rmdir(fullPath, { recursive: true });
   return deleted;
 };
 
-const removeCameraDirs = ({ logger, userId, cameraId }) => {
-  logger && logger(`disk.storage.removeCameraDirs cameraId: ${cameraId}`);
-  const deleted = removeDir({ logger, dirPath: createCameraDirPath(userId, cameraId) });
-  return deleted;
-};
-
 //
-// files
+// files paths
 //
 
-const saveVideo = async ({ logger, file, data }) => {
-  logger && logger(`disk.storage.saveVideo file.name: ${file.name}`);
-
+const createVideoFilePath = ({ logger, file }) => {
+  logger && logger(`disk.storage.createVideoFilePath file.name: ${file.name}`);
   const videosDirPath = createVideosDirPath(file.user, file.camera);
-
   const fileName = makeVideoNameOnDisk(file.date);
-  const fullPath = createFullPath([...videosDirPath, fileName]);
-
-  logger && logger(`disk.storage.saveVideo fullPath: ${fullPath}`);
-  const created = await fsp.writeFile(fullPath, data);
-  return created;
+  return [...videosDirPath, fileName];
 };
 
-const savePhoto = async ({ logger, file, data }) => {
-  logger && logger(`disk.storage.savePhoto file.name: ${file.name}`);
-
+const createCurrentDatePhotoDirPath = ({ logger, file }) => {
+  logger && logger(`disk.storage.createCurrentDatePhotoDirPath file.name: ${file.name}`);
   const photosDirPath = createPhotosDirPath(file.user, file.camera);
+  const currentDatePhotoDirName = makeCurrentDateName(file.date);
+  return [...photosDirPath, currentDatePhotoDirName];
+};
 
-  const currentDateDirName = makeCurrentDateName(file.date);
-  const currentDateDirPath = [...photosDirPath, currentDateDirName];
+const cretePhotoFilePath = ({ logger, file }) => {
+  logger && logger(`disk.storage.cretePhotoFilePath file.name: ${file.name}`);
+  const dirPath = createCurrentDatePhotoDirPath({ logger, file });
+  const fileName = makePhotoNameOnDisk(file.date);
+  return [...dirPath, fileName];
+};
 
-  if (!existsSync(createFullPath(currentDateDirPath))) {
-    logger && logger(`disk.storage.savePhoto mkdir dirPath: ${currentDateDirPath}`);
-    await fsp.mkdir(createFullPath(currentDateDirPath));
+const createPosterPath = ({ logger, file }) => {
+  logger && logger(`disk.storage.createVideoFilePath file.name: ${file.name}`);
+  const videosDirPath = createVideosDirPath(file.user, file.camera);
+  const posterName = makeVideoPosterNameOnDisk(file.date);
+  const filePath = [...videosDirPath, posterName];
+  const fullPath = createFullPath(filePath);
+  return fullPath;
+};
+
+const createFilePath = ({ logger, file }) => {
+  logger && logger(`disk.storage.createFilePath file.name: ${file.name}`);
+  let filePath;
+
+  if (file.type === 'video') {
+    filePath = createVideoFilePath({ logger, file });
   }
 
-  const fileName = makePhotoNameOnDisk(file.date);
-  const fullPath = createFullPath([...currentDateDirPath, fileName]);
+  if (file.type === 'photo') {
+    filePath = cretePhotoFilePath({ logger, file });
+  }
 
-  logger && logger(`disk.storage.savePhoto fullPath: ${fullPath}`);
-  const created = await fsp.writeFile(fullPath, data);
-  return created;
+  const fullPath = createFullPath(filePath);
+  return fullPath;
 };
+
+//
+// make new dir for photo every day
+//
+
+const makeCurrentDatePhotoDirIfNotExist = async ({ logger, file }) => {
+  const dirPath = createCurrentDatePhotoDirPath({ logger, file });
+  const fullPath = createFullPath(dirPath);
+
+  if (!existsSync(fullPath)) {
+    logger && logger(`disk.storage.makeDirIfNotExist mkdir dirPath: ${fullPath}`);
+    await fsp.mkdir(fullPath);
+  }
+};
+
+//
+// save
+//
 
 const saveFile = async ({ logger, file, data }) => {
   logger && logger(`disk.storage.saveFile file: ${file.name}`);
 
-  if (file.type === 'video') {
-    const created = await saveVideo({ logger, file, data });
-    return created;
+  if (file.type === 'photo') {
+    await makeCurrentDatePhotoDirIfNotExist({ logger, file });
   }
 
-  if (file.type === 'photo') {
-    const created = await savePhoto({ logger, file, data });
-    return created;
-  }
+  const filePath = createFilePath({ logger, file });
+
+  logger && logger(`disk.storage.savePhoto fullPath: ${filePath}`);
+  const created = await fsp.writeFile(filePath, data);
+  return created;
 };
 
 //
 // remove
 //
 
-const removeVideo = async ({ logger, file }) => {
-  logger && logger(`disk.storage.removeVideo file.name: ${file.name}`);
-
-  const videosDirPath = createVideosDirPath(file.user, file.camera);
-
-  const fileName = makeVideoNameOnDisk(file.date);
-  const fullPath = createFullPath([...videosDirPath, fileName]);
-
-  logger && logger(`disk.storage.removeVideo fullPath: ${fullPath}`);
-  const deleted = await fsp.unlink(fullPath);
-  return deleted;
-};
-
-const removePhoto = async ({ logger, file, data }) => {
-  logger && logger(`disk.storage.removePhoto file.name: ${file.name}`);
-
-  const photosDirPath = createPhotosDirPath(file.user, file.camera);
-
-  const currentDateDirName = makeCurrentDateName(file.date);
-  const currentDateDirPath = [...photosDirPath, currentDateDirName];
-
-  const fileName = makePhotoNameOnDisk(file.date);
-  const fullPath = createFullPath([...currentDateDirPath, fileName]);
-
-  logger && logger(`disk.storage.removePhoto fullPath: ${fullPath}`);
-  const deleted = await fsp.unlink(fullPath, data);
-  return deleted;
-};
-
 const removeFile = async ({ logger, file }) => {
   logger && logger(`disk.storage.removeFile file.name: ${file.name}`);
 
-  if (file.type === 'video') {
-    const deleted = await removeVideo({ logger, file });
-    return deleted;
-  }
+  const filePath = createFilePath({ logger, file });
 
-  if (file.type === 'photo') {
-    const deleted = await removePhoto({ logger, file });
-    return deleted;
-  }
+  logger && logger(`disk.storage.removeFile fullPath: ${filePath}`);
+  const deleted = await fsp.unlink(filePath);
+  return deleted;
 };
 
 //
-//
+// streams
 //
 
-const openUploadStream = ({ logger, filePath }) => {
-  const fullPath = createFullPath(filePath);
-  logger && logger(`disk.storage.openUploadStream fileName: ${fullPath}`);
+const openUploadStream = ({ logger, file }) => {
+  logger && logger(`disk.storage.openUploadStream file.name: ${file.name}`);
 
-  const uploadStream = createWriteStream(fullPath);
+  const filePath = createFilePath({ logger, file });
+
+  const uploadStream = createWriteStream(filePath);
   return uploadStream;
 };
 
-const openDownloadStream = ({ logger, filePath }) => {
-  const fullPath = createFullPath(filePath);
-  logger && logger(`disk.storage.openDownloadStream fileName: ${fullPath}`);
+const openDownloadStream = ({ logger, file }) => {
+  logger && logger(`disk.storage.openDownloadStream file.name: ${file.name}`);
 
-  const stream = createReadStream(fullPath);
+  const filePath = createFilePath({ logger, file });
+
+  const stream = createReadStream(filePath);
   return stream;
 };
+
+//
+//
+//
 
 const copyFile = async ({ logger, sourceFilePath, destinationFilePath }) => {
   const sourceFullPath = createFullPath(sourceFilePath);
@@ -204,22 +217,30 @@ const copyFile = async ({ logger, sourceFilePath, destinationFilePath }) => {
   await fsp.copyFile(sourceFullPath, destinationFullPath);
 };
 
-const fileStat = ({ logger, filePath }) => {
-  const fullPath = createFullPath(filePath);
-  logger && logger(`disk.storage.fileStat fileName: ${fullPath}`);
+const fileStat = ({ logger, file }) => {
+  logger && logger(`disk.storage.fileStat file.name: ${file.name}`);
 
-  const stat = fsp.stat(fullPath);
+  const filePath = createFilePath({ logger, file });
+
+  const stat = fsp.stat(filePath);
   return stat;
 };
 
 export default {
   createUserDir,
   createCameraDirs,
-  removeCameraDirs,
+  removeUserDir,
+  removeCameraDir,
+
+  createPosterPath,
+  createFilePath,
+
   saveFile,
   removeFile,
+
   openUploadStream,
   openDownloadStream,
+
   copyFile,
   fileStat,
 };

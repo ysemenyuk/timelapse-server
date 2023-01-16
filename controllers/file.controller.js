@@ -85,15 +85,15 @@ const deleteOne = async (req, res) => {
   req.logResp(req);
 };
 
-const deleteMany = async (req, res) => {
-  req.logger(`fileController.deleteMany`);
+// const deleteMany = async (req, res) => {
+//   req.logger(`fileController.deleteMany`);
 
-  const itemsIds = []; // from query or body?
+//   const itemsIds = []; // from query or body?
 
-  await fileService.deleteManyByIds({ itemsIds, logger: req.logger });
+//   await fileService.deleteManyByIds({ itemsIds, logger: req.logger });
 
-  res.status(204).send();
-  req.logResp(req);
-};
+//   res.status(204).send();
+//   req.logResp(req);
+// };
 
-export default { getAll, getCount, getOne, createOne, updateOne, deleteOne, deleteMany };
+export default { getAll, getCount, getOne, createOne, updateOne, deleteOne };

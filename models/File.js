@@ -6,7 +6,7 @@ const FileSchema = mongoose.Schema({
   camera: { type: mongoose.ObjectId, ref: 'Camera' },
   task: { type: mongoose.ObjectId, ref: 'Task' },
 
-  path: { type: [{ type: String }] },
+  // path: { type: [{ type: String }] },
   url: { type: String },
 
   name: { type: String, required: true },
