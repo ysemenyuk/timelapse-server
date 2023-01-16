@@ -62,6 +62,14 @@ const openDownloadStream = ({ logger, filePath }) => {
   return stream;
 };
 
+const copyFile = async ({ logger, sourceFilePath, destinationFilePath }) => {
+  const sourceFullPath = creteFullPath(sourceFilePath);
+  const destinationFullPath = creteFullPath(destinationFilePath);
+
+  logger && logger(`disk.storage.copyFile ${sourceFullPath} to ${destinationFullPath}`);
+  await fsp.copyFile(sourceFullPath, destinationFullPath);
+};
+
 const fileStat = ({ logger, filePath }) => {
   const fullPath = creteFullPath(filePath);
   logger && logger(`disk.storage.fileStat fileName: ${fullPath}`);
@@ -79,5 +87,6 @@ export default {
   removeFile,
   openUploadStream,
   openDownloadStream,
+  copyFile,
   fileStat,
 };

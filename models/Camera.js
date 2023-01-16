@@ -5,22 +5,18 @@ const CameraSchema = mongoose.Schema(
     date: { type: Date, default: new Date() },
     name: { type: String, required: true },
     description: { type: String, required: true },
-    cameraModel: { type: String },
+    model: { type: String },
+    location: { type: [{ type: Number }] },
 
     photoUrl: { type: String, default: '' },
     rtspUrl: { type: String, default: '' },
 
     user: { type: mongoose.ObjectId, ref: 'User' },
-    avatar: { type: mongoose.ObjectId, ref: 'CameraFile' },
+    avatar: { type: mongoose.ObjectId, ref: 'File' },
 
-    cameraFolder: { type: mongoose.ObjectId, ref: 'CameraFile' },
-    photosByHandFolder: { type: mongoose.ObjectId, ref: 'CameraFile' },
-    photosByTimeFolder: { type: mongoose.ObjectId, ref: 'CameraFile' },
-    videosByHandFolder: { type: mongoose.ObjectId, ref: 'CameraFile' },
-    videosByTimeFolder: { type: mongoose.ObjectId, ref: 'CameraFile' },
-
-    photosByTimeTask: { type: mongoose.ObjectId, ref: 'CameraTask' },
-    videosByTimeTask: { type: mongoose.ObjectId, ref: 'CameraTask' },
+    cameraFolder: { type: mongoose.ObjectId, ref: 'File' },
+    photosFolder: { type: mongoose.ObjectId, ref: 'File' },
+    videosFolder: { type: mongoose.ObjectId, ref: 'File' },
   },
   {
     toJSON: { virtuals: true }, // So `res.json()` and other `JSON.stringify()` functions include virtuals
@@ -29,7 +25,7 @@ const CameraSchema = mongoose.Schema(
 );
 
 CameraSchema.virtual('lastPhoto', {
-  ref: 'CameraFile',
+  ref: 'File',
   localField: '_id',
   foreignField: 'camera',
   match: { type: ['photo'], createType: ['byHand', 'byTime'] },
@@ -38,7 +34,7 @@ CameraSchema.virtual('lastPhoto', {
 });
 
 CameraSchema.virtual('firstPhoto', {
-  ref: 'CameraFile',
+  ref: 'File',
   localField: '_id',
   foreignField: 'camera',
   match: { type: ['photo'], createType: ['byHand', 'byTime'] },
@@ -47,7 +43,7 @@ CameraSchema.virtual('firstPhoto', {
 });
 
 CameraSchema.virtual('totalPhotos', {
-  ref: 'CameraFile',
+  ref: 'File',
   localField: '_id',
   foreignField: 'camera',
   count: true,
@@ -56,7 +52,7 @@ CameraSchema.virtual('totalPhotos', {
 });
 
 CameraSchema.virtual('lastVideo', {
-  ref: 'CameraFile',
+  ref: 'File',
   localField: '_id',
   foreignField: 'camera',
   match: { type: ['video'], createType: ['byHand', 'byTime'] },
@@ -65,7 +61,7 @@ CameraSchema.virtual('lastVideo', {
 });
 
 CameraSchema.virtual('firstVideo', {
-  ref: 'CameraFile',
+  ref: 'File',
   localField: '_id',
   foreignField: 'camera',
   match: { type: ['video'], createType: ['byHand', 'byTime'] },
@@ -74,7 +70,7 @@ CameraSchema.virtual('firstVideo', {
 });
 
 CameraSchema.virtual('totalVideos', {
-  ref: 'CameraFile',
+  ref: 'File',
   localField: '_id',
   foreignField: 'camera',
   count: true,
@@ -82,13 +78,13 @@ CameraSchema.virtual('totalVideos', {
   match: { type: ['video'], createType: { $in: ['byHand', 'byTime'] } },
 });
 
-// CameraSchema.virtual('createPhotosByTimeTask', {
-//   ref: 'CameraTask',
-//   localField: '_id',
-//   foreignField: 'camera',
-//   justOne: true,
-//   match: { name: ['CreatePhotosByTime'] },
-// });
+CameraSchema.virtual('photosByTimeTask', {
+  ref: 'Task',
+  localField: '_id',
+  foreignField: 'camera',
+  justOne: true,
+  match: { name: ['CreatePhotosByTime'] },
+});
 
 const Camera = mongoose.model('Camera', CameraSchema);
 

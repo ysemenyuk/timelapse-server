@@ -1,6 +1,6 @@
 import Camera from '../models/Camera.js';
-import cameraFileService from './cameraFile.service.js';
-import cameraTaskService from './cameraTask.service.js';
+import fileService from './file.service.js';
+import taskService from './task.service.js';
 
 const defaultPopulateItems = [
   'avatar',
@@ -11,12 +11,9 @@ const defaultPopulateItems = [
   'lastVideo',
   'totalVideos',
   'cameraFolder',
-  'photosByHandFolder',
-  'photosByTimeFolder',
-  'videosByHandFolder',
-  'videosByTimeFolder',
+  'photosFolder',
+  'videosFolder',
   'photosByTimeTask',
-  'videosByTimeTask',
 ];
 
 const getAll = async ({ userId, logger, populateItems = defaultPopulateItems }) => {
@@ -33,7 +30,9 @@ const getOneById = async ({ logger, cameraId, populateItems = defaultPopulateIte
   return camera;
 };
 
+//
 // create
+//
 
 const createOne = async ({ logger, userId, payload }) => {
   logger && logger(`cameraService.createOne`);
@@ -43,18 +42,17 @@ const createOne = async ({ logger, userId, payload }) => {
 
   // create default folders
 
-  const defaultFolders = await cameraFileService.createDefaultFolders({
+  const defaultFolders = await fileService.createDefaultCameraFolders({
     logger,
     userId,
     cameraId: camera._id,
   });
 
-  const { cameraFolder, photosByHandFolder, photosByTimeFolder, videosByHandFolder, videosByTimeFolder } =
-    defaultFolders;
+  const { cameraFolder, photosFolder, videosFolder } = defaultFolders;
 
   // create defaul tasks
 
-  const defaultTasks = await cameraTaskService.createDefaultTasks({
+  const defaultTasks = await taskService.createDefaultCameraTasks({
     logger,
     userId,
     cameraId: camera._id,
@@ -65,10 +63,8 @@ const createOne = async ({ logger, userId, payload }) => {
   await camera.updateOne({
     // default folders
     cameraFolder: cameraFolder._id,
-    photosByHandFolder: photosByHandFolder._id,
-    photosByTimeFolder: photosByTimeFolder._id,
-    videosByHandFolder: videosByHandFolder._id,
-    videosByTimeFolder: videosByTimeFolder._id,
+    photosFolder: photosFolder._id,
+    videosFolder: videosFolder._id,
     // default tasks
     photosByTimeTask: photosByTimeTask._id,
   });
@@ -77,6 +73,8 @@ const createOne = async ({ logger, userId, payload }) => {
   return createdCamera;
 };
 
+//
+// update
 //
 
 const updateOneById = async ({ logger, cameraId, payload }) => {
@@ -88,12 +86,14 @@ const updateOneById = async ({ logger, cameraId, payload }) => {
 };
 
 //
+// delete
+//
 
-const deleteOneById = async ({ logger, cameraId }) => {
+const deleteOneById = async ({ logger, userId, cameraId }) => {
   logger && logger(`cameraService.deleteOne`);
 
-  await cameraFileService.deleteCameraFiles({ cameraId, logger });
-  await cameraTaskService.deleteCameraTasks({ cameraId, logger });
+  await fileService.deleteCameraFiles({ userId, cameraId, logger });
+  await taskService.deleteCameraTasks({ userId, cameraId, logger });
 
   const deleted = await Camera.findOneAndDelete({ _id: cameraId });
   return deleted;

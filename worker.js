@@ -51,11 +51,9 @@ class Worker {
   async create(task) {
     const { name } = task;
 
-    // await this.oneTimeJob(task);
-
     const mapping = {
-      [taskName.CREATE_PHOTO_BY_HAND]: this.oneTimeJob.bind(this),
-      [taskName.CREATE_VIDEO_BY_HAND]: this.oneTimeJob.bind(this),
+      [taskName.CREATE_PHOTO]: this.oneTimeJob.bind(this),
+      [taskName.CREATE_VIDEO]: this.oneTimeJob.bind(this),
       [taskName.CREATE_PHOTOS_BY_TIME]: this.repeatEveryJob.bind(this),
       [taskName.CREATE_VIDEOS_BY_TIME]: this.repeatAtJob.bind(this),
     };
@@ -67,8 +65,8 @@ class Worker {
     const { name } = task;
 
     const mapping = {
-      [taskName.CREATE_PHOTO_BY_HAND]: this.oneTimeJob.bind(this),
-      [taskName.CREATE_VIDEO_BY_HAND]: this.oneTimeJob.bind(this),
+      [taskName.CREATE_PHOTO]: this.oneTimeJob.bind(this),
+      [taskName.CREATE_VIDEO]: this.oneTimeJob.bind(this),
       [taskName.CREATE_PHOTOS_BY_TIME]: this.repeatEveryJob.bind(this),
       [taskName.CREATE_VIDEOS_BY_TIME]: this.repeatAtJob.bind(this),
     };
@@ -104,14 +102,14 @@ class Worker {
     const { status, photoSettings } = task;
 
     const jobs = await this.agenda.jobs({ 'data.taskId': task._id });
-    console.log(5555, jobs.length);
+    // console.log(5555, jobs.length);
 
-    if (jobs.length) {
+    if (jobs.length > 0) {
       await Promise.all(jobs.map((job) => job.remove()));
     }
 
-    const jobs2 = await this.agenda.jobs({ 'data.taskId': task._id });
-    console.log(6666, jobs2.length);
+    // const jobs2 = await this.agenda.jobs({ 'data.taskId': task._id });
+    // console.log(6666, jobs2.length);
 
     if (status !== taskStatus.RUNNING) {
       return;
@@ -129,7 +127,7 @@ class Worker {
   }
 
   async repeatAtJob(task) {
-    const { status, settings } = task;
+    const { status, videoSettings } = task;
 
     if (status !== taskStatus.RUNNING) {
       return;
@@ -141,7 +139,7 @@ class Worker {
       taskId: task._id,
     });
 
-    job.repeatAt(settings.startTime);
+    job.repeatAt(videoSettings.createTime);
 
     await job.save();
   }

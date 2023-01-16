@@ -1,8 +1,8 @@
 import _ from 'lodash';
-import CameraFile from '../models/CameraFile.js';
-import { makeCameraFolderName, promisifyUploadStream } from '../utils/index.js';
+import File from '../models/File.js';
+import { makeCameraFolderName, makeUserFolderName, promisifyUploadStream } from '../utils/index.js';
 import storageService from './storage.service.js';
-import { fileType, folderName } from '../utils/constants.js';
+import { folderName, folderType, type } from '../utils/constants.js';
 
 const createQuery = (cameraId, query) => {
   const { type, createType, startDate, endDate, oneDate } = query;
@@ -40,32 +40,32 @@ const createQuery = (cameraId, query) => {
 };
 
 const getManyByQuery = async ({ logger, cameraId, query }) => {
-  logger && logger(`cameraFileService.getManyByQuery`);
+  logger && logger(`fileService.getManyByQuery`);
 
   const queryObject = createQuery(cameraId, query);
-  const files = await CameraFile.find(queryObject);
+  const files = await File.find(queryObject);
   return files;
 };
 
 const getCountByQuery = async ({ logger, cameraId, query }) => {
-  logger && logger(`cameraFileService.getCountByQuery`);
+  logger && logger(`fileService.getCountByQuery`);
 
   const queryObject = createQuery(cameraId, query);
-  const count = await CameraFile.countDocuments(queryObject);
+  const count = await File.countDocuments(queryObject);
   return count;
 };
 
 const getOneById = async ({ logger, itemId }) => {
-  logger && logger(`cameraFileService.getOneById`);
+  logger && logger(`fileService.getOneById`);
 
-  const file = await CameraFile.findOne({ _id: itemId });
+  const file = await File.findOne({ _id: itemId });
   return file;
 };
 
 const getOne = async ({ logger, ...query }) => {
-  logger && logger(`cameraFileService.getOne`);
+  logger && logger(`fileService.getOne`);
 
-  const file = await CameraFile.findOne({ ...query });
+  const file = await File.findOne({ ...query });
   return file;
 };
 
@@ -74,21 +74,20 @@ const getOne = async ({ logger, ...query }) => {
 //
 
 const createFolder = async ({ logger, ...payload }) => {
-  logger && logger(`cameraFileService.createFolder`);
+  logger && logger(`fileService.createFolder`);
 
   await storageService.createFolder({
     logger,
     folderPath: payload.pathOnDisk,
   });
 
-  const folder = new CameraFile({ ...payload });
+  const folder = new File({ ...payload });
   await folder.save();
-
   return folder;
 };
 
 const createFile = async ({ logger, data, ...payload }) => {
-  logger && logger(`cameraFileService.createFile`);
+  logger && logger(`fileService.createFile`);
 
   if (data) {
     await storageService.writeFile({
@@ -98,13 +97,13 @@ const createFile = async ({ logger, data, ...payload }) => {
     });
   }
 
-  const file = new CameraFile({ ...payload });
+  const file = new File({ ...payload });
   await file.save();
   return file;
 };
 
 const createFileByStream = async ({ logger, stream, ...payload }) => {
-  logger && logger(`cameraFileService.createFileByStream`);
+  logger && logger(`fileService.createFileByStream`);
 
   const uploadStream = storageService.openUploadStream({
     logger,
@@ -114,7 +113,7 @@ const createFileByStream = async ({ logger, stream, ...payload }) => {
   stream.pipe(uploadStream);
   await promisifyUploadStream(uploadStream);
 
-  const file = new CameraFile({ ...payload });
+  const file = new File({ ...payload });
   await file.save();
   return file;
 };
@@ -123,10 +122,10 @@ const createFileByStream = async ({ logger, stream, ...payload }) => {
 // update
 //
 
-const updateOneById = async ({ fileId, payload, logger }) => {
-  logger && logger(`cameraFileService.updateOneById`);
+const updateOneById = async ({ itemId, payload, logger }) => {
+  logger && logger(`fileService.updateOneById`);
 
-  const updated = await CameraFile.findOneAndUpdate({ _id: fileId }, payload, { new: true });
+  const updated = await File.findOneAndUpdate({ _id: itemId }, payload, { new: true });
   return updated;
 };
 
@@ -135,9 +134,9 @@ const updateOneById = async ({ fileId, payload, logger }) => {
 //
 
 const deleteFolder = async ({ logger, folder }) => {
-  logger && logger(`cameraFileService.deleteFolder`);
+  logger && logger(`fileService.deleteFolder`);
 
-  // delete folder  from disk
+  // delete folder from disk
   try {
     await storageService.removeFolder({ logger, folderPath: folder.pathOnDisk });
   } catch (error) {
@@ -145,8 +144,8 @@ const deleteFolder = async ({ logger, folder }) => {
   }
 
   // delete folder and files from db
-  const deletedChildren = await CameraFile.deleteMany({ parent: folder._id });
-  const deletedFolder = await CameraFile.findOneAndDelete({ _id: folder._id });
+  const deletedChildren = await File.deleteMany({ parent: folder._id });
+  const deletedFolder = await File.findOneAndDelete({ _id: folder._id });
 
   console.log('deletedChildren', deletedChildren);
   console.log('deletedFolder', deletedFolder);
@@ -155,7 +154,7 @@ const deleteFolder = async ({ logger, folder }) => {
 };
 
 const deleteFile = async ({ logger, file }) => {
-  logger && logger(`cameraFileService.deleteFile`);
+  logger && logger(`fileService.deleteFile`);
 
   // delete file from disk
   try {
@@ -165,14 +164,14 @@ const deleteFile = async ({ logger, file }) => {
   }
 
   // delete file from db
-  const deleted = await CameraFile.findOneAndDelete({ _id: file._id });
+  const deleted = await File.findOneAndDelete({ _id: file._id });
   return deleted;
 };
 
 const deleteOneById = async ({ logger, itemId }) => {
-  logger && logger(`cameraFileService.deleteOneById`);
+  logger && logger(`fileService.deleteOneById`);
 
-  const item = await CameraFile.findOne({ _id: itemId });
+  const item = await File.findOne({ _id: itemId });
 
   if (item.type === 'folder') {
     const deleted = await deleteFolder({ logger, folder: item });
@@ -184,14 +183,14 @@ const deleteOneById = async ({ logger, itemId }) => {
 };
 
 const deleteManyByIds = async ({ logger, itemsIds }) => {
-  logger && logger(`cameraFileService.deleteManyByIds`);
+  logger && logger(`fileService.deleteManyByIds`);
 
   // console.log('itemsIds', itemsIds);
 
   // TODO: delete items from storage
 
   // delete items from db
-  const deleted = await CameraFile.deleteMany({ _id: { $in: itemsIds } });
+  const deleted = await File.deleteMany({ _id: { $in: itemsIds } });
   return deleted;
 };
 
@@ -199,66 +198,84 @@ const deleteManyByIds = async ({ logger, itemsIds }) => {
 // camera default
 //
 
-const createDefaultFolders = async ({ logger, userId, cameraId }) => {
-  logger && logger(`cameraFileService.createDefaultFolders`);
+// create
 
-  const userFolder = await CameraFile.findOne({ user: userId, camera: null, parent: null });
+const createUserFolder = async ({ logger, userId }) => {
+  logger && logger(`fileService.createDefaultFolders`);
+
+  const userFolderName = makeUserFolderName(userId);
+
+  const userFolder = await createFolder({
+    logger,
+    pathOnDisk: [userFolderName],
+    user: userId,
+    camera: null,
+    parent: null,
+    name: userFolderName,
+    type: type.FOLDER,
+    folderType: folderType.DEFAULT,
+    removable: false,
+  });
+
+  return userFolder;
+};
+
+const createDefaultCameraFolders = async ({ logger, userId, cameraId }) => {
+  logger && logger(`fileService.createDefaultCameraFolders`);
+
+  const userFolder = await File.findOne({ user: userId, camera: null, parent: null });
+
+  console.log(111, userFolder);
 
   const cameraFolderName = makeCameraFolderName(cameraId);
+
   const cameraFolder = await createFolder({
     logger,
     user: userId,
     camera: cameraId,
     parent: userFolder._id,
-    pathOnDisk: [...userFolder.pathOnDisk, cameraFolderName],
-    name: cameraFolderName,
-    type: fileType.FOLDER,
+    type: type.FOLDER,
+    folderType: folderType.DEFAULT,
     removable: false,
+    name: cameraFolderName,
+    pathOnDisk: [...userFolder.pathOnDisk, cameraFolderName],
   });
 
-  const defaultPayload = {
+  const photosFolder = await createFolder({
     logger,
     user: userId,
     camera: cameraId,
     parent: cameraFolder._id,
-    type: fileType.FOLDER,
+    type: type.FOLDER,
+    folderType: folderType.DEFAULT,
     removable: false,
-  };
-
-  const photosByHandFolder = await createFolder({
-    ...defaultPayload,
-    pathOnDisk: [...cameraFolder.pathOnDisk, folderName.PHOTOS_BY_HAND],
-    name: folderName.PHOTOS_BY_HAND,
+    name: folderName.PHOTOS,
+    pathOnDisk: [...cameraFolder.pathOnDisk, folderName.PHOTOS],
   });
 
-  const photosByTimeFolder = await createFolder({
-    ...defaultPayload,
-    pathOnDisk: [...cameraFolder.pathOnDisk, folderName.PHOTOS_BY_TIME],
-    name: folderName.PHOTOS_BY_TIME,
+  const videosFolder = await createFolder({
+    logger,
+    user: userId,
+    camera: cameraId,
+    parent: cameraFolder._id,
+    type: type.FOLDER,
+    folderType: folderType.DEFAULT,
+    removable: false,
+    name: folderName.VIDEOS,
+    pathOnDisk: [...cameraFolder.pathOnDisk, folderName.VIDEOS],
   });
 
-  const videosByHandFolder = await createFolder({
-    ...defaultPayload,
-    pathOnDisk: [...cameraFolder.pathOnDisk, folderName.VIDEOS_BY_HAND],
-    name: folderName.VIDEOS_BY_HAND,
-  });
-
-  const videosByTimeFolder = await createFolder({
-    ...defaultPayload,
-    pathOnDisk: [...cameraFolder.pathOnDisk, folderName.VIDEOS_BY_TIME],
-    name: folderName.VIDEOS_BY_TIME,
-  });
-
-  return { cameraFolder, photosByHandFolder, photosByTimeFolder, videosByHandFolder, videosByTimeFolder };
+  return { cameraFolder, photosFolder, videosFolder };
 };
 
-//
+// delete
 
 const deleteCameraFiles = async ({ logger, userId, cameraId }) => {
-  logger && logger(`cameraFileService.deleteCameraFiles`);
+  logger && logger(`fileService.deleteCameraFiles`);
 
-  const userFolder = await CameraFile.findOne({ user: userId, camera: null, parent: null });
-  const cameraFolder = await CameraFile.findOne({ camera: cameraId, parent: userFolder._id });
+  const userFolder = await File.findOne({ user: userId, camera: null, parent: null });
+  // search by name?
+  const cameraFolder = await File.findOne({ camera: cameraId, parent: userFolder._id });
 
   // delete camera folder from disk
   try {
@@ -271,7 +288,7 @@ const deleteCameraFiles = async ({ logger, userId, cameraId }) => {
   }
 
   // delete camera files from DB
-  const deleted = await CameraFile.deleteMany({ camera: cameraId });
+  const deleted = await File.deleteMany({ camera: cameraId });
   return deleted;
 };
 
@@ -292,6 +309,7 @@ export default {
   deleteOneById,
   deleteManyByIds,
 
-  createDefaultFolders,
+  createUserFolder,
+  createDefaultCameraFolders,
   deleteCameraFiles,
 };

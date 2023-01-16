@@ -1,9 +1,6 @@
-import cameraService from '../services/camera.service.js';
-import cameraFileService from '../services/cameraFile.service.js';
-import cameraTaskService from '../services/cameraTask.service.js';
-import { taskName, taskStatus } from '../utils/constants.js';
-// import { makeFileName } from '../utils/index.js';
-import storageService from '../services/storage.service.js';
+import taskService from '../services/task.service.js';
+import { fileCreateType, taskName, taskStatus } from '../utils/constants.js';
+import createAndSaveVideo from './createAndSaveVideo.js';
 
 const sleep = (time, message = 'Hello') =>
   new Promise((resolve) => {
@@ -11,10 +8,10 @@ const sleep = (time, message = 'Hello') =>
   });
 
 export default (agenda, socket, workerLogger) => {
-  agenda.define(taskName.CREATE_VIDEO_BY_HAND, async (job) => {
-    const logger = workerLogger.extend(taskName.CREATE_VIDEO_BY_HAND);
+  agenda.define(taskName.CREATE_VIDEO, async (job) => {
+    const logger = workerLogger.extend(taskName.CREATE_VIDEO);
 
-    logger(`start ${taskName.CREATE_VIDEO_BY_HAND} job`);
+    logger(`start ${taskName.CREATE_VIDEO} job`);
 
     const { cameraId, userId, taskId } = job.attrs.data;
     const userSocket = socket.getUserSocket(userId);
@@ -22,60 +19,31 @@ export default (agenda, socket, workerLogger) => {
     let task;
 
     try {
-      task = await cameraTaskService.getOneById({ taskId });
+      task = await taskService.getOneById({ taskId });
       const { videoSettings } = task;
-
-      // console.log('task', task);
 
       await task.updateOne({ status: taskStatus.RUNNING, startedAt: new Date() });
 
       userSocket && userSocket.emit('update-task', { cameraId, userId, taskId });
 
-      //
       await sleep(10 * 1000); // doing job
-      //
 
-      const camera = await cameraService.getOneById({ cameraId });
-      const { videosByHandFolder } = camera;
-
-      const date = new Date();
-      const fileName = 'timelapse.mp4';
-      const fileNameOnDisk = 'timelapse.mp4';
-      const filePathOnDisk = [...videosByHandFolder.pathOnDisk, fileNameOnDisk];
-
-      const stat = await storageService.fileStat({ logger, filePath: filePathOnDisk });
-
-      const video = await cameraFileService.createFile({
+      const file = await createAndSaveVideo({
         logger,
-        date,
-        user: userId,
-        camera: camera._id,
-        parent: videosByHandFolder._id,
-        pathOnDisk: filePathOnDisk,
-        name: fileName,
-        type: 'video',
-        fileType: 'videp/mp4',
-        createType: 'byHand',
-        data: undefined,
-        videoData: {
-          startDate: videoSettings.startDate,
-          endDate: videoSettings.endDate,
-          fps: videoSettings.fps,
-          duration: videoSettings.duration,
-          poster: null, // photo id
-          size: stat.size,
-        },
+        userId,
+        cameraId,
+        videoSettings,
+        create: fileCreateType.BY_HAND,
       });
 
       await task.updateOne({
         status: taskStatus.SUCCESSED,
         finishedAt: new Date(),
-        message: `File "${video.name}" successfully saved.`,
+        message: `File "${file.name}" successfully saved.`,
       });
 
-      // socket emit update-task, add-file
       userSocket && userSocket.emit('update-task', { cameraId, userId, taskId });
-      userSocket && userSocket.emit('add-file', { cameraId, userId, file: video });
+      userSocket && userSocket.emit('add-file', { cameraId, userId, file });
     } catch (error) {
       console.log('-- error createVideo job --', error);
 

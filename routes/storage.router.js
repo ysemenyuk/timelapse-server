@@ -1,6 +1,6 @@
 import express from 'express';
 import { asyncHandler } from '../middleware/errorHandlerMiddleware.js';
-import cameraFileService from '../services/cameraFile.service.js';
+import fileService from '../services/file.service.js';
 import imageService from '../services/image.service.js';
 import storageService from '../services/storage.service.js';
 import * as consts from '../utils/constants.js';
@@ -21,7 +21,7 @@ router.get(
   asyncHandler(async (req, res) => {
     req.logger(`storage.router.get /files/${req.params.fileId}/poster`);
 
-    const file = await cameraFileService.getOneById({
+    const file = await fileService.getOneById({
       itemId: req.params.fileId,
       logger: req.logger,
     });
@@ -53,7 +53,7 @@ router.get(
   asyncHandler(async (req, res) => {
     req.logger(`storage.router.get /files/${req.params.fileId}`);
 
-    const file = await cameraFileService.getOneById({
+    const file = await fileService.getOneById({
       itemId: req.params.fileId,
       logger: req.logger,
     });

@@ -1,9 +1,9 @@
-import cameraTaskService from '../services/cameraTask.service.js';
+import taskService from '../services/task.service.js';
 
 const getAll = async (req, res) => {
   req.logger('cameraTask.controller getAll');
 
-  const tasks = await cameraTaskService.getAll({
+  const tasks = await taskService.getAll({
     cameraId: req.params.cameraId,
     logger: req.logger,
   });
@@ -15,7 +15,7 @@ const getAll = async (req, res) => {
 const getOne = async (req, res) => {
   req.logger(`cameraTask.controller getOne`);
 
-  const task = await cameraTaskService.getOneById({
+  const task = await taskService.getOneById({
     taskId: req.params.taskId,
     logger: req.logger,
   });
@@ -30,7 +30,7 @@ const createOne = async (req, res) => {
   // TODO: check req.body take fields by schema!
   const payload = req.body;
 
-  const task = await cameraTaskService.createOne({
+  const task = await taskService.createOne({
     userId: req.userId,
     cameraId: req.params.cameraId,
     payload,
@@ -48,7 +48,7 @@ const updateOne = async (req, res) => {
   // TODO: check req.body take fields by schema!
   const payload = req.body;
 
-  const updated = await cameraTaskService.updateOneById({
+  const updated = await taskService.updateOneById({
     taskId: req.params.taskId,
     payload,
     worker: req.app.worker,
@@ -62,7 +62,7 @@ const updateOne = async (req, res) => {
 const deleteOne = async (req, res) => {
   req.logger(`cameraTask.controller deleteOne`);
 
-  const deleted = await cameraTaskService.deleteOneById({
+  const deleted = await taskService.deleteOneById({
     taskId: req.params.taskId,
     worker: req.app.worker,
     logger: req.logger,

@@ -1,3 +1,5 @@
+import format from 'date-fns/format/index.js';
+
 export const promisifyUploadStream = (uploadStream) => {
   return new Promise((resolve, reject) => {
     uploadStream.on('error', () => {
@@ -24,12 +26,16 @@ export const parseTime = (time) => {
 
   return {
     year,
-    month,
-    date,
-    hh,
-    mm,
-    ss,
+    month: dd(month + 1),
+    date: dd(date),
+    hh: dd(hh),
+    mm: dd(mm),
+    ss: dd(ss),
   };
+};
+
+export const getCurrentTime = (date) => {
+  return format(date, 'hh:mm');
 };
 
 export const makeUserFolderName = (userId) => {
@@ -40,24 +46,28 @@ export const makeCameraFolderName = (cameraId) => {
   return `camera_${cameraId.toString()}`;
 };
 
-export const makeTodayName = (time) => {
-  const { year, month, date } = parseTime(time);
-  return `${year}-${dd(month + 1)}-${dd(date)}`;
+export const makeCurrentDateName = (date) => {
+  return format(date, 'yyyy-MM-dd');
 };
 
-export const makeMonthName = (time) => {
-  const { year, month } = parseTime(time);
-  return `${year}-${dd(month + 1)}`;
+export const makeCurrentMonthName = (date) => {
+  return format(date, 'yyyy-MM');
 };
 
-export const makeFileNameOnDisk = (time) => {
-  const { year, month, date, hh, mm, ss } = parseTime(time);
-  return `img--${year}-${dd(month + 1)}-${dd(date)}--${dd(hh)}-${dd(mm)}-${dd(ss)}.jpg`;
+export const makePhotoName = (date) => {
+  return format(date, 'yyyy.MM.dd hh:mm:ss');
 };
 
-export const makeFileName = (time) => {
-  const { year, month, date, hh, mm, ss } = parseTime(time);
-  return `${year}.${dd(month + 1)}.${dd(date)} ${dd(hh)}:${dd(mm)}:${dd(ss)}`;
+export const makePhotoNameOnDisk = (date) => {
+  return `img--${format(date, 'yyyy-MM-dd--hh-mm-ss')}.jpg`;
+};
+
+export const makeVideoName = (date) => {
+  return format(date, 'yyyy.MM.dd hh:mm:ss');
+};
+
+export const makeVideoNameOnDisk = (date) => {
+  return `video--${format(date, 'yyyy-MM-dd--hh-mm-ss')}.mp4`;
 };
 
 export const makeNum = (num) => {

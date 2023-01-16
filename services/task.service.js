@@ -1,26 +1,28 @@
-import CameraTask from '../models/CameraTask.js';
+import Task from '../models/Task.js';
 import { taskName, taskType } from '../utils/constants.js';
 
-const getAll = async ({ cameraId, logger }) => {
-  logger && logger(`cameraTaskService.getAll`);
+// get
 
-  const tasks = await CameraTask.find({ camera: cameraId });
+const getAll = async ({ cameraId, logger }) => {
+  logger && logger(`taskService.getAll`);
+
+  const tasks = await Task.find({ camera: cameraId });
   return tasks;
 };
 
 const getOneById = async ({ logger, taskId }) => {
-  logger && logger(`cameraTaskService.getOne`);
+  logger && logger(`taskService.getOne`);
 
-  const task = await CameraTask.findOne({ _id: taskId });
+  const task = await Task.findOne({ _id: taskId });
   return task;
 };
 
 // create
 
 const createOne = async ({ userId, cameraId, payload, worker, logger }) => {
-  logger && logger(`cameraTaskService.createOne`);
+  logger && logger(`taskService.createOne`);
 
-  const task = new CameraTask({
+  const task = new Task({
     user: userId,
     camera: cameraId,
     ...payload,
@@ -35,9 +37,9 @@ const createOne = async ({ userId, cameraId, payload, worker, logger }) => {
 // update
 
 const updateOneById = async ({ taskId, payload, worker, logger }) => {
-  logger && logger(`cameraTaskService.updateOne`);
+  logger && logger(`taskService.updateOne`);
 
-  const task = await CameraTask.findOneAndUpdate({ _id: taskId }, payload, { new: true });
+  const task = await Task.findOneAndUpdate({ _id: taskId }, payload, { new: true });
 
   await worker.update(task);
 
@@ -47,11 +49,11 @@ const updateOneById = async ({ taskId, payload, worker, logger }) => {
 // delete
 
 const deleteOneById = async ({ taskId, logger }) => {
-  logger && logger(`cameraTaskService.deleteOne`);
+  logger && logger(`taskService.deleteOne`);
 
   // TODO: if not removable return error
 
-  const deleted = await CameraTask.findOneAndRemove({ _id: taskId });
+  const deleted = await Task.findOneAndRemove({ _id: taskId });
   return deleted;
 };
 
@@ -59,10 +61,10 @@ const deleteOneById = async ({ taskId, logger }) => {
 // camera default
 //
 
-const createDefaultTasks = async ({ logger, userId, cameraId }) => {
-  logger && logger(`cameraTaskService.createDefaultTasks`);
+const createDefaultCameraTasks = async ({ logger, userId, cameraId }) => {
+  logger && logger(`taskService.createDefaultTasks`);
 
-  const photosByTimeTask = new CameraTask({
+  const photosByTimeTask = new Task({
     user: userId,
     camera: cameraId,
     name: taskName.CREATE_PHOTOS_BY_TIME,
@@ -83,7 +85,7 @@ const createDefaultTasks = async ({ logger, userId, cameraId }) => {
 const deleteCameraTasks = async ({ cameraId, logger }) => {
   logger && logger(`cameraFileService.deleteCameraTasks`);
 
-  const deleted = await CameraTask.deleteMany({ camera: cameraId });
+  const deleted = await Task.deleteMany({ camera: cameraId });
   return deleted;
 };
 
@@ -95,6 +97,6 @@ export default {
   updateOneById,
   deleteOneById,
 
-  createDefaultTasks,
+  createDefaultCameraTasks,
   deleteCameraTasks,
 };

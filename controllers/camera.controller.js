@@ -49,6 +49,7 @@ const updateOne = async (req, res) => {
   const updated = await cameraService.updateOneById({
     logger: req.logger,
     cameraId: req.cameraId,
+    userId: req.userId,
     payload,
   });
 
@@ -62,6 +63,7 @@ const deleteOne = async (req, res) => {
   const deleted = await cameraService.deleteOneById({
     logger: req.logger,
     cameraId: req.cameraId,
+    userId: req.userId,
   });
 
   res.status(204).send(deleted);

@@ -3,9 +3,7 @@ import _ from 'lodash';
 import jwt from '../libs/token.js';
 import { BadRequestError } from '../middleware/errorHandlerMiddleware.js';
 import User from '../models/User.js';
-import { fileType } from '../utils/constants.js';
-import { makeUserFolderName } from '../utils/index.js';
-import cameraFileService from './cameraFile.service.js';
+import fileService from './file.service.js';
 
 const singUp = async ({ email, password, logger }) => {
   logger(`userService.singUp email: ${email}`);
@@ -23,16 +21,9 @@ const singUp = async ({ email, password, logger }) => {
   await newUser.save();
 
   // crete user folder
-  const userFolderName = makeUserFolderName(newUser._id);
-  const userFolder = await cameraFileService.createFolder({
+  const userFolder = await fileService.createUserFolder({
     logger,
-    pathOnDisk: [userFolderName],
-    user: newUser._id,
-    camera: null,
-    parent: null,
-    name: userFolderName,
-    type: fileType.FOLDER,
-    removable: false,
+    userId: newUser._id,
   });
 
   await newUser.updateOne({ userFolder: userFolder._id });

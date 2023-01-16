@@ -42,7 +42,7 @@ class Socket {
 
       socket.emit('hello', socket.userId);
 
-      console.log(111, this.sessions.has(socket.userId), socket.userId);
+      // console.log(111, this.sessions.has(socket.userId), socket.userId);
 
       socket.on('disconnect', () => {
         logger('user disconnect', socket.userId);

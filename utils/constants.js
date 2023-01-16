@@ -1,28 +1,44 @@
 export const THUMBNAIL_SIZE = 200;
 
-// file type
-export const fileType = {
+// type
+export const type = {
   FOLDER: 'folder',
-  PHOTO_BY_HAND: 'photoByHand',
-  PHOTO_BY_TIME: 'photoByTime',
-  VIDEO_BY_HAND: 'videoByHand',
-  VIDEO_BY_TIME: 'videoByTime',
+  PHOTO: 'photo',
+  VIDEO: 'video',
+};
+
+// fileType
+export const fileType = {
+  IMAGE_JPG: 'image/jpg',
+  IMAGE_PNG: 'image/png',
+  VIDEO_MPEG: 'video/mpeg',
+  VIDEO_MP4: 'video/mp4',
+};
+
+//fileCreateType
+export const fileCreateType = {
+  BY_HAND: 'byHand',
+  BY_TIME: 'byTime',
+};
+
+// folderType
+export const folderType = {
+  DEFAULT: 'default',
+  DATE: 'date',
 };
 
 // folders
 export const folderName = {
   USER_FOLDER: 'UserFolder',
   CAMERA_FOLDER: 'CameraFolder',
-  PHOTOS_BY_HAND: 'PhotosByHand',
-  PHOTOS_BY_TIME: 'PhotosByTime',
-  VIDEOS_BY_HAND: 'VideosByHand',
-  VIDEOS_BY_TIME: 'VideosByTime',
+  PHOTOS: 'Photos',
+  VIDEOS: 'Videos',
 };
 
 // tasks
 export const taskName = {
-  CREATE_PHOTO_BY_HAND: 'CreatePhotoByHand',
-  CREATE_VIDEO_BY_HAND: 'CreateVideoByHand',
+  CREATE_PHOTO: 'CreatePhoto',
+  CREATE_VIDEO: 'CreateVideo',
   CREATE_PHOTOS_BY_TIME: 'CreatePhotosByTime',
   CREATE_VIDEOS_BY_TIME: 'CreateVideosByTime',
 };

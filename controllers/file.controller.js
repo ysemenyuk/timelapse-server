@@ -1,9 +1,9 @@
-import cameraFileService from '../services/cameraFile.service.js';
+import fileService from '../services/file.service.js';
 
 const getAll = async (req, res) => {
-  req.logger(`cameraFileController.getAll`);
+  req.logger(`fileController.getAll`);
 
-  const files = await cameraFileService.getManyByQuery({
+  const files = await fileService.getManyByQuery({
     logger: req.logger,
     cameraId: req.cameraId,
     query: req.query,
@@ -14,9 +14,9 @@ const getAll = async (req, res) => {
 };
 
 const getCount = async (req, res) => {
-  req.logger(`cameraFileController.getCount`);
+  req.logger(`fileController.getCount`);
 
-  const count = await cameraFileService.getCountByQuery({
+  const count = await fileService.getCountByQuery({
     logger: req.logger,
     cameraId: req.cameraId,
     query: req.query,
@@ -27,9 +27,9 @@ const getCount = async (req, res) => {
 };
 
 const getOne = async (req, res) => {
-  req.logger(`cameraFileController.getOne`);
+  req.logger(`fileController.getOne`);
 
-  const file = await cameraFileService.getOneById({
+  const file = await fileService.getOneById({
     fileId: req.params.fileId,
     logger: req.logger,
   });
@@ -39,14 +39,14 @@ const getOne = async (req, res) => {
 };
 
 const createOne = async (req, res) => {
-  req.logger('cameraFileController.createOne');
+  req.logger('fileController.createOne');
 
   // console.log(777, req.body);
 
   // TODO: check req.body take fields by schema!
   const payload = req.body;
 
-  const file = await cameraFileService.createFile({
+  const file = await fileService.createFile({
     logger: req.logger,
     user: req.userId,
     camera: req.cameraId,
@@ -58,12 +58,12 @@ const createOne = async (req, res) => {
 };
 
 const updateOne = async (req, res) => {
-  req.logger('cameraFileController.updateOne');
+  req.logger('fileController.updateOne');
 
   // TODO: check req.body take fields by schema!
   const payload = req.body;
 
-  const file = await cameraFileService.updateOneById({
+  const file = await fileService.updateOneById({
     logger: req.logger,
     fileId: req.params.fileId,
     payload,
@@ -74,9 +74,9 @@ const updateOne = async (req, res) => {
 };
 
 const deleteOne = async (req, res) => {
-  req.logger(`cameraFileController.deleteOne`);
+  req.logger(`fileController.deleteOne`);
 
-  const deleted = await cameraFileService.deleteOneById({
+  const deleted = await fileService.deleteOneById({
     itemId: req.params.fileId,
     logger: req.logger,
   });
@@ -90,7 +90,7 @@ const deleteMany = async (req, res) => {
 
   const itemsIds = []; // from query or body?
 
-  await cameraFileService.deleteManyByIds({ itemsIds, logger: req.logger });
+  await fileService.deleteManyByIds({ itemsIds, logger: req.logger });
 
   res.status(204).send();
   req.logResp(req);

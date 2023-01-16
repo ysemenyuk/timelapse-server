@@ -1,9 +1,7 @@
 import cameraService from '../services/camera.service.js';
 
 export default async (req, res, next) => {
-  req.logger(`userCameraMiddleware cameraId: ${req.params.cameraId}`);
-
-  // console.log('req.params', req.params, req.userId);
+  req.logger(`cameraMiddleware cameraId: ${req.params.cameraId}`);
 
   try {
     const camera = await cameraService.getOneById({

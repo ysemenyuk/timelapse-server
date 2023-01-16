@@ -10,8 +10,8 @@ import { errorHandlerMiddleware } from './middleware/errorHandlerMiddleware.js';
 import Worker from './worker.js';
 import Socket from './socket.js';
 import cameraRouter from './routes/camera.router.js';
-import cameraFileRouter from './routes/cameraFile.router.js';
-import cameraTaskRouter from './routes/cameraTask.router.js';
+import fileRouter from './routes/file.router.js';
+import taskRouter from './routes/task.router.js';
 import storageRouter from './routes/storage.router.js';
 import userRouter from './routes/user.router.js';
 
@@ -54,8 +54,8 @@ const startServer = async () => {
 
     app.use('/files', storageRouter);
 
-    app.use('/api/cameras/:cameraId/tasks', cameraTaskRouter);
-    app.use('/api/cameras/:cameraId/files', cameraFileRouter);
+    app.use('/api/cameras/:cameraId/tasks', taskRouter);
+    app.use('/api/cameras/:cameraId/files', fileRouter);
     app.use('/api/cameras', cameraRouter);
     app.use('/api/users', userRouter);
 

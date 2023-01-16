@@ -1,19 +1,20 @@
 import mongoose from 'mongoose';
 
-const CameraFileSchema = mongoose.Schema({
+const FileSchema = mongoose.Schema({
   date: { type: Date, default: new Date() },
   user: { type: mongoose.ObjectId, ref: 'User' },
   camera: { type: mongoose.ObjectId, ref: 'Camera' },
 
-  parent: { type: mongoose.ObjectId, ref: 'CameraFile' },
+  parent: { type: mongoose.ObjectId, ref: 'File' },
 
   pathOnDisk: { type: [{ type: String }], required: true },
   nameOnDisk: { type: String },
 
   name: { type: String, required: true },
-  type: { type: String, required: true }, // folder(date), photo, video
-  createType: { type: String }, // byHand, byTime
+  type: { type: String, required: true }, // folder, photo, video, zip
+  folderType: { type: String }, // default, date
   fileType: { type: String }, // image/jpg, image/png, video/mpeg, video/mp4
+  fileCreateType: { type: String }, // byHand, byTime
   removable: { type: Boolean, default: true },
 
   folderData: {
@@ -30,11 +31,11 @@ const CameraFileSchema = mongoose.Schema({
     endDate: { type: Date },
     duration: { type: Number },
     fps: { type: Number },
-    poster: { type: mongoose.ObjectId, ref: 'CameraFile' }, // photo
+    poster: { type: mongoose.ObjectId, ref: 'File' },
     size: { type: Number }, // ??
   },
 });
 
-const CameraFile = mongoose.model('CameraFile', CameraFileSchema);
+const File = mongoose.model('File', FileSchema);
 
-export default CameraFile;
+export default File;
