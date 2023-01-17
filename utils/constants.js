@@ -2,7 +2,7 @@ export const THUMBNAIL_SIZE = 200;
 
 // type
 export const type = {
-  FOLDER: 'folder',
+  POSTER: 'poster',
   PHOTO: 'photo',
   VIDEO: 'video',
 };
@@ -21,16 +21,8 @@ export const fileCreateType = {
   BY_TIME: 'byTime',
 };
 
-// folderType
-export const folderType = {
-  DEFAULT: 'default',
-  DATE: 'date',
-};
-
-// folders
-export const folderName = {
-  USER_FOLDER: 'UserFolder',
-  CAMERA_FOLDER: 'CameraFolder',
+// dirs
+export const dirName = {
   PHOTOS: 'Photos',
   VIDEOS: 'Videos',
 };

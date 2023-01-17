@@ -2,11 +2,6 @@ import taskService from '../services/task.service.js';
 import { fileCreateType, taskName, taskStatus } from '../utils/constants.js';
 import createAndSaveVideo from './createAndSaveVideo.js';
 
-const sleep = (time, message = 'Hello') =>
-  new Promise((resolve) => {
-    setTimeout(() => resolve(message), time);
-  });
-
 export default (agenda, socket, workerLogger) => {
   //
   agenda.define(taskName.CREATE_VIDEO, async (job) => {
@@ -25,8 +20,6 @@ export default (agenda, socket, workerLogger) => {
 
       await task.updateOne({ status: taskStatus.RUNNING, startedAt: new Date() });
       userSocket && userSocket.emit('update-task', { cameraId, userId, taskId });
-
-      await sleep(1 * 1000); // doing job
 
       const file = await createAndSaveVideo({
         logger,
@@ -64,8 +57,6 @@ export default (agenda, socket, workerLogger) => {
     const logger = workerLogger.extend(taskName.CREATE_VIDEOS_BY_TIME);
 
     logger(`start ${taskName.CREATE_VIDEOS_BY_TIME} job`);
-
-    await sleep(10 * 1000);
 
     logger(`finish ${taskName.CREATE_VIDEOS_BY_TIME} job`);
   });

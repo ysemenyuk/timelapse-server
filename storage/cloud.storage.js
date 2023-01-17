@@ -12,9 +12,8 @@ const removeDir = async ({ logger, dirPath }) => {
 
 // save file
 
-const saveFile = async ({ logger, filePath, data }) => {
+const saveFile = async ({ logger, filePath }) => {
   logger && logger(`cloud.storage.saveFile filePath: ${filePath}`);
-  console.log('data', data);
 };
 
 // remove file

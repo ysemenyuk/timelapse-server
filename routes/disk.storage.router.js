@@ -65,9 +65,10 @@ router.get(
     const filePath = createFilePath({ logger: req.logger, file });
     const fileFullPath = diskStorage.createFullPath(filePath);
 
+    const isImage = file.fileType && file.fileType.includes('image');
     const isThumbnail = req.query && req.query.size && req.query.size === 'thumbnail';
 
-    if (isThumbnail) {
+    if (isImage && isThumbnail) {
       res.set('Content-Type', 'image/jpg');
       const buffer = await imageService.resizeImage(fileFullPath, consts.THUMBNAIL_SIZE);
       res.send(buffer);

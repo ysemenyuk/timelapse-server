@@ -1,13 +1,8 @@
 import taskService from '../services/task.service.js';
-import { getCurrentTime } from '../utils/index.js';
+import { makeTimeName } from '../utils/utils.js';
 import { fileCreateType, taskName, taskStatus } from '../utils/constants.js';
 import createAndSavePhoto from './createAndSavePhoto.js';
-import { createDateInfoIfNotExist, getDateInfo } from './dateInfo.js';
-
-const sleep = (time, message = 'Hello') =>
-  new Promise((resolve) => {
-    setTimeout(() => resolve(message), time);
-  });
+import { createDateInfo, getDateInfo } from './dateInfo.js';
 
 export default (agenda, socket, workerLogger) => {
   //
@@ -25,12 +20,14 @@ export default (agenda, socket, workerLogger) => {
       task = await taskService.getOneById({ taskId });
       const { photoSettings } = task;
 
-      await createDateInfoIfNotExist({ logger, cameraId, userId });
+      let dateInfo = await getDateInfo({ logger, userId, cameraId });
+
+      if (!dateInfo) {
+        dateInfo = await createDateInfo({ logger, userId, cameraId });
+      }
 
       await task.updateOne({ status: taskStatus.RUNNING, startedAt: new Date() });
       userSocket && userSocket.emit('update-task', { cameraId, userId, taskId });
-
-      await sleep(1 * 1000); // doing job
 
       const file = await createAndSavePhoto({
         logger,
@@ -79,22 +76,24 @@ export default (agenda, socket, workerLogger) => {
       task = await taskService.getOneById({ logger, taskId });
       const { photoSettings } = task;
 
-      await createDateInfoIfNotExist();
+      let dateInfo = await getDateInfo({ logger, userId, cameraId });
 
-      let startTime;
-      let stopTime;
-
-      if (photoSettings.bySun) {
-        const dateInfo = await getDateInfo();
-        startTime = dateInfo.metaData.sunrise;
-        stopTime = dateInfo.metaData.sunset;
-      } else {
-        startTime = photoSettings.startTime;
-        stopTime = photoSettings.stopTime;
+      if (!dateInfo) {
+        dateInfo = await createDateInfo({ logger, userId, cameraId });
       }
 
-      const date = new Date();
-      const currentTime = getCurrentTime(date);
+      let startTime = photoSettings.startTime;
+      let stopTime = photoSettings.stopTime;
+
+      // const dateInfo = await getDateInfo();
+      if (dateInfo && photoSettings.bySun) {
+        const { weather } = dateInfo;
+        startTime = makeTimeName(new Date(weather.sys.sunrise));
+        stopTime = makeTimeName(new Date(weather.sys.sunset));
+      }
+
+      // const date = new Date();
+      const currentTime = makeTimeName(new Date());
 
       if (currentTime < startTime || currentTime > stopTime) {
         logger(`out of time - currentTime: ${currentTime}, startTime: ${startTime} stopTime: ${stopTime}`);

@@ -10,7 +10,7 @@ const FileSchema = mongoose.Schema({
   preview: { type: String },
 
   name: { type: String, required: true },
-  type: { type: String, required: true }, // photo, video, zip
+  type: { type: String, required: true }, // photo, video, poster, .. zip
   fileType: { type: String }, // image/jpg, image/png, video/mpeg, video/mp4, .. zip
   createType: { type: String }, // byHand, byTime
   removable: { type: Boolean, default: true },
@@ -25,6 +25,7 @@ const FileSchema = mongoose.Schema({
     endDate: { type: Date },
     duration: { type: Number },
     fps: { type: Number },
+    poster: { type: mongoose.ObjectId, ref: 'File' },
   },
 });
 

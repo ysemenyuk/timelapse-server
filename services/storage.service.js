@@ -1,5 +1,5 @@
 // import format from 'date-fns/format/index.js';
-import { makeCurrentDateName } from '../utils/index.js';
+import { makeDateName } from '../utils/utils.js';
 import { createCameraDirPath, createUserDirPath, createPhotosDirPath, createFilePath } from '../storage/utils.js';
 import storage from '../storage/index.js';
 
@@ -45,8 +45,8 @@ const removeCameraDir = async ({ logger, userId, cameraId }) => {
 
 const makePhotoDirIfNotExist = async ({ logger, file }) => {
   const photosDirPath = createPhotosDirPath(file.user, file.camera);
-  const currentDateDirName = makeCurrentDateName(file.date);
-  const dirPath = [...photosDirPath, currentDateDirName];
+  const dateDirName = makeDateName(file.date);
+  const dirPath = [...photosDirPath, dateDirName];
 
   if (!storage.isDirExist({ logger, dirPath })) {
     logger && logger(`storage.service.makePhotoDirIfNotExist dirPath: ${dirPath}`);
@@ -55,7 +55,7 @@ const makePhotoDirIfNotExist = async ({ logger, file }) => {
 };
 
 //
-// save
+// save file
 //
 
 const saveFile = async ({ logger, file, data, stream }) => {
@@ -72,7 +72,7 @@ const saveFile = async ({ logger, file, data, stream }) => {
 };
 
 //
-// remove
+// remove file
 //
 
 const removeFile = async ({ logger, file }) => {
@@ -84,27 +84,7 @@ const removeFile = async ({ logger, file }) => {
 };
 
 //
-// streams
-//
-
-// const openUploadStream = ({ logger, file }) => {
-//   logger && logger(`storage.service.openUploadStream file.name: ${file.name}`);
-
-//   const filePath = createFilePath({ logger, file });
-//   const stream = storage.createWriteStream({ logger, filePath });
-//   return stream;
-// };
-
-// const openDownloadStream = ({ logger, file }) => {
-//   logger && logger(`storage.service.openDownloadStream file.name: ${file.name}`);
-
-//   const filePath = createFilePath({ logger, file });
-//   const stream = storage.createReadStream({ logger, filePath });
-//   return stream;
-// };
-
-//
-//
+// file stat
 //
 
 const getFileStat = async ({ logger, file }) => {
@@ -120,12 +100,7 @@ export default {
   createCameraDirs,
   removeUserDir,
   removeCameraDir,
-
   saveFile,
   removeFile,
-
-  // openUploadStream,
-  // openDownloadStream,
-
   getFileStat,
 };

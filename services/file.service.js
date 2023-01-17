@@ -86,7 +86,7 @@ const createFile = async ({ logger, data, stream, ...payload }) => {
   // console.log(22222, fileInfo);
   await file.save();
   const created = await File.findOneAndUpdate({ _id: file._id }, fileInfo, { new: true });
-  // console.log(33333, created);
+  console.log(22222, created);
   return created;
 };
 
@@ -125,6 +125,7 @@ const deleteOneById = async ({ logger, itemId }) => {
   logger && logger(`fileService.deleteOneById`);
 
   const item = await File.findOne({ _id: itemId });
+  // if video delete poster
   const deleted = await deleteFile({ logger, file: item });
   return deleted;
 };

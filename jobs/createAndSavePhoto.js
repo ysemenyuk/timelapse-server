@@ -1,7 +1,7 @@
 import fileService from '../services/file.service.js';
 import cameraService from '../services/camera.service.js';
 import cameraApi from '../services/cameraApi.service.js';
-import { makePhotoName } from '../utils/index.js';
+import { makePhotoName } from '../utils/utils.js';
 import { fileType, type } from '../utils/constants.js';
 
 const createAndSavePhoto = async ({ logger, userId, cameraId, taskId, photoSettings, create }) => {

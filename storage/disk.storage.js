@@ -1,11 +1,24 @@
 import * as fsp from 'fs/promises';
 import { existsSync, createWriteStream, createReadStream } from 'fs';
 import path from 'path';
-import { promisifyUploadStream } from '../utils/index.js';
 
 const pathToDiskSpace = process.env.DISK_PATH;
 
 const createFullPath = (filePath) => path.join(pathToDiskSpace, ...filePath);
+
+const promisifyUploadStream = (uploadStream) => {
+  return new Promise((resolve, reject) => {
+    uploadStream.on('error', () => {
+      // console.log('error file uploadStream');
+      reject('error file uploadStream');
+    });
+
+    uploadStream.on('finish', () => {
+      // console.log('finish uploadStream');
+      resolve('finish file uploadStream');
+    });
+  });
+};
 
 // create dir
 
@@ -31,7 +44,6 @@ const makeLink = (file) => {
   if (file.link) {
     return file.link;
   }
-
   return `/files/${file._id}`;
 };
 
@@ -39,15 +51,12 @@ const makePreview = (file) => {
   if (file.preview) {
     return file.preview;
   }
-
-  if (file.type === 'photo') {
+  if (file.fileType.includes('image')) {
     return `/files/${file._id}?size=thumbnail`;
   }
-
-  if (file.type === 'video') {
+  if (file.fileType.includes('video')) {
     return `/files/${file._id}/poster`;
   }
-
   return `/files/${file._id}`;
 };
 
@@ -66,9 +75,9 @@ const saveFile = async ({ logger, file, filePath, data, stream }) => {
     await fsp.writeFile(fullPath, data);
   }
 
-  const { size } = await fsp.stat(fullPath);
   const link = makeLink(file);
   const preview = makePreview(file);
+  const { size } = await fsp.stat(fullPath);
 
   return { link, preview, size };
 };

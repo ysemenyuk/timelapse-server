@@ -1,5 +1,5 @@
 import format from 'date-fns/format/index.js';
-import { makeCurrentDateName } from '../utils/index.js';
+import { makeDateName } from '../utils/utils.js';
 
 //
 // names
@@ -21,11 +21,7 @@ const makeVideoName = (date) => {
   return `video--${format(date, 'yyyy-MM-dd--HH-mm-ss')}.mp4`;
 };
 
-// const makeTmpVideoName = (date) => {
-//   return `tmp-video--${format(date, 'yyyy-MM-dd--HH-mm-ss')}.mp4`;
-// };
-
-const makeVideoPosterName = (date) => {
+const makePosterName = (date) => {
   return `poster--${format(date, 'yyyy-MM-dd--HH-mm-ss')}.jpg`;
 };
 
@@ -62,17 +58,24 @@ export const createVideosDirPath = (userId, cameraId) => {
 
 const createVideoFilePath = ({ logger, file }) => {
   logger && logger(`storage.service.createVideoFilePath file.name: ${file.name}`);
-  const videosDirPath = createVideosDirPath(file.user, file.camera);
+  const dirPath = createVideosDirPath(file.user, file.camera);
   const fileName = makeVideoName(file.date);
-  return [...videosDirPath, fileName];
+  return [...dirPath, fileName];
 };
 
 const cretePhotoFilePath = ({ logger, file }) => {
   logger && logger(`storage.service.cretePhotoFilePath file.name: ${file.name}`);
-  const photosDirPath = createPhotosDirPath(file.user, file.camera);
-  const currentDateDirName = makeCurrentDateName(file.date);
+  const dirPath = createPhotosDirPath(file.user, file.camera);
+  const dateDirName = makeDateName(file.date);
   const fileName = makePhotoName(file.date);
-  return [...photosDirPath, currentDateDirName, fileName];
+  return [...dirPath, dateDirName, fileName];
+};
+
+export const createPosterFilePath = ({ logger, file }) => {
+  logger && logger(`storage.service.createPosterFilePath file.name: ${file.name}`);
+  const dirPath = createVideosDirPath(file.user, file.camera);
+  const fileName = makePosterName(file.date);
+  return [...dirPath, fileName];
 };
 
 export const createFilePath = ({ logger, file }) => {
@@ -86,15 +89,9 @@ export const createFilePath = ({ logger, file }) => {
     return cretePhotoFilePath({ logger, file });
   }
 
+  if (file.type === 'poster') {
+    return createPosterFilePath({ logger, file });
+  }
+
   // return err file.type not found
-};
-
-export const createPosterFilePath = ({ logger, file }) => {
-  logger && logger(`storage.service.createPosterFilePath file.name: ${file.name}`);
-
-  const dirPath = createCameraDirPath(file.user, file.camera);
-  const fileName = makeVideoPosterName(file.date);
-  const filePath = [...dirPath, fileName];
-
-  return filePath;
 };

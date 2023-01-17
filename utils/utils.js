@@ -1,49 +1,19 @@
 import format from 'date-fns/format/index.js';
 
-export const promisifyUploadStream = (uploadStream) => {
-  return new Promise((resolve, reject) => {
-    uploadStream.on('error', () => {
-      // console.log('error file uploadStream');
-      reject('error file uploadStream');
-    });
-
-    uploadStream.on('finish', () => {
-      // console.log('finish uploadStream');
-      resolve('finish file uploadStream');
-    });
-  });
-};
-
-export const dd = (num) => (num < 10 ? `0${num}` : `${num}`);
-
-export const parseTime = (time) => {
-  const year = time.getFullYear();
-  const month = time.getMonth();
-  const date = time.getDate();
-  const hh = time.getHours();
-  const mm = time.getMinutes();
-  const ss = time.getSeconds();
-
-  return {
-    year,
-    month: dd(month + 1),
-    date: dd(date),
-    hh: dd(hh),
-    mm: dd(mm),
-    ss: dd(ss),
-  };
-};
-
-export const getCurrentTime = (date) => {
+export const makeTimeName = (date) => {
   return format(date, 'HH:mm');
 };
 
-export const makeCurrentDateName = (date) => {
+export const makeDateName = (date) => {
   return format(date, 'yyyy-MM-dd');
 };
 
-export const makeCurrentMonthName = (date) => {
+export const makeMonthName = (date) => {
   return format(date, 'yyyy-MM');
+};
+
+export const makeFileName = (date) => {
+  return format(date, 'yyyy.MM.dd HH:mm:ss');
 };
 
 export const makePhotoName = (date) => {
@@ -72,6 +42,26 @@ export const makeNum = (num) => {
   }
   return num;
 };
+
+// export const dd = (num) => (num < 10 ? `0${num}` : `${num}`);
+
+// export const parseTime = (time) => {
+//   const year = time.getFullYear();
+//   const month = time.getMonth();
+//   const date = time.getDate();
+//   const hh = time.getHours();
+//   const mm = time.getMinutes();
+//   const ss = time.getSeconds();
+
+//   return {
+//     year,
+//     month: dd(month + 1),
+//     date: dd(date),
+//     hh: dd(hh),
+//     mm: dd(mm),
+//     ss: dd(ss),
+//   };
+// };
 
 // export const msToTime = (duration) => {
 //   let milliseconds = parseInt((duration%1000))
