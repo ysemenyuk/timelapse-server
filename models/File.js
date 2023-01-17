@@ -6,8 +6,8 @@ const FileSchema = mongoose.Schema({
   camera: { type: mongoose.ObjectId, ref: 'Camera' },
   task: { type: mongoose.ObjectId, ref: 'Task' },
 
-  // path: { type: [{ type: String }] },
-  url: { type: String },
+  link: { type: String },
+  preview: { type: String },
 
   name: { type: String, required: true },
   type: { type: String, required: true }, // photo, video, zip
@@ -25,7 +25,6 @@ const FileSchema = mongoose.Schema({
     endDate: { type: Date },
     duration: { type: Number },
     fps: { type: Number },
-    poster: { type: mongoose.ObjectId, ref: 'File' },
   },
 });
 

@@ -3,13 +3,13 @@ import format from 'date-fns/format/index.js';
 export const promisifyUploadStream = (uploadStream) => {
   return new Promise((resolve, reject) => {
     uploadStream.on('error', () => {
-      // console.log('error file uploadStream stream');
-      reject('error file uploadStream stream');
+      // console.log('error file uploadStream');
+      reject('error file uploadStream');
     });
 
     uploadStream.on('finish', () => {
-      // console.log('finish uploadStream stream');
-      resolve('finish file uploadStream stream');
+      // console.log('finish uploadStream');
+      resolve('finish file uploadStream');
     });
   });
 };
@@ -35,15 +35,7 @@ export const parseTime = (time) => {
 };
 
 export const getCurrentTime = (date) => {
-  return format(date, 'hh:mm');
-};
-
-export const makeUserDirName = (userId) => {
-  return `user_${userId.toString()}`;
-};
-
-export const makeCameraDirName = (cameraId) => {
-  return `camera_${cameraId.toString()}`;
+  return format(date, 'HH:mm');
 };
 
 export const makeCurrentDateName = (date) => {
@@ -58,20 +50,8 @@ export const makePhotoName = (date) => {
   return format(date, 'yyyy.MM.dd HH:mm:ss');
 };
 
-export const makePhotoNameOnDisk = (date) => {
-  return `photo--${format(date, 'yyyy-MM-dd--HH-mm-ss')}.jpg`;
-};
-
 export const makeVideoName = (date) => {
-  return format(date, 'yyyy.MM.dd hh:mm:ss');
-};
-
-export const makeVideoNameOnDisk = (date) => {
-  return `video--${format(date, 'yyyy-MM-dd--hh-mm-ss')}.mp4`;
-};
-
-export const makeVideoPosterNameOnDisk = (date) => {
-  return `poster--${format(date, 'yyyy-MM-dd--hh-mm-ss')}.jpg`;
+  return format(date, 'yyyy.MM.dd HH:mm:ss');
 };
 
 export const makeNum = (num) => {

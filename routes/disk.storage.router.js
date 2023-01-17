@@ -2,11 +2,11 @@ import express from 'express';
 import { asyncHandler } from '../middleware/errorHandlerMiddleware.js';
 import fileService from '../services/file.service.js';
 import imageService from '../services/image.service.js';
-import storageService from '../services/storage.service.js';
 import * as consts from '../utils/constants.js';
-import fs from 'fs';
 import util from 'util';
 import { exec } from 'child_process';
+import { createFilePath, createPosterFilePath } from '../storage/utils.js';
+import diskStorage from '../storage/disk.storage.js';
 
 const router = express.Router();
 const execp = util.promisify(exec);
@@ -29,14 +29,17 @@ router.get(
       return;
     }
 
-    const videoFilePath = storageService.createFilePath({ logger: req.logger, file });
-    const posterFilePath = storageService.createPosterPath({ logger: req.logger, file });
+    const videoFilePath = createFilePath({ logger: req.logger, file });
+    const posterFilePath = createPosterFilePath({ logger: req.logger, file });
 
-    if (!fs.existsSync(posterFilePath)) {
-      await execp(`ffmpeg -y -i ${videoFilePath} -ss 00:00:1 -frames:v 1 ${posterFilePath}`);
+    const videoFileFullPath = diskStorage.createFullPath(videoFilePath);
+    const posterFileFullPath = diskStorage.createFullPath(posterFilePath);
+
+    if (!diskStorage.isFileExist({ logger: req.logger, filePath: posterFilePath })) {
+      await execp(`ffmpeg -y -i ${videoFileFullPath} -ss 00:00:1 -frames:v 1 ${posterFileFullPath}`);
     }
 
-    res.sendFile(posterFilePath);
+    res.sendFile(posterFileFullPath);
     req.logResp(req);
   })
 );
@@ -59,23 +62,25 @@ router.get(
       return;
     }
 
-    const filePath = storageService.createFilePath({ logger: req.logger, file });
+    const filePath = createFilePath({ logger: req.logger, file });
+    const fileFullPath = diskStorage.createFullPath(filePath);
+
     const isThumbnail = req.query && req.query.size && req.query.size === 'thumbnail';
 
     if (isThumbnail) {
       res.set('Content-Type', 'image/jpg');
-      const buffer = await imageService.resizeImage(filePath, consts.THUMBNAIL_SIZE);
+      const buffer = await imageService.resizeImage(fileFullPath, consts.THUMBNAIL_SIZE);
       res.send(buffer);
       req.logResp(req);
       return;
     }
 
-    res.sendFile(filePath);
+    res.sendFile(fileFullPath);
     req.logResp(req);
     return;
 
-    //   const stream = storageService.openDownloadStream({
-    //     file,
+    //   const stream = diskStorage.openDownloadStream({
+    //     filePath,
     //     logger: req.logger,
     //   });
 

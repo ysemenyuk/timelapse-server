@@ -13,7 +13,7 @@ const TaskSchema = mongoose.Schema({
   type: { type: String }, // OneTime, RepeatEvery, RepeatAt
   status: { type: String, default: 'Created' }, // Created, Ready, Running, Stopped, Successed, Failed, Canceled
   removable: { type: Boolean, default: true },
-  message: { type: String },
+  message: { type: String, default: '' },
 
   photoSettings: {
     // CreatePhoto
@@ -22,6 +22,7 @@ const TaskSchema = mongoose.Schema({
     interval: { type: Number }, // seconds
     startTime: { type: String },
     stopTime: { type: String },
+    bySun: { type: Boolean },
   },
 
   videoSettings: {

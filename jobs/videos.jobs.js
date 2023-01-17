@@ -8,6 +8,7 @@ const sleep = (time, message = 'Hello') =>
   });
 
 export default (agenda, socket, workerLogger) => {
+  //
   agenda.define(taskName.CREATE_VIDEO, async (job) => {
     const logger = workerLogger.extend(taskName.CREATE_VIDEO);
 
@@ -23,10 +24,9 @@ export default (agenda, socket, workerLogger) => {
       const { videoSettings } = task;
 
       await task.updateOne({ status: taskStatus.RUNNING, startedAt: new Date() });
-
       userSocket && userSocket.emit('update-task', { cameraId, userId, taskId });
 
-      await sleep(10 * 1000); // doing job
+      await sleep(1 * 1000); // doing job
 
       const file = await createAndSaveVideo({
         logger,
@@ -43,7 +43,7 @@ export default (agenda, socket, workerLogger) => {
       });
 
       userSocket && userSocket.emit('update-task', { cameraId, userId, taskId });
-      userSocket && userSocket.emit('add-file', { cameraId, userId, file });
+      userSocket && userSocket.emit('create-file', { cameraId, userId, file });
     } catch (error) {
       console.log('-- error createVideo job --', error);
 
@@ -56,13 +56,10 @@ export default (agenda, socket, workerLogger) => {
       userSocket && userSocket.emit('update-task', { cameraId, userId, taskId });
     }
 
-    logger(`finish ${taskName.CREATE_VIDEO_BY_HAND} job`);
+    logger(`finish ${taskName.CREATE_VIDEO} job`);
   });
 
   //
-  //
-  //
-
   agenda.define(taskName.CREATE_VIDEOS_BY_TIME, async () => {
     const logger = workerLogger.extend(taskName.CREATE_VIDEOS_BY_TIME);
 

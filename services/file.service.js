@@ -71,22 +71,23 @@ const getOne = async ({ logger, ...query }) => {
 // create
 //
 
-const createFile = async ({ logger, data, ...payload }) => {
+const createFile = async ({ logger, data, stream, ...payload }) => {
   logger && logger(`fileService.createFile`);
 
   const file = new File({ ...payload });
-  console.log('createFile', file);
-
-  if (data) {
-    await storageService.saveFile({
-      logger,
-      file,
-      data,
-    });
-  }
-
+  // console.log(11111, file);
+  const fileInfo = await storageService.saveFile({
+    logger,
+    file,
+    data,
+    stream,
+  });
+  // const { link, preview, size } = fileInfo
+  // console.log(22222, fileInfo);
   await file.save();
-  return file;
+  const created = await File.findOneAndUpdate({ _id: file._id }, fileInfo, { new: true });
+  // console.log(33333, created);
+  return created;
 };
 
 //
@@ -206,6 +207,7 @@ export default {
   getOne,
 
   createFile,
+  // createFileByStream,
 
   updateOneById,
 
