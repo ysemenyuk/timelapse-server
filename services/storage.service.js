@@ -1,7 +1,6 @@
-// import format from 'date-fns/format/index.js';
-import { makeDateName } from '../utils/utils.js';
-import { createCameraDirPath, createUserDirPath, createPhotosDirPath, createFilePath } from '../storage/utils.js';
+// import { makeDateName } from '../utils/utils.js';
 import storage from '../storage/index.js';
+import { isPhotoFile } from '../utils/utils.js';
 
 //
 // create dirs
@@ -9,32 +8,39 @@ import storage from '../storage/index.js';
 
 const createUserDir = async ({ logger, userId }) => {
   logger && logger(`storage.service.createUserDir userId: ${userId}`);
-  const userDirPath = createUserDirPath(userId);
+  const userDirPath = storage.createUserDirPath(userId);
   const userDir = await storage.createDir({ logger, dirPath: userDirPath });
   return userDir;
 };
 
 const createCameraDirs = async ({ logger, userId, cameraId }) => {
   logger && logger(`storage.service.createCameraDirs cameraId: ${cameraId}`);
-  const cameraDirPath = createCameraDirPath(userId, cameraId);
+
+  const cameraDirPath = storage.createCameraDirPath(userId, cameraId);
+  const cameraPhotosDirPath = storage.createPhotosDirPath(userId, cameraId);
+  const cameraVideosDirPath = storage.createVideosDirPath(userId, cameraId);
+
   const cameraDir = await storage.createDir({ logger, dirPath: cameraDirPath });
-  const cameraPhotosDir = await storage.createDir({ logger, dirPath: [...cameraDirPath, 'Photos'] });
-  const cameraVideosDir = await storage.createDir({ logger, dirPath: [...cameraDirPath, 'Videos'] });
+  const cameraPhotosDir = await storage.createDir({ logger, dirPath: cameraPhotosDirPath });
+  const cameraVideosDir = await storage.createDir({ logger, dirPath: cameraVideosDirPath });
+
   return { cameraDir, cameraPhotosDir, cameraVideosDir };
 };
 
+//
 // remove dirs
+//
 
 const removeUserDir = async ({ logger, userId }) => {
   logger && logger(`storage.service.removeUserDir userId: ${userId}`);
-  const userDirPath = createUserDirPath(userId);
+  const userDirPath = storage.createUserDirPath(userId);
   const deleted = await storage.removeDir({ logger, dirPath: userDirPath });
   return deleted;
 };
 
 const removeCameraDir = async ({ logger, userId, cameraId }) => {
   logger && logger(`storage.service.removeCameraDir cameraId: ${cameraId}`);
-  const cameraDirPath = createCameraDirPath(userId, cameraId);
+  const cameraDirPath = storage.createCameraDirPath(userId, cameraId);
   const deleted = await storage.removeDir({ logger, dirPath: cameraDirPath });
   return deleted;
 };
@@ -43,13 +49,10 @@ const removeCameraDir = async ({ logger, userId, cameraId }) => {
 // make dir for photo if not exist
 //
 
-const makePhotoDirIfNotExist = async ({ logger, file }) => {
-  const photosDirPath = createPhotosDirPath(file.user, file.camera);
-  const dateDirName = makeDateName(file.date);
-  const dirPath = [...photosDirPath, dateDirName];
-
+const makeDateDirIfNotExist = async ({ logger, file }) => {
+  const dirPath = storage.createDateDirPath(file.user, file.camera, file.date);
   if (!storage.isDirExist({ logger, dirPath })) {
-    logger && logger(`storage.service.makePhotoDirIfNotExist dirPath: ${dirPath}`);
+    logger && logger(`storage.service.makeDateDirIfNotExist dirPath: ${dirPath}`);
     await storage.createDir({ logger, dirPath });
   }
 };
@@ -61,12 +64,12 @@ const makePhotoDirIfNotExist = async ({ logger, file }) => {
 const saveFile = async ({ logger, file, data, stream }) => {
   logger && logger(`storage.service.saveFile file: ${file.name}`);
 
-  if (file.type === 'photo') {
-    await makePhotoDirIfNotExist({ logger, file });
+  if (isPhotoFile(file)) {
+    await makeDateDirIfNotExist({ logger, file });
   }
 
-  const filePath = createFilePath({ logger, file });
-  const fileInfo = await storage.saveFile({ logger, file, filePath, data, stream });
+  const filePath = storage.createFilePath({ logger, file });
+  const fileInfo = await storage.saveFile({ logger, filePath, data, stream });
 
   return fileInfo;
 };
@@ -78,7 +81,7 @@ const saveFile = async ({ logger, file, data, stream }) => {
 const removeFile = async ({ logger, file }) => {
   logger && logger(`storage.service.removeFile file.name: ${file.name}`);
 
-  const filePath = createFilePath({ logger, file });
+  const filePath = storage.createFilePath({ logger, file });
   const deleted = await storage.removeFile({ logger, filePath });
   return deleted;
 };
@@ -90,7 +93,7 @@ const removeFile = async ({ logger, file }) => {
 const getFileStat = async ({ logger, file }) => {
   logger && logger(`storage.service.fileStat file.name: ${file.name}`);
 
-  const filePath = createFilePath({ logger, file });
+  const filePath = storage.createFilePath({ logger, file });
   const stat = await storage.fileStat({ logger, filePath });
   return stat;
 };

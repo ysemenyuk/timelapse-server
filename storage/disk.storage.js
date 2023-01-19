@@ -1,10 +1,11 @@
-import * as fsp from 'fs/promises';
 import { existsSync, createWriteStream, createReadStream } from 'fs';
+import * as fsp from 'fs/promises';
 import path from 'path';
+import paths from './paths.js';
 
 const pathToDiskSpace = process.env.DISK_PATH;
 
-const createFullPath = (filePath) => path.join(pathToDiskSpace, ...filePath);
+const createFullPath = (filePath) => path.join(pathToDiskSpace, filePath);
 
 const promisifyUploadStream = (uploadStream) => {
   return new Promise((resolve, reject) => {
@@ -14,7 +15,7 @@ const promisifyUploadStream = (uploadStream) => {
     });
 
     uploadStream.on('finish', () => {
-      // console.log('finish uploadStream');
+      // console.log('finish file uploadStream');
       resolve('finish file uploadStream');
     });
   });
@@ -40,27 +41,7 @@ const removeDir = async ({ logger, dirPath }) => {
 
 // save file
 
-const makeLink = (file) => {
-  if (file.link) {
-    return file.link;
-  }
-  return `/files/${file._id}`;
-};
-
-const makePreview = (file) => {
-  if (file.preview) {
-    return file.preview;
-  }
-  if (file.fileType.includes('image')) {
-    return `/files/${file._id}?size=thumbnail`;
-  }
-  if (file.fileType.includes('video')) {
-    return `/files/${file._id}/poster`;
-  }
-  return `/files/${file._id}`;
-};
-
-const saveFile = async ({ logger, file, filePath, data, stream }) => {
+const saveFile = async ({ logger, filePath, data, stream }) => {
   logger && logger(`disk.storage.saveFile filePath: ${filePath}`);
 
   const fullPath = createFullPath(filePath);
@@ -75,11 +56,10 @@ const saveFile = async ({ logger, file, filePath, data, stream }) => {
     await fsp.writeFile(fullPath, data);
   }
 
-  const link = makeLink(file);
-  const preview = makePreview(file);
+  const link = `/files/${filePath}`;
   const { size } = await fsp.stat(fullPath);
 
-  return { link, preview, size };
+  return { link, size };
 };
 
 // remove file
@@ -110,7 +90,7 @@ const openDownloadStream = ({ logger, filePath }) => {
   return stream;
 };
 
-//
+// copy
 
 const copyFile = async ({ logger, sourceFilePath, destinationFilePath }) => {
   logger && logger(`disk.storage.copyFile ${sourceFilePath} to ${destinationFilePath}`);
@@ -119,6 +99,8 @@ const copyFile = async ({ logger, sourceFilePath, destinationFilePath }) => {
   const destinationFullPath = createFullPath(destinationFilePath);
   await fsp.copyFile(sourceFullPath, destinationFullPath);
 };
+
+// stat
 
 const fileStat = async ({ logger, filePath }) => {
   logger && logger(`disk.storage.fileStat filePath: ${filePath}`);
@@ -152,4 +134,5 @@ export default {
   isFileExist,
   openUploadStream,
   openDownloadStream,
+  ...paths,
 };

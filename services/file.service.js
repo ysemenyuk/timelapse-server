@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import File from '../models/File.js';
+import { type } from '../utils/constants.js';
 import storageService from './storage.service.js';
 
 const createQuery = (cameraId, query) => {
@@ -37,11 +38,13 @@ const createQuery = (cameraId, query) => {
   return _.pickBy({ camera: cameraId, type, createType: createdBy, date }, _.identity);
 };
 
+// get
+
 const getManyByQuery = async ({ logger, cameraId, query }) => {
   logger && logger(`fileService.getManyByQuery`);
 
   const queryObject = createQuery(cameraId, query);
-  const files = await File.find(queryObject);
+  const files = await File.find(queryObject).populate('poster');
   return files;
 };
 
@@ -56,14 +59,14 @@ const getCountByQuery = async ({ logger, cameraId, query }) => {
 const getOneById = async ({ logger, itemId }) => {
   logger && logger(`fileService.getOneById`);
 
-  const file = await File.findOne({ _id: itemId });
+  const file = await File.findOne({ _id: itemId }).populate('poster');
   return file;
 };
 
 const getOne = async ({ logger, ...query }) => {
   logger && logger(`fileService.getOne`);
-
-  const file = await File.findOne({ ...query });
+  // check query?
+  const file = await File.findOne({ ...query }).populate('poster');
   return file;
 };
 
@@ -75,18 +78,18 @@ const createFile = async ({ logger, data, stream, ...payload }) => {
   logger && logger(`fileService.createFile`);
 
   const file = new File({ ...payload });
-  // console.log(11111, file);
+
+  // save on storage
   const fileInfo = await storageService.saveFile({
     logger,
     file,
     data,
     stream,
   });
-  // const { link, preview, size } = fileInfo
-  // console.log(22222, fileInfo);
+
   await file.save();
+
   const created = await File.findOneAndUpdate({ _id: file._id }, fileInfo, { new: true });
-  console.log(22222, created);
   return created;
 };
 
@@ -96,7 +99,7 @@ const createFile = async ({ logger, data, stream, ...payload }) => {
 
 const updateOneById = async ({ logger, itemId, payload }) => {
   logger && logger(`fileService.updateOneById`);
-
+  // check payload?
   const updated = await File.findOneAndUpdate({ _id: itemId }, payload, { new: true });
   return updated;
 };
@@ -105,38 +108,37 @@ const updateOneById = async ({ logger, itemId, payload }) => {
 // delete
 //
 
-const deleteFile = async ({ logger, file }) => {
-  logger && logger(`fileService.deleteFile`);
+const deleteOne = async ({ logger, item }) => {
+  logger && logger(`fileService.deleteOne`);
 
   // delete file from storage
   try {
-    await storageService.removeFile({ logger, file });
+    await storageService.removeFile({ logger, file: item });
   } catch (error) {
     console.log('error deletedFromStorage', error);
   }
 
   // delete file from db
-  const deletedFromDb = await File.findOneAndDelete({ _id: file._id });
-  // console.log('deletedFromDb', deletedFromDb);
+  const deletedFromDb = await File.findOneAndDelete({ _id: item._id });
   return deletedFromDb;
 };
 
 const deleteOneById = async ({ logger, itemId }) => {
   logger && logger(`fileService.deleteOneById`);
 
-  const item = await File.findOne({ _id: itemId });
+  const item = await getOneById({ logger, itemId });
   // if video delete poster
-  const deleted = await deleteFile({ logger, file: item });
+  if (item.type === type.VIDEO && item.poster) {
+    await deleteOne({ logger, file: item.poster });
+  }
+
+  const deleted = await deleteOne({ logger, item });
   return deleted;
 };
 
 // const deleteManyByIds = async ({ logger, itemsIds }) => {
 //   logger && logger(`fileService.deleteManyByIds`);
-
-//   // console.log('itemsIds', itemsIds);
-
-//   // delete camera files from storage !!!
-
+//   // delete camera files from storage
 //   // delete items from db
 //   const deletedFromDb = await File.deleteMany({ _id: { $in: itemsIds } });
 //   return deletedFromDb;
@@ -206,16 +208,11 @@ export default {
   getCountByQuery,
   getOneById,
   getOne,
-
   createFile,
-  // createFileByStream,
-
   updateOneById,
-
-  deleteFile,
+  deleteOne,
   deleteOneById,
   // deleteManyByIds,
-
   createDefaultUserFiles,
   deleteUserFiles,
   createDefaultCameraFiles,

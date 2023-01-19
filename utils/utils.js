@@ -1,4 +1,35 @@
 import format from 'date-fns/format/index.js';
+import { type } from './constants.js';
+
+export const isPhotoFile = (file) => {
+  return file && file.type === type.PHOTO;
+};
+
+export const makeUserDirName = (userId) => {
+  return `u_${userId.toString()}`;
+};
+
+export const makeCameraDirName = (cameraId) => {
+  return `c_${cameraId.toString()}`;
+};
+
+export const makePhotoFileName = (date) => {
+  return `photo--${format(date, 'yyyy-MM-dd--HH-mm-ss')}.jpg`;
+};
+
+export const makeVideoFileName = (date) => {
+  return `video--${format(date, 'yyyy-MM-dd--HH-mm-ss')}.mp4`;
+};
+
+export const makePosterFileName = (date) => {
+  return `poster--${format(date, 'yyyy-MM-dd--HH-mm-ss')}.jpg`;
+};
+
+//
+
+export const makeDateAndTimeName = (date) => {
+  return format(date, 'yyyy.MM.dd HH:mm:ss');
+};
 
 export const makeTimeName = (date) => {
   return format(date, 'HH:mm');
@@ -12,17 +43,7 @@ export const makeMonthName = (date) => {
   return format(date, 'yyyy-MM');
 };
 
-export const makeFileName = (date) => {
-  return format(date, 'yyyy.MM.dd HH:mm:ss');
-};
-
-export const makePhotoName = (date) => {
-  return format(date, 'yyyy.MM.dd HH:mm:ss');
-};
-
-export const makeVideoName = (date) => {
-  return format(date, 'yyyy.MM.dd HH:mm:ss');
-};
+//
 
 export const makeNum = (num) => {
   if (num < 10) {

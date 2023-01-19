@@ -2,30 +2,30 @@ import mongoose from 'mongoose';
 
 const FileSchema = mongoose.Schema({
   date: { type: Date, default: new Date() },
+
   user: { type: mongoose.ObjectId, ref: 'User' },
   camera: { type: mongoose.ObjectId, ref: 'Camera' },
   task: { type: mongoose.ObjectId, ref: 'Task' },
 
-  link: { type: String },
-  preview: { type: String },
-
   name: { type: String, required: true },
-  type: { type: String, required: true }, // photo, video, poster, .. zip
-  fileType: { type: String }, // image/jpg, image/png, video/mpeg, video/mp4, .. zip
+  type: { type: String, required: true }, // photo, video, poster
+  fileType: { type: String }, // image/jpg, video/mp4
   createType: { type: String }, // byHand, byTime
   removable: { type: Boolean, default: true },
 
   size: { type: Number },
+  link: { type: String },
+  poster: { type: mongoose.ObjectId, ref: 'File' }, // for videoFile
 
-  metaData: {
-    // photo
+  photoFileData: {
     photoUrl: { type: String },
-    // video
+  },
+
+  videoFileData: {
     startDate: { type: Date },
     endDate: { type: Date },
     duration: { type: Number },
     fps: { type: Number },
-    poster: { type: mongoose.ObjectId, ref: 'File' },
   },
 });
 

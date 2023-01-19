@@ -41,8 +41,6 @@ const getOne = async (req, res) => {
 const createOne = async (req, res) => {
   req.logger('fileController.createOne');
 
-  // console.log(777, req.body);
-
   // TODO: check req.body take fields by schema!
   const payload = req.body;
 

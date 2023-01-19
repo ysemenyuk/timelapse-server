@@ -1,5 +1,7 @@
 import cameraService from '../services/camera.service.js';
 
+// get
+
 const getAll = async (req, res) => {
   req.logger('cameraController.getAll');
 
@@ -24,6 +26,8 @@ const getOne = async (req, res) => {
   req.logResp(req);
 };
 
+// create
+
 const createOne = async (req, res) => {
   req.logger('cameraController.createOne');
 
@@ -39,6 +43,8 @@ const createOne = async (req, res) => {
   res.status(201).send(camera);
   req.logResp(req);
 };
+
+// update
 
 const updateOne = async (req, res) => {
   req.logger(`cameraController.updateOne`);

@@ -1,5 +1,5 @@
 import fileService from '../services/file.service.js';
-import { makeFileName } from '../utils/utils.js';
+import { makePosterFileName, makeVideoFileName } from '../utils/utils.js';
 import { fileType, type } from '../utils/constants.js';
 import diskStorage from '../storage/disk.storage.js';
 
@@ -22,8 +22,8 @@ const createAndSaveVideo = async ({ logger, userId, cameraId, taskId, create, vi
 
   const date = new Date();
 
-  const posterFileName = makeFileName(date);
-  const posterFileStream = diskStorage.openDownloadStream({ logger, filePath: ['poster_timelapse.jpg'] });
+  const posterFileName = makePosterFileName(date);
+  const posterFileStream = diskStorage.openDownloadStream({ logger, filePath: 'poster_timelapse.jpg' });
 
   const poster = await fileService.createFile({
     logger,
@@ -32,16 +32,17 @@ const createAndSaveVideo = async ({ logger, userId, cameraId, taskId, create, vi
     camera: cameraId,
     task: taskId,
     name: posterFileName,
-    stream: posterFileStream,
     type: type.POSTER,
     fileType: fileType.IMAGE_JPG,
-    metaData: {},
+    createType: null,
+    photoFileData: {},
+    stream: posterFileStream,
   });
 
-  console.log(3333, poster);
+  // console.log('poster, poster);
 
-  const videoFileName = videoSettings.fileName || makeFileName(date);
-  const videoFileStream = diskStorage.openDownloadStream({ logger, filePath: ['timelapse.mp4'] });
+  const videoFileName = videoSettings.fileName || makeVideoFileName(date);
+  const videoFileStream = diskStorage.openDownloadStream({ logger, filePath: 'timelapse.mp4' });
 
   const video = await fileService.createFile({
     logger,
@@ -50,18 +51,17 @@ const createAndSaveVideo = async ({ logger, userId, cameraId, taskId, create, vi
     camera: cameraId,
     task: taskId,
     name: videoFileName,
-    stream: videoFileStream,
     type: type.VIDEO,
     fileType: fileType.VIDEO_MP4,
     createType: create,
-    preview: poster.preview,
-    metaData: {
+    poster: poster._id,
+    videoFileData: {
       startDate: videoSettings.startDate,
       endDate: videoSettings.endDate,
       duration: videoSettings.duration,
       fps: videoSettings.fps,
-      poster: poster._id,
     },
+    stream: videoFileStream,
   });
 
   // remove tmp-dir from disk

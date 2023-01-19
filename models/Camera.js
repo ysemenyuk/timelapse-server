@@ -5,18 +5,19 @@ const CameraSchema = mongoose.Schema(
     date: { type: Date, default: new Date() },
     name: { type: String, required: true },
     description: { type: String, required: true },
-    model: { type: String },
-    location: { type: [{ type: Number }] },
+    address: { type: String },
 
+    location: {
+      latitude: { type: String },
+      longitude: { type: String },
+    },
+
+    model: { type: String },
     photoUrl: { type: String, default: '' },
     rtspUrl: { type: String, default: '' },
 
     user: { type: mongoose.ObjectId, ref: 'User' },
     avatar: { type: mongoose.ObjectId, ref: 'File' },
-
-    // cameraFolder: { type: mongoose.ObjectId, ref: 'File' },
-    // photosFolder: { type: mongoose.ObjectId, ref: 'File' },
-    // videosFolder: { type: mongoose.ObjectId, ref: 'File' },
   },
   {
     toJSON: { virtuals: true }, // So `res.json()` and other `JSON.stringify()` functions include virtuals
