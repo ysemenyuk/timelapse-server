@@ -32,7 +32,7 @@ export const makeDateAndTimeName = (date) => {
 };
 
 export const makeTimeName = (date) => {
-  return format(date, 'HH:mm');
+  return format(date, 'HH:mm:ss');
 };
 
 export const makeDateName = (date) => {

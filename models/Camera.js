@@ -8,8 +8,8 @@ const CameraSchema = mongoose.Schema(
     address: { type: String },
 
     location: {
-      latitude: { type: String },
-      longitude: { type: String },
+      latitude: { type: String, default: null },
+      longitude: { type: String, default: null },
     },
 
     model: { type: String },

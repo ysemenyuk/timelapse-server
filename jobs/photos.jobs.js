@@ -20,14 +20,14 @@ export default (agenda, socket, workerLogger) => {
       task = await taskService.getOneById({ taskId });
       const { photoSettings } = task;
 
+      await task.updateOne({ status: taskStatus.RUNNING, startedAt: new Date() });
+      userSocket && userSocket.emit('update-task', { cameraId, userId, taskId });
+
       let dateInfo = await getDateInfo({ logger, userId, cameraId });
 
       if (!dateInfo) {
         dateInfo = await createDateInfo({ logger, userId, cameraId });
       }
-
-      await task.updateOne({ status: taskStatus.RUNNING, startedAt: new Date() });
-      userSocket && userSocket.emit('update-task', { cameraId, userId, taskId });
 
       const file = await createAndSavePhoto({
         logger,
@@ -86,7 +86,7 @@ export default (agenda, socket, workerLogger) => {
       let stopTime = photoSettings.stopTime;
 
       // const dateInfo = await getDateInfo();
-      if (dateInfo && photoSettings.bySun) {
+      if (dateInfo && dateInfo.weather && photoSettings.bySun) {
         const { weather } = dateInfo;
         startTime = makeTimeName(new Date(weather.sys.sunrise));
         stopTime = makeTimeName(new Date(weather.sys.sunset));

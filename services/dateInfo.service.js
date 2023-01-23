@@ -12,6 +12,8 @@ const getAll = async ({ cameraId, logger }) => {
 const getOne = async ({ logger, cameraId, name }) => {
   logger && logger(`DateInfoService.getOne`);
 
+  // console.log('dateInfo name', name);
+
   const dateInfo = await DateInfo.findOne({ camera: cameraId, name });
   return dateInfo;
 };

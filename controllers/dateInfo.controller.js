@@ -23,6 +23,8 @@ const getOne = async (req, res) => {
     logger: req.logger,
   });
 
+  // console.log('dateInfo', dateInfo);
+
   res.status(200).send(dateInfo);
   req.logResp(req);
 };

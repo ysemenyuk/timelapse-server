@@ -12,6 +12,7 @@ import Socket from './socket.js';
 import cameraRouter from './routes/camera.router.js';
 import fileRouter from './routes/file.router.js';
 import taskRouter from './routes/task.router.js';
+import dateInfoRouter from './routes/dateInfo.router.js';
 import diskStorageRouter from './routes/disk.storage.router.js';
 import userRouter from './routes/user.router.js';
 
@@ -56,6 +57,7 @@ const startServer = async () => {
 
     app.use('/api/cameras/:cameraId/tasks', taskRouter);
     app.use('/api/cameras/:cameraId/files', fileRouter);
+    app.use('/api/cameras/:cameraId/date-info', dateInfoRouter);
     app.use('/api/cameras', cameraRouter);
     app.use('/api/users', userRouter);
 

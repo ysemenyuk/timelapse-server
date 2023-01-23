@@ -22,7 +22,8 @@ const TaskSchema = mongoose.Schema({
     interval: { type: Number }, // seconds
     startTime: { type: String },
     stopTime: { type: String },
-    bySun: { type: Boolean },
+    sunTime: { type: Boolean },
+    allTime: { type: Boolean },
   },
 
   videoSettings: {
@@ -30,11 +31,10 @@ const TaskSchema = mongoose.Schema({
     fileName: { type: String },
     startDate: { type: String },
     endDate: { type: String },
+    startTime: { type: String },
+    stopTime: { type: String },
     duration: { type: Number }, // seconds
-    fps: { type: Number }, // frame per second
-    // CreateVideosByTime
-    periodicity: { type: String }, // everyDay, everyWeek, everyMonth
-    createTime: { type: String }, // time for make video file
+    fps: { type: Number, default: 20 }, // frame per second
   },
 });
 

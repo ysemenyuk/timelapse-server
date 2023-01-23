@@ -17,6 +17,9 @@ const FileSchema = mongoose.Schema({
   link: { type: String },
   poster: { type: mongoose.ObjectId, ref: 'File' }, // for videoFile
 
+  dateString: { type: String },
+  timeString: { type: String },
+
   photoFileData: {
     photoUrl: { type: String },
   },
@@ -24,6 +27,8 @@ const FileSchema = mongoose.Schema({
   videoFileData: {
     startDate: { type: Date },
     endDate: { type: Date },
+    startTime: { type: Number },
+    stopTime: { type: Number },
     duration: { type: Number },
     fps: { type: Number },
   },

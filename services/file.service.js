@@ -1,7 +1,11 @@
 import _ from 'lodash';
+import { addHours } from 'date-fns';
 import File from '../models/File.js';
 import { type } from '../utils/constants.js';
 import storageService from './storage.service.js';
+
+const getStartDateTime = (date) => new Date(`${date} 00:00:00`);
+const getEndDateTime = (date) => addHours(new Date(`${date} 00:00:00`), 24);
 
 const createQuery = (cameraId, query) => {
   const { type, createType, startDate, endDate, oneDate } = query;
@@ -12,28 +16,22 @@ const createQuery = (cameraId, query) => {
   let date;
 
   if (oneDate) {
-    const start = new Date(oneDate);
-    const end = new Date(oneDate);
-    end.setDate(end.getDate() + 1);
-    date = { $gte: start, $lt: end };
+    date = { $gte: getStartDateTime(oneDate), $lt: getEndDateTime(oneDate) };
   }
 
   if (startDate && endDate) {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    end.setDate(end.getDate() + 1);
-    date = { $gte: start, $lt: end };
+    date = { $gte: getStartDateTime(startDate), $lt: getEndDateTime(endDate) };
   }
 
   if (startDate && !endDate) {
-    const start = new Date(startDate);
-    date = { $gte: start };
+    date = { $gte: getStartDateTime(startDate) };
   }
 
   if (!startDate && endDate) {
-    const end = new Date(endDate);
-    date = { $lt: end };
+    date = { $lt: getEndDateTime(endDate) };
   }
+
+  console.log(2222, 'date', date);
 
   return _.pickBy({ camera: cameraId, type, createType: createdBy, date }, _.identity);
 };
@@ -90,6 +88,7 @@ const createFile = async ({ logger, data, stream, ...payload }) => {
   await file.save();
 
   const created = await File.findOneAndUpdate({ _id: file._id }, fileInfo, { new: true });
+  console.log(555, created);
   return created;
 };
 
@@ -129,7 +128,7 @@ const deleteOneById = async ({ logger, itemId }) => {
   const item = await getOneById({ logger, itemId });
   // if video delete poster
   if (item.type === type.VIDEO && item.poster) {
-    await deleteOne({ logger, file: item.poster });
+    await deleteOne({ logger, item: item.poster });
   }
 
   const deleted = await deleteOne({ logger, item });
