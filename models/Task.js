@@ -20,21 +20,21 @@ const TaskSchema = mongoose.Schema({
     photoUrl: { type: String }, // url
     // CreatePhotosByTime
     interval: { type: Number }, // seconds
-    startTime: { type: String },
-    stopTime: { type: String },
-    sunTime: { type: Boolean },
-    allTime: { type: Boolean },
+    timeRangeType: { type: String }, // allTime, sunTime, customTime
+    customTimeStart: { type: String }, // 08:00
+    customTimeStop: { type: String }, // 20:00
   },
 
   videoSettings: {
     // CreateVideo
-    fileName: { type: String },
-    startDate: { type: String },
-    endDate: { type: String },
-    startTime: { type: String },
-    stopTime: { type: String },
+    customName: { type: String },
+    startDate: { type: String }, // dateString
+    endDate: { type: String }, // dateString
+    timeRangeType: { type: String }, // allTime, customTime
+    customTimeStart: { type: String }, // timeString
+    customTimeEnd: { type: String }, // timeString
     duration: { type: Number }, // seconds
-    fps: { type: Number, default: 20 }, // frame per second
+    fps: { type: Number }, // fps
   },
 });
 

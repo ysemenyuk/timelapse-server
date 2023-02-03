@@ -30,12 +30,26 @@ const createDir = async ({ logger, dirPath }) => {
   return created;
 };
 
+const createTmpDir = async ({ logger }) => {
+  logger && logger(`disk.storage.createTmpDir`);
+  const fullPath = createFullPath('tmp-');
+  const created = await fsp.mkdtemp(fullPath);
+  return created;
+};
+
 // remove dir
 
 const removeDir = async ({ logger, dirPath }) => {
   logger && logger(`disk.storage.removeDir dirPath: ${dirPath}`);
   const fullPath = createFullPath(dirPath);
   const deleted = await fsp.rmdir(fullPath, { recursive: true });
+  return deleted;
+};
+
+const removeTmpDir = async ({ logger, tmpdir }) => {
+  logger && logger(`disk.storage.removeTmpDir tmpdir: ${tmpdir}`);
+  // const fullPath = createFullPath(dirPath);
+  const deleted = await fsp.rmdir(tmpdir, { recursive: true });
   return deleted;
 };
 
@@ -60,6 +74,32 @@ const saveFile = async ({ logger, filePath, data, stream }) => {
   const { size } = await fsp.stat(fullPath);
 
   return { link, size };
+};
+
+const saveFileInTmpDir = async ({ logger, tmpdir, fileName, data, stream }) => {
+  logger && logger(`disk.storage.saveFileInTmpDir tmpdir: ${tmpdir}`);
+
+  const fullPath = path.join(tmpdir, fileName);
+
+  if (stream) {
+    const writeStream = createWriteStream(fullPath);
+    stream.pipe(writeStream);
+    await promisifyUploadStream(writeStream);
+  }
+
+  if (data) {
+    await fsp.writeFile(fullPath, data);
+  }
+
+  return fullPath;
+};
+
+const downloadFile = async ({ logger, filePath }) => {
+  logger && logger(`disk.storage.downloadFile filePath: ${filePath}`);
+
+  const fullPath = createFullPath(filePath);
+  const dataBuffer = await fsp.readFile(fullPath);
+  return dataBuffer;
 };
 
 // remove file
@@ -125,8 +165,12 @@ const isFileExist = ({ logger, filePath }) => {
 export default {
   createFullPath,
   createDir,
+  createTmpDir,
   removeDir,
+  removeTmpDir,
   saveFile,
+  saveFileInTmpDir,
+  downloadFile,
   removeFile,
   copyFile,
   fileStat,

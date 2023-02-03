@@ -82,8 +82,7 @@ export default (agenda, socket, workerLogger) => {
         dateInfo = await createDateInfo({ logger, userId, cameraId });
       }
 
-      let startTime = photoSettings.startTime;
-      let stopTime = photoSettings.stopTime;
+      let { startTime, stopTime } = photoSettings;
 
       // const dateInfo = await getDateInfo();
       if (dateInfo && dateInfo.weather && photoSettings.bySun) {

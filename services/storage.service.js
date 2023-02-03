@@ -74,6 +74,15 @@ const saveFile = async ({ logger, file, data, stream }) => {
   return fileInfo;
 };
 
+const downloadFile = async ({ logger, file }) => {
+  logger && logger(`storage.service.downloadFile file: ${file.name}`);
+
+  const filePath = storage.createFilePath({ logger, file });
+  const dataBuffer = await storage.downloadFile({ logger, filePath });
+
+  return dataBuffer;
+};
+
 //
 // remove file
 //
@@ -104,6 +113,7 @@ export default {
   removeUserDir,
   removeCameraDir,
   saveFile,
+  downloadFile,
   removeFile,
   getFileStat,
 };

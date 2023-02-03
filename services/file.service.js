@@ -8,7 +8,7 @@ const getStartDateTime = (date) => new Date(`${date} 00:00:00`);
 const getEndDateTime = (date) => addHours(new Date(`${date} 00:00:00`), 24);
 
 const createQuery = (cameraId, query) => {
-  const { type, createType, startDate, endDate, oneDate } = query;
+  const { type, createType, oneDate, startDate, endDate, startTime, endTime } = query;
   // console.log(1111, 'query', query);
 
   const createdBy = createType && createType.split(',');
@@ -23,17 +23,13 @@ const createQuery = (cameraId, query) => {
     date = { $gte: getStartDateTime(startDate), $lt: getEndDateTime(endDate) };
   }
 
-  if (startDate && !endDate) {
-    date = { $gte: getStartDateTime(startDate) };
+  let timeString;
+
+  if (startTime && endTime) {
+    timeString = { $gte: `${startTime}:00`, $lt: `${endTime}:00` };
   }
 
-  if (!startDate && endDate) {
-    date = { $lt: getEndDateTime(endDate) };
-  }
-
-  console.log(2222, 'date', date);
-
-  return _.pickBy({ camera: cameraId, type, createType: createdBy, date }, _.identity);
+  return _.pickBy({ camera: cameraId, type, createType: createdBy, date, timeString }, _.identity);
 };
 
 // get
@@ -43,6 +39,21 @@ const getManyByQuery = async ({ logger, cameraId, query }) => {
 
   const queryObject = createQuery(cameraId, query);
   const files = await File.find(queryObject).populate('poster');
+  // const files = await File.aggregate([
+  //   {
+  //     $addFields: {
+  //       time: {
+  //         $dateToString: {
+  //           date: '$date',
+  //           format: '%H:%M:%S',
+  //           timezone: '+03:00',
+  //         },
+  //       },
+  //     },
+  //   },
+  //   { $match: { type: 'video', time: { $gte: '09:25:00' } } },
+  // ]);
+  // console.log('files', files);
   return files;
 };
 
@@ -88,7 +99,7 @@ const createFile = async ({ logger, data, stream, ...payload }) => {
   await file.save();
 
   const created = await File.findOneAndUpdate({ _id: file._id }, fileInfo, { new: true });
-  console.log(555, created);
+  // console.log(5555, created);
   return created;
 };
 

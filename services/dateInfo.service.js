@@ -28,7 +28,7 @@ const createOne = async ({ logger, userId, cameraId, ...payload }) => {
   });
 
   await dateInfo.save();
-  console.log(5555, dateInfo);
+  // console.log(5555, dateInfo);
   return dateInfo;
 };
 

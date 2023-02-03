@@ -28,7 +28,7 @@ export const makePosterFileName = (date) => {
 //
 
 export const makeDateAndTimeName = (date) => {
-  return format(date, 'yyyy.MM.dd HH:mm:ss');
+  return format(date, 'yyyy-MM-dd HH:mm:ss');
 };
 
 export const makeTimeName = (date) => {
@@ -64,7 +64,7 @@ export const makeNum = (num) => {
   return num;
 };
 
-// export const dd = (num) => (num < 10 ? `0${num}` : `${num}`);
+export const dd = (num) => (num < 10 ? `0${num}` : `${num}`);
 
 // export const parseTime = (time) => {
 //   const year = time.getFullYear();
