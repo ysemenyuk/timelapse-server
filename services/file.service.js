@@ -34,6 +34,15 @@ const createQuery = (cameraId, query) => {
 
 // get
 
+const getFilesForVideo = async ({ logger, cameraId, query }) => {
+  logger && logger(`fileService.getFilesForVideo`);
+
+  const queryObject = createQuery(cameraId, query);
+  const files = await File.find(queryObject).sort({ _id: 1 });
+
+  return files;
+};
+
 const getManyByQuery = async ({ logger, cameraId, query }) => {
   logger && logger(`fileService.getManyByQuery`);
 
@@ -214,6 +223,7 @@ const deleteCameraFiles = async ({ logger, userId, cameraId }) => {
 };
 
 export default {
+  getFilesForVideo,
   getManyByQuery,
   getCountByQuery,
   getOneById,

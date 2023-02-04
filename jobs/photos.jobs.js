@@ -3,6 +3,7 @@ import { makeTimeName } from '../utils/utils.js';
 import { fileCreateType, taskName, taskStatus } from '../utils/constants.js';
 import createAndSavePhoto from './createAndSavePhoto.js';
 import { createDateInfo, getDateInfo } from './dateInfo.js';
+import { fromUnixTime } from 'date-fns';
 
 export default (agenda, socket, workerLogger) => {
   //
@@ -75,6 +76,10 @@ export default (agenda, socket, workerLogger) => {
     try {
       task = await taskService.getOneById({ logger, taskId });
       const { photoSettings } = task;
+      const { timeRangeType } = photoSettings;
+      const isAllTime = timeRangeType === 'allTime';
+      const isSunTime = timeRangeType === 'sunTime';
+      const isCustomTime = timeRangeType === 'customTime';
 
       let dateInfo = await getDateInfo({ logger, userId, cameraId });
 
@@ -82,21 +87,33 @@ export default (agenda, socket, workerLogger) => {
         dateInfo = await createDateInfo({ logger, userId, cameraId });
       }
 
-      let { startTime, stopTime } = photoSettings;
+      let startTime;
+      let stopTime;
 
-      // const dateInfo = await getDateInfo();
-      if (dateInfo && dateInfo.weather && photoSettings.bySun) {
+      if (isSunTime && dateInfo && dateInfo.weather) {
         const { weather } = dateInfo;
-        startTime = makeTimeName(new Date(weather.sys.sunrise));
-        stopTime = makeTimeName(new Date(weather.sys.sunset));
+        startTime = makeTimeName(fromUnixTime(weather.sys.sunrise));
+        stopTime = makeTimeName(fromUnixTime(weather.sys.sunset));
+      } else if (isCustomTime) {
+        const { customTimeStart, customTimeStop } = photoSettings;
+        startTime = `${customTimeStart}:00`;
+        stopTime = `${customTimeStop}:00`;
+      } else if (isAllTime) {
+        startTime = `00:00:00`;
+        stopTime = `23:59:59`;
+      } else {
+        startTime = `08:00:00`;
+        stopTime = `20:00:00`;
       }
 
-      // const date = new Date();
-      const currentTime = makeTimeName(new Date());
+      const date = new Date();
+      const currentTime = makeTimeName(date);
+
+      logger(`timeRangeType: ${timeRangeType}`);
+      logger(`currentTime: ${currentTime}, startTime: ${startTime} stopTime: ${stopTime}`);
 
       if (currentTime < startTime || currentTime > stopTime) {
-        logger(`out of time - currentTime: ${currentTime}, startTime: ${startTime} stopTime: ${stopTime}`);
-        logger('cancel CreatePhotosByTime job');
+        logger(`cancel ${taskName.CREATE_PHOTOS_BY_TIME} job - out of time - `);
         return;
       }
 

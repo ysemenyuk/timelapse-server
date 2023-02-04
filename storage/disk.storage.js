@@ -1,25 +1,38 @@
 import { existsSync, createWriteStream, createReadStream } from 'fs';
 import * as fsp from 'fs/promises';
+import { pipeline } from 'stream/promises';
 import path from 'path';
 import paths from './paths.js';
+
+// const stp = st.promises;
 
 const pathToDiskSpace = process.env.DISK_PATH;
 
 const createFullPath = (filePath) => path.join(pathToDiskSpace, filePath);
 
-const promisifyUploadStream = (uploadStream) => {
-  return new Promise((resolve, reject) => {
-    uploadStream.on('error', () => {
-      // console.log('error file uploadStream');
-      reject('error file uploadStream');
-    });
+// const promisifyUploadStream = (stream, uploadStream) => {
+//   return new Promise((resolve, reject) => {
+//     stream.on('error', () => {
+//       console.log('error file readStream');
+//       // reject('error file readStream');
+//     });
 
-    uploadStream.on('finish', () => {
-      // console.log('finish file uploadStream');
-      resolve('finish file uploadStream');
-    });
-  });
-};
+//     stream.on('end', () => {
+//       console.log('end file readStream');
+//       // resolve('end file readStream');
+//     });
+
+//     uploadStream.on('error', () => {
+//       console.log('error file uploadStream');
+//       reject('error file uploadStream');
+//     });
+
+//     uploadStream.on('finish', () => {
+//       console.log('finish file uploadStream');
+//       resolve('finish file uploadStream');
+//     });
+//   });
+// };
 
 // create dir
 
@@ -60,14 +73,16 @@ const saveFile = async ({ logger, filePath, data, stream }) => {
 
   const fullPath = createFullPath(filePath);
 
-  if (stream) {
-    const writeStream = createWriteStream(fullPath);
-    stream.pipe(writeStream);
-    await promisifyUploadStream(writeStream);
-  }
-
-  if (data) {
-    await fsp.writeFile(fullPath, data);
+  try {
+    if (stream) {
+      const writeStream = createWriteStream(fullPath);
+      await pipeline(stream, writeStream);
+    }
+    if (data) {
+      await fsp.writeFile(fullPath, data);
+    }
+  } catch (error) {
+    console.log('error saveFileInTmpDir', error);
   }
 
   const link = `/files/${filePath}`;
@@ -77,29 +92,31 @@ const saveFile = async ({ logger, filePath, data, stream }) => {
 };
 
 const saveFileInTmpDir = async ({ logger, tmpdir, fileName, data, stream }) => {
-  logger && logger(`disk.storage.saveFileInTmpDir tmpdir: ${tmpdir}`);
+  logger && logger(`disk.storage.saveFileInTmpDir tmpdir/fileName: ${tmpdir}/${fileName}`);
 
   const fullPath = path.join(tmpdir, fileName);
 
-  if (stream) {
-    const writeStream = createWriteStream(fullPath);
-    stream.pipe(writeStream);
-    await promisifyUploadStream(writeStream);
-  }
-
-  if (data) {
-    await fsp.writeFile(fullPath, data);
+  try {
+    if (stream) {
+      const writeStream = createWriteStream(fullPath);
+      await pipeline(stream, writeStream);
+    }
+    if (data) {
+      await fsp.writeFile(fullPath, data);
+    }
+  } catch (error) {
+    console.log('error saveFileInTmpDir', error);
   }
 
   return fullPath;
 };
 
-const downloadFile = async ({ logger, filePath }) => {
-  logger && logger(`disk.storage.downloadFile filePath: ${filePath}`);
+const openDownloadStreamFromTmpDir = ({ logger, tmpdir, fileName }) => {
+  logger && logger(`disk.storage.openDownloadStreamFromTmpDir tmpdir/fileName: ${tmpdir}/${fileName}`);
 
-  const fullPath = createFullPath(filePath);
-  const dataBuffer = await fsp.readFile(fullPath);
-  return dataBuffer;
+  const fullPath = path.join(tmpdir, fileName);
+  const stream = createReadStream(fullPath);
+  return stream;
 };
 
 // remove file
@@ -170,7 +187,7 @@ export default {
   removeTmpDir,
   saveFile,
   saveFileInTmpDir,
-  downloadFile,
+  openDownloadStreamFromTmpDir,
   removeFile,
   copyFile,
   fileStat,

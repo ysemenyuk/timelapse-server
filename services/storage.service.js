@@ -74,13 +74,26 @@ const saveFile = async ({ logger, file, data, stream }) => {
   return fileInfo;
 };
 
-const downloadFile = async ({ logger, file }) => {
-  logger && logger(`storage.service.downloadFile file: ${file.name}`);
+//
+//
+//
+
+// const downloadFile = async ({ logger, file }) => {
+//   logger && logger(`storage.service.downloadFile file: ${file.name}`);
+
+//   const filePath = storage.createFilePath({ logger, file });
+//   const dataBuffer = await storage.downloadFile({ logger, filePath });
+
+//   return dataBuffer;
+// };
+
+const openDownloadStream = ({ logger, file }) => {
+  logger && logger(`storage.service.openDownloadStream file: ${file.name}`);
 
   const filePath = storage.createFilePath({ logger, file });
-  const dataBuffer = await storage.downloadFile({ logger, filePath });
+  const stream = storage.openDownloadStream({ logger, filePath });
 
-  return dataBuffer;
+  return stream;
 };
 
 //
@@ -107,13 +120,22 @@ const getFileStat = async ({ logger, file }) => {
   return stat;
 };
 
+const isFileExist = ({ logger, file }) => {
+  logger && logger(`storage.service.isFileExist file.name: ${file.name}`);
+
+  const filePath = storage.createFilePath({ logger, file });
+  return storage.isFileExist({ logger, filePath });
+};
+
 export default {
   createUserDir,
   createCameraDirs,
   removeUserDir,
   removeCameraDir,
   saveFile,
-  downloadFile,
+  // downloadFile,
+  openDownloadStream,
   removeFile,
   getFileStat,
+  isFileExist,
 };

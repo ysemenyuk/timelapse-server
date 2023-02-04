@@ -45,7 +45,7 @@ export const makeMonthName = (date) => {
 
 //
 
-export const makeNum = (num) => {
+export const makeNumber = (num) => {
   if (num < 10) {
     return `00000${num}`;
   }
