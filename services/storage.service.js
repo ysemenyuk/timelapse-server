@@ -1,6 +1,12 @@
 // import { makeDateName } from '../utils/utils.js';
-import storage from '../storage/index.js';
+import Storage from '../storage/index.js';
 import { isPhotoFile } from '../utils/utils.js';
+
+console.log(55555, Storage);
+
+const storage = Storage.instance;
+
+console.log(6666, Storage.instance);
 
 //
 // create dirs
@@ -50,10 +56,10 @@ const removeCameraDir = async ({ logger, userId, cameraId }) => {
 //
 
 const makeDateDirIfNotExist = async ({ logger, file }) => {
-  const dirPath = storage.createDateDirPath(file.user, file.camera, file.date);
-  if (!storage.isDirExist({ logger, dirPath })) {
+  const dirPath = Storage.instance.createDateDirPath(file.user, file.camera, file.date);
+  if (!Storage.instance.isDirExist({ logger, dirPath })) {
     logger && logger(`storage.service.makeDateDirIfNotExist dirPath: ${dirPath}`);
-    await storage.createDir({ logger, dirPath });
+    await Storage.instance.createDir({ logger, dirPath });
   }
 };
 
@@ -68,8 +74,8 @@ const saveFile = async ({ logger, file, data, stream }) => {
     await makeDateDirIfNotExist({ logger, file });
   }
 
-  const filePath = storage.createFilePath({ logger, file });
-  const fileInfo = await storage.saveFile({ logger, filePath, data, stream });
+  const filePath = Storage.instance.createFilePath({ logger, file });
+  const fileInfo = await Storage.instance.saveFile({ logger, filePath, data, stream });
 
   return fileInfo;
 };

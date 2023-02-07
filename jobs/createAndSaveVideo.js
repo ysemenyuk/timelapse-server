@@ -1,7 +1,7 @@
 import fileService from '../services/file.service.js';
 import { makeNumber, makePosterFileName, makeVideoFileName } from '../utils/utils.js';
 import { fileType, type } from '../utils/constants.js';
-import diskStorage from '../storage/disk.storage.js';
+import diskService from '../services/disk.service.js';
 import storageService from '../services/storage.service.js';
 import ffmpegService from '../services/ffmpeg.service.js';
 import makeUniformSample from './makeUniformSample.js';
@@ -16,10 +16,11 @@ const createAndSaveVideo = async ({ logger, userId, cameraId, taskId, create, vi
   //
   const { customName, duration, fps, startDate, endDate, timeRangeType, customTimeStart, customTimeEnd } =
     videoSettings;
+
   const isCustomTime = timeRangeType === 'customTime';
   //
   // create tmp-dir on disk
-  const tmpdir = await diskStorage.createTmpDir({ logger });
+  const tmpdir = await diskService.createTmpDir({ logger });
   console.log('tmpdir', tmpdir);
 
   // getFile from DB
@@ -37,7 +38,7 @@ const createAndSaveVideo = async ({ logger, userId, cameraId, taskId, create, vi
   const samplingOfPhotos = makeUniformSample(photos, duration, fps);
   console.log('samplingOfPhotos.length', samplingOfPhotos.length);
 
-  // filter
+  // filter if exist in storage
   const filtered = samplingOfPhotos.filter((photo) => storageService.isFileExist({ file: photo }));
   console.log('filtered.length', filtered.length);
 
@@ -48,13 +49,13 @@ const createAndSaveVideo = async ({ logger, userId, cameraId, taskId, create, vi
     // }
     const stream = storageService.openDownloadStream({ file: photo });
     const fileName = `img-${makeNumber(index)}.jpg`;
-    const saved = diskStorage.saveFileInTmpDir({ tmpdir, fileName, stream });
+    const saved = diskService.saveFile({ dir: tmpdir, fileName, stream });
     return saved;
   });
   console.log('promises.length', promises.length);
 
-  const saved = await Promise.all(promises.filter((i) => i));
-  console.log('saved.length', saved.filter((i) => i).length);
+  const saved = await Promise.all(promises);
+  console.log('saved.length', saved.length);
 
   // create tmp-video on disk
 
@@ -79,8 +80,8 @@ const createAndSaveVideo = async ({ logger, userId, cameraId, taskId, create, vi
   const posterFileName = makePosterFileName(date);
   const videoFileName = makeVideoFileName(date);
 
-  const posterFileStream = diskStorage.openDownloadStreamFromTmpDir({ logger, tmpdir, fileName: tmpposter });
-  const videoFileStream = diskStorage.openDownloadStreamFromTmpDir({ logger, tmpdir, fileName: tmpvideo });
+  const posterFileStream = diskService.openDownloadStream({ logger, dir: tmpdir, fileName: tmpposter });
+  const videoFileStream = diskService.openDownloadStream({ logger, dir: tmpdir, fileName: tmpvideo });
 
   const poster = await fileService.createFile({
     logger,
@@ -125,7 +126,7 @@ const createAndSaveVideo = async ({ logger, userId, cameraId, taskId, create, vi
   // console.log('video', video);
 
   // remove tmp-dir from disk
-  const deleted = await diskStorage.removeTmpDir({ logger, tmpdir });
+  const deleted = await diskService.removeDir({ logger, dir: tmpdir });
   console.log('deleted', deleted);
 
   return video;

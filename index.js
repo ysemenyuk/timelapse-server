@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import mongoose from 'mongoose';
+import mongodb from 'mongodb';
 import debug from 'debug';
 import http from 'http';
 import cors from 'cors';
@@ -15,6 +16,7 @@ import taskRouter from './routes/task.router.js';
 import dateInfoRouter from './routes/dateInfo.router.js';
 import diskStorageRouter from './routes/disk.storage.router.js';
 import userRouter from './routes/user.router.js';
+import storage from './storage/index.js';
 
 const mode = process.env.NODE_ENV || 'development';
 const PORT = process.env.PORT || 4000;
@@ -23,6 +25,8 @@ const dbUri = process.env.MONGO_URI;
 const app = express();
 const httpServer = http.createServer(app);
 const logger = debug('server');
+
+const { MongoClient } = mongodb;
 
 if (mode === 'development') {
   app.use(debugMiddleware);
@@ -44,11 +48,22 @@ const startServer = async () => {
 
     logger(`Mongoose successfully Connected`);
 
+    const mongoClient = new MongoClient(dbUri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+
+    await mongoClient.connect();
+
+    logger(`mongoClient successfully Connected`);
+
     const socket = new Socket(httpServer);
     await socket.start();
 
     const worker = new Worker(socket);
-    await worker.start();
+    await worker.start(mongoClient);
+
+    storage.start(mongoClient);
 
     app.socket = socket;
     app.worker = worker;

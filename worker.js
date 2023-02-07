@@ -1,13 +1,13 @@
 import { Agenda } from 'agenda/es.js';
-import mongodb from 'mongodb';
+// import mongodb from 'mongodb';
 import jobs from './jobs/index.js';
 import debug from 'debug';
 import { taskName, taskStatus } from './utils/constants.js';
 
-const { MongoClient } = mongodb;
+// const { MongoClient } = mongodb;
 const logger = debug('worker');
 
-const dbUri = process.env.MONGO_URI;
+// const dbUri = process.env.MONGO_URI;
 const dbName = process.env.MONGO_DB_NAME;
 const jobTypes = ['photosJobs', 'videosJobs'];
 
@@ -22,13 +22,15 @@ class Worker {
     return this.agenda;
   }
 
-  async start() {
-    this.mongoClient = new MongoClient(dbUri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+  async start(mongoClient) {
+    // this.mongoClient = new MongoClient(dbUri, {
+    //   useNewUrlParser: true,
+    //   useUnifiedTopology: true,
+    // });
 
-    await this.mongoClient.connect();
+    // await this.mongoClient.connect();
+
+    this.mongoClient = mongoClient;
 
     logger(`mongoClient successfully connect`);
 
