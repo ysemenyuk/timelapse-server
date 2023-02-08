@@ -4,11 +4,23 @@ import { pipeline } from 'stream/promises';
 import paths from './paths.js';
 
 export default (mongoClient) => {
-  console.log(111111);
+  // console.log(111111);
 
   const database = mongoClient.db('myFirstDatabase');
   const bucket = new mongodb.GridFSBucket(database);
   // const collection = database.collection('fs.files');
+
+  // create dir
+
+  const createDir = async ({ logger, dirPath }) => {
+    logger && logger(`gridfs.storage.createDir dirPath: ${dirPath}`);
+  };
+
+  // remove dir
+
+  const removeDir = async ({ logger, dirPath }) => {
+    logger && logger(`gridfs.storage.removeDir dirPath: ${dirPath}`);
+  };
 
   // save file
 
@@ -29,44 +41,65 @@ export default (mongoClient) => {
       console.log('error saveFile', error);
     }
 
-    const link = `/files/db/${filePath}`;
+    const link = `/files/g/${filePath}`;
     // const meta = await collection.find({ name: filePath });
     // console.log('meta, meta);
 
     return { link };
   };
 
-  // streams
+  // read file
 
-  const openUploadStream = ({ fileName, logger }) => {
-    logger(`gridFs.storage.openUploadStream fileName: ${fileName}`);
+  function stream2buffer(stream) {
+    return new Promise((resolve, reject) => {
+      const _buf = [];
+      stream.on('data', (chunk) => _buf.push(chunk));
+      stream.on('end', () => resolve(Buffer.concat(_buf)));
+      stream.on('error', (err) => reject(err));
+    });
+  }
 
-    const database = mongoClient.db('myFirstDatabase');
-    const bucket = new mongodb.GridFSBucket(database);
+  const readFile = async ({ logger, filePath, type }) => {
+    logger && logger(`disk.storage.readFile filePath: ${filePath}`);
 
-    const uploadStream = bucket.openUploadStream(fileName);
+    const stream = bucket.openDownloadStreamByName(filePath);
+
+    try {
+      if (type === 'stream') {
+        return stream;
+      }
+      if (type === 'buffer') {
+        const buffer = await stream2buffer(stream);
+        return buffer;
+      }
+    } catch (error) {
+      console.log('error readFile', error);
+    }
+  };
+
+  // remove file
+
+  const removeFile = ({ logger, filePath }) => {
+    logger(`gridFs.storage.removeFile filePath: ${filePath}`);
+  };
+
+  // stream
+
+  const openUploadStream = ({ logger, filePath }) => {
+    logger && logger(`gridFs.storage.openUploadStream filePath: ${filePath}`);
+
+    const uploadStream = bucket.openUploadStream(filePath);
     return uploadStream;
   };
 
-  const openDownloadStream = ({ file, logger }) => {
-    logger(`gridFs.storage.openDownloadStream file.name isThumbnail: ${file.name}`);
+  const openDownloadStream = ({ logger, filePath }) => {
+    logger(`gridFs.storage.openDownloadStream filePath: ${filePath}`);
 
-    if (!file.name) {
-      throw new Error('gridFs.storage.openDownloadStream have not file.name');
-    }
-
-    const database = mongoClient.db('myFirstDatabase');
-    const bucket = new mongodb.GridFSBucket(database);
-
-    const downloadStream = bucket.openDownloadStreamByName(file.name);
+    const downloadStream = bucket.openDownloadStreamByName(filePath);
     return downloadStream;
   };
 
-  const deleteOne = ({ file, logger }) => {
-    logger(`gridFs.storage.deleteOne file.name: ${file.name}`);
-
-    // return bucket.delete(file);
-  };
+  // stat
 
   const fileStat = async ({ logger, filePath }) => {
     logger && logger(`gridFs.storage.fileStat filePath: ${filePath}`);
@@ -82,13 +115,16 @@ export default (mongoClient) => {
   };
 
   return {
+    createDir,
+    removeDir,
     saveFile,
-    openUploadStream,
-    openDownloadStream,
-    deleteOne,
+    readFile,
+    removeFile,
     fileStat,
     isDirExist,
     isFileExist,
+    openUploadStream,
+    openDownloadStream,
     ...paths,
   };
 };

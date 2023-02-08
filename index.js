@@ -14,13 +14,14 @@ import cameraRouter from './routes/camera.router.js';
 import fileRouter from './routes/file.router.js';
 import taskRouter from './routes/task.router.js';
 import dateInfoRouter from './routes/dateInfo.router.js';
-import diskStorageRouter from './routes/disk.storage.router.js';
+import diskStorageRouter from './routes/storage.router.js';
 import userRouter from './routes/user.router.js';
 import storage from './storage/index.js';
 
 const mode = process.env.NODE_ENV || 'development';
 const PORT = process.env.PORT || 4000;
 const dbUri = process.env.MONGO_URI;
+const storageType = process.env.STORAGE_TYPE;
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -63,7 +64,7 @@ const startServer = async () => {
     const worker = new Worker(socket);
     await worker.start(mongoClient);
 
-    storage.start(mongoClient);
+    storage.start(mongoClient, storageType);
 
     app.socket = socket;
     app.worker = worker;

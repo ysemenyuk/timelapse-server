@@ -2,7 +2,7 @@ import fileService from '../services/file.service.js';
 import { makeNumber, makePosterFileName, makeVideoFileName } from '../utils/utils.js';
 import { fileType, type } from '../utils/constants.js';
 import diskService from '../services/disk.service.js';
-import storageService from '../services/storage.service.js';
+import storageService from '../storage/index.js';
 import ffmpegService from '../services/ffmpeg.service.js';
 import makeUniformSample from './makeUniformSample.js';
 // import path from 'path';
@@ -43,13 +43,13 @@ const createAndSaveVideo = async ({ logger, userId, cameraId, taskId, create, vi
   console.log('filtered.length', filtered.length);
 
   // download and rename files in tmp-dir from storage
-  const promises = filtered.map((photo, index) => {
+  const promises = filtered.map(async (photo, index) => {
     // if (!storageService.isFileExist({ file: photo })) {
     //   return null;
     // }
     const stream = storageService.openDownloadStream({ file: photo });
     const fileName = `img-${makeNumber(index)}.jpg`;
-    const saved = diskService.saveFile({ dir: tmpdir, fileName, stream });
+    const saved = await diskService.saveFile({ dir: tmpdir, fileName, stream });
     return saved;
   });
   console.log('promises.length', promises.length);
