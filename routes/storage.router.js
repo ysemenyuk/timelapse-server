@@ -1,4 +1,5 @@
 import express from 'express';
+import _ from 'lodash';
 import { asyncHandler } from '../middleware/errorHandlerMiddleware.js';
 // import fileService from '../services/file.service.js';
 import imageService from '../services/image.service.js';
@@ -17,10 +18,9 @@ const router = express.Router({ mergeParams: true });
 router.get(
   /g+\/u_[a-z0-9]+\/c_[a-z0-9]+\/.*\.jpg/,
   asyncHandler(async (req, res, next) => {
-    req.logger(`disk.storage.router.get jpg ${req.url}`);
+    req.logger(`gridfs.storage.router.get jpg ${req.url}`);
 
-    const filePath = req._parsedUrl.pathname;
-
+    const filePath = _.trimStart(req._parsedUrl.pathname, '/g/');
     const stream = storageService.openDownloadStream({
       logger: req.logger,
       filePath,
@@ -50,7 +50,7 @@ router.get(
 router.get(
   /u_[a-z0-9]+\/c_[a-z0-9]+\/.*\.mp4/,
   asyncHandler(async (req, res, next) => {
-    req.logger(`disk.storage.router.get mp4 ${req.url}`);
+    req.logger(`gridfs.storage.router.get mp4 ${req.url}`);
 
     const filePath = req._parsedUrl.pathname;
     const stream = storageService.openDownloadStream({

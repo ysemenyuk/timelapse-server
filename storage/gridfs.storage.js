@@ -42,10 +42,10 @@ export default (mongoClient) => {
     }
 
     const link = `/files/g/${filePath}`;
-    // const meta = await collection.find({ name: filePath });
-    // console.log('meta, meta);
+    const [metadata] = await bucket.find({ filename: filePath }).toArray();
+    // console.log('metadata', metadata);
 
-    return { link };
+    return { link, size: metadata.length };
   };
 
   // read file

@@ -119,7 +119,7 @@ class Storage {
   // stream
   //
 
-  async openDownloadStream({ logger, filePath }) {
+  openDownloadStream({ logger, filePath }) {
     logger && logger(`storage.service.openDownloadStream filePath: ${filePath}`);
 
     const stream = this.storage.openDownloadStream({ logger, filePath });
