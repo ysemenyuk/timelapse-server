@@ -2,17 +2,26 @@ import { existsSync, createWriteStream, createReadStream } from 'fs';
 import * as fsp from 'fs/promises';
 import { pipeline } from 'stream/promises';
 import path from 'path';
+import _ from 'lodash';
 import { isPhotoFile } from '../utils/utils.js';
-import {
+import paths from './disk.paths.js';
+
+const pathToDiskSpace = process.env.DISK_PATH;
+
+const {
   createFilePath,
   createUserDirPath,
   createCameraDirPath,
   createPhotosDirPath,
   createVideosDirPath,
   createDateDirPath,
-} from './disk.paths.js';
+} = paths;
 
-const pathToDiskSpace = process.env.DISK_PATH;
+export const createFullPathOnDisk = (filePath) => path.join(pathToDiskSpace, filePath);
+
+//
+// main
+//
 
 export default () => {
   const createFullPath = (filePath) => path.join(pathToDiskSpace, filePath);
@@ -148,10 +157,23 @@ export default () => {
 
   // streams
 
-  const openDownloadStreamByLink = ({ logger, fileLink }) => {
-    logger && logger(`disk.storage.openDownloadStream fileLink: ${fileLink}`);
+  const openDownloadStream = ({ logger, file }) => {
+    logger && logger(`disk.storage.openDownloadStream file.name: ${file.name}`);
 
-    const fullPath = createFullPath(fileLink);
+    const filePath = createFilePath(file);
+    const fullPath = createFullPath(filePath);
+
+    const stream = createReadStream(fullPath);
+    return stream;
+  };
+
+  const openDownloadStreamByLink = ({ logger, fileLink }) => {
+    logger && logger(`disk.storage.openDownloadStreamByLink fileLink: ${fileLink}`);
+
+    // const fileName = _.last(fileLink.split('/'));
+    const filePath = _.trimStart(fileLink, '/');
+    const fullPath = createFullPath(filePath);
+
     const stream = createReadStream(fullPath);
     return stream;
   };
@@ -177,6 +199,7 @@ export default () => {
   };
 
   return {
+    createFullPath,
     createUserPath,
     createCameraPath,
     removeUserFiles,
@@ -184,6 +207,7 @@ export default () => {
     saveFile,
     readFile,
     removeFile,
+    openDownloadStream,
     openDownloadStreamByLink,
     getFileStat,
     isFileExist,

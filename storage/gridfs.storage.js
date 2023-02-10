@@ -1,4 +1,5 @@
 import mongodb from 'mongodb';
+import _ from 'lodash';
 import { Readable } from 'stream';
 import { pipeline } from 'stream/promises';
 import { type } from '../utils/constants.js';
@@ -13,7 +14,7 @@ const map = {
 };
 
 const createFileName = (file) => {
-  const startPart = `g/u_${file.user.toString()}/u_${file.camera.toString()}`;
+  const startPart = `u_${file.user.toString()}/c_${file.camera.toString()}`;
   const fileName = map[file.type](file.date);
   return [startPart, fileName].join('/');
 };
@@ -28,7 +29,7 @@ const stream2buffer = (stream) => {
 };
 
 //
-//
+// main
 //
 
 export default (mongoClient) => {
@@ -78,7 +79,7 @@ export default (mongoClient) => {
       console.log('error saveFile', error);
     }
 
-    const link = `/files/${fileName}`;
+    const link = `/files/g/${fileName}`;
     const [metadata] = await bucket.find({ filename: fileName }).toArray();
     // console.log('metadata', metadata);
 
@@ -113,10 +114,19 @@ export default (mongoClient) => {
 
   // streams
 
-  const openDownloadStreamByLink = ({ logger, fileLink }) => {
-    logger(`gridFs.storage.openDownloadStreamByLink fileLink: ${fileLink}`);
+  const openDownloadStream = ({ logger, file }) => {
+    logger(`gridFs.storage.openDownloadStream  file.name: ${file.name}`);
 
-    const downloadStream = bucket.openDownloadStreamByName(fileLink);
+    const fileName = createFileName(file);
+    const downloadStream = bucket.openDownloadStreamByName(fileName);
+    return downloadStream;
+  };
+
+  const openDownloadStreamByLink = ({ logger, fileLink }) => {
+    logger(`gridFs.storage.openDownloadStreamByLink fileName: ${fileLink}`);
+
+    const fileName = _.trimStart(fileLink, '/g/');
+    const downloadStream = bucket.openDownloadStreamByName(fileName);
     return downloadStream;
   };
 
@@ -138,6 +148,7 @@ export default (mongoClient) => {
     saveFile,
     readFile,
     removeFile,
+    openDownloadStream,
     openDownloadStreamByLink,
     getFileStat,
     isFileExist,

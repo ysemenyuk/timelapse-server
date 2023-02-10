@@ -72,7 +72,7 @@ const map = {
 };
 
 const createFilePath = (file) => {
-  const filePath = map[file.type](file.date);
+  const filePath = map[file.type](file);
   return filePath;
   // return err file.type not found
 };

@@ -87,9 +87,17 @@ class Storage {
   }
 
   //
-  // stream
+  // streams
   //
 
+  openDownloadStream({ logger, file }) {
+    logger && logger(`storage.service.openDownloadStream file.name: ${file.name}`);
+
+    const stream = this.storage.openDownloadStream({ logger, file });
+    return stream;
+  }
+
+  // for gridfs
   openDownloadStreamByLink({ logger, fileLink }) {
     logger && logger(`storage.service.openDownloadStreamByLink fileLink: ${fileLink}`);
 
