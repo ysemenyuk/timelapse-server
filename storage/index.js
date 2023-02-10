@@ -1,7 +1,6 @@
 import cloudStorage from './cloud.storage.js';
 import diskStorage from './disk.storage.js';
 import gridfsStorage from './gridfs.storage.js';
-import { isPhotoFile } from '../utils/utils.js';
 
 const mapping = {
   disk: diskStorage,
@@ -19,58 +18,39 @@ class Storage {
   }
 
   //
-  // create dirs
+  // create
   //
 
-  async createUserDir({ logger, userId }) {
-    logger && logger(`storage.service.createUserDir userId: ${userId}`);
-    const userDirPath = this.storage.createUserDirPath(userId);
-    const userDir = await this.storage.createDir({ logger, dirPath: userDirPath });
+  async createUserPath({ logger, userId }) {
+    logger && logger(`storage.service.createUserPath userId: ${userId}`);
+
+    const userDir = await this.storage.createUserPath({ logger, userId });
     return userDir;
   }
 
-  async createCameraDirs({ logger, userId, cameraId }) {
-    logger && logger(`storage.service.createCameraDirs cameraId: ${cameraId}`);
+  async createCameraPath({ logger, userId, cameraId }) {
+    logger && logger(`storage.service.createCameraPath cameraId: ${cameraId}`);
 
-    const cameraDirPath = this.storage.createCameraDirPath(userId, cameraId);
-    const cameraPhotosDirPath = this.storage.createPhotosDirPath(userId, cameraId);
-    const cameraVideosDirPath = this.storage.createVideosDirPath(userId, cameraId);
-
-    const cameraDir = await this.storage.createDir({ logger, dirPath: cameraDirPath });
-    const cameraPhotosDir = await this.storage.createDir({ logger, dirPath: cameraPhotosDirPath });
-    const cameraVideosDir = await this.storage.createDir({ logger, dirPath: cameraVideosDirPath });
-
-    return { cameraDir, cameraPhotosDir, cameraVideosDir };
+    const cameraDir = await this.storage.createCameraPath({ logger, userId, cameraId });
+    return cameraDir;
   }
 
   //
-  // remove dirs
+  // remove
   //
 
-  async removeUserDir({ logger, userId }) {
-    logger && logger(`storage.service.removeUserDir userId: ${userId}`);
-    const userDirPath = this.storage.createUserDirPath(userId);
-    const deleted = await this.storage.removeDir({ logger, dirPath: userDirPath });
+  async removeUserFiles({ logger, userId }) {
+    logger && logger(`storage.service.removeUserFiles userId: ${userId}`);
+
+    const deleted = await this.storage.removeUserFiles({ logger, userId });
     return deleted;
   }
 
-  async removeCameraDir({ logger, userId, cameraId }) {
-    logger && logger(`storage.service.removeCameraDir cameraId: ${cameraId}`);
-    const cameraDirPath = this.storage.createCameraDirPath(userId, cameraId);
-    const deleted = await this.storage.removeDir({ logger, dirPath: cameraDirPath });
+  async removeCameraFiles({ logger, userId, cameraId }) {
+    logger && logger(`storage.service.removeCameraFiles cameraId: ${cameraId}`);
+
+    const deleted = await this.storage.removeCameraFiles({ logger, userId, cameraId });
     return deleted;
-  }
-
-  //
-  // make dir for photo if not exist
-  //
-
-  async makeDateDirIfNotExist({ logger, file }) {
-    const dirPath = this.storage.createDateDirPath(file.user, file.camera, file.date);
-    if (!this.storage.isDirExist({ logger, dirPath })) {
-      logger && logger(`storage.service.makeDateDirIfNotExist dirPath: ${dirPath}`);
-      await this.storage.createDir({ logger, dirPath });
-    }
   }
 
   //
@@ -80,13 +60,7 @@ class Storage {
   async saveFile({ logger, file, data, stream }) {
     logger && logger(`storage.service.saveFile file: ${file.name}`);
 
-    if (isPhotoFile(file)) {
-      await this.makeDateDirIfNotExist({ logger, file });
-    }
-
-    const filePath = this.storage.createFilePath({ logger, file });
-    const fileInfo = await this.storage.saveFile({ logger, filePath, data, stream });
-
+    const fileInfo = await this.storage.saveFile({ logger, file, data, stream });
     return fileInfo;
   }
 
@@ -94,13 +68,11 @@ class Storage {
   // read file
   //
 
-  async readFile({ logger, file, type = 'buffer' }) {
+  async readFile({ logger, file, type }) {
     logger && logger(`storage.service.readFile file: ${file.name}`);
 
-    const filePath = this.storage.createFilePath({ logger, file });
-    const stream = this.storage.openDownloadStream({ logger, filePath, type });
-
-    return stream;
+    const readed = await this.storage.readFile({ logger, file, type });
+    return readed;
   }
 
   //
@@ -110,8 +82,7 @@ class Storage {
   async removeFile({ logger, file }) {
     logger && logger(`storage.service.removeFile file.name: ${file.name}`);
 
-    const filePath = this.storage.createFilePath({ logger, file });
-    const deleted = await this.storage.removeFile({ logger, filePath });
+    const deleted = await this.storage.removeFile({ logger, file });
     return deleted;
   }
 
@@ -119,30 +90,29 @@ class Storage {
   // stream
   //
 
-  openDownloadStream({ logger, filePath }) {
-    logger && logger(`storage.service.openDownloadStream filePath: ${filePath}`);
+  openDownloadStreamByLink({ logger, fileLink }) {
+    logger && logger(`storage.service.openDownloadStreamByLink fileLink: ${fileLink}`);
 
-    const stream = this.storage.openDownloadStream({ logger, filePath });
+    const stream = this.storage.openDownloadStreamByLink({ logger, fileLink });
     return stream;
   }
 
   //
-  // file stat
+  //
   //
 
   async getFileStat({ logger, file }) {
     logger && logger(`storage.service.fileStat file.name: ${file.name}`);
 
-    const filePath = this.storage.createFilePath({ logger, file });
-    const stat = await this.storage.fileStat({ logger, filePath });
+    const stat = await this.storage.getFileStat({ logger, file });
     return stat;
   }
 
   isFileExist({ logger, file }) {
     logger && logger(`storage.service.isFileExist file.name: ${file.name}`);
 
-    const filePath = this.storage.createFilePath({ logger, file });
-    return this.storage.isFileExist({ logger, filePath });
+    const isFileExist = this.storage.isFileExist({ logger, file });
+    return isFileExist;
   }
 }
 

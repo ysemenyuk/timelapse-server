@@ -20,7 +20,7 @@ const singUp = async ({ email, password, logger }) => {
   const newUser = new User({ email, password: hashPassword });
 
   // crete user folder
-  await fileService.createDefaultUserFiles({
+  await fileService.createUserDefaultFiles({
     logger,
     userId: newUser._id,
   });

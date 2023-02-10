@@ -38,7 +38,7 @@ const createOne = async ({ logger, userId, payload }) => {
   // console.log('camera', camera);
 
   // create default folders
-  await fileService.createDefaultCameraFiles({
+  await fileService.createCameraDefaultFiles({
     logger,
     userId,
     cameraId: camera._id,

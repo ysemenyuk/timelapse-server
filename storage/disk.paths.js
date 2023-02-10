@@ -45,22 +45,19 @@ const createDateDirPath = (userId, cameraId, date) => {
 // files paths
 //
 
-const createVideoFilePath = ({ logger, file }) => {
-  logger && logger(`path.createVideoFilePath file.name: ${file.name}`);
+const createVideoFilePath = (file) => {
   const videosDirPath = createVideosDirPath(file.user, file.camera);
   const fileName = makeVideoFileName(file.date);
   return [videosDirPath, fileName].join('/');
 };
 
-const cretePhotoFilePath = ({ logger, file }) => {
-  logger && logger(`path.cretePhotoFilePath file.name: ${file.name}`);
+const cretePhotoFilePath = (file) => {
   const dateDirPath = createDateDirPath(file.user, file.camera, file.date);
   const fileName = makePhotoFileName(file.date);
   return [dateDirPath, fileName].join('/');
 };
 
-const createPosterFilePath = ({ logger, file }) => {
-  logger && logger(`path.createPosterFilePath file.name: ${file.name}`);
+const createPosterFilePath = (file) => {
   const cameraDirPath = createCameraDirPath(file.user, file.camera);
   const fileName = makePosterFileName(file.date);
   return [cameraDirPath, fileName].join('/');
@@ -68,21 +65,15 @@ const createPosterFilePath = ({ logger, file }) => {
 
 //
 
-const createFilePath = ({ logger, file }) => {
-  logger && logger(`path.createFilePath file.name: ${file.name}`);
+const map = {
+  [type.VIDEO]: createVideoFilePath,
+  [type.PHOTO]: cretePhotoFilePath,
+  [type.POSTER]: createPosterFilePath,
+};
 
-  if (file.type === type.VIDEO) {
-    return createVideoFilePath({ logger, file });
-  }
-
-  if (file.type === type.PHOTO) {
-    return cretePhotoFilePath({ logger, file });
-  }
-
-  if (file.type === type.POSTER) {
-    return createPosterFilePath({ logger, file });
-  }
-
+const createFilePath = (file) => {
+  const filePath = map[file.type](file.date);
+  return filePath;
   // return err file.type not found
 };
 

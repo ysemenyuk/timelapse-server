@@ -169,10 +169,10 @@ const deleteOneById = async ({ logger, itemId }) => {
 
 // user
 
-const createDefaultUserFiles = async ({ logger, userId }) => {
-  logger && logger(`fileService.createDefaultUserFiles`);
+const createUserDefaultFiles = async ({ logger, userId }) => {
+  logger && logger(`fileService.createUserDefaultFiles`);
 
-  await storageService.createUserDir({
+  await storageService.createUserPath({
     logger,
     userId,
   });
@@ -183,7 +183,7 @@ const deleteUserFiles = async ({ logger, userId }) => {
 
   // delete camera files from storage
   try {
-    await storageService.removeUserDir({ logger, userId });
+    await storageService.removeUserFiles({ logger, userId });
   } catch (error) {
     console.log('error fileService.deleteUserFiles', error);
   }
@@ -196,14 +196,10 @@ const deleteUserFiles = async ({ logger, userId }) => {
 
 // camera
 
-const createDefaultCameraFiles = async ({ logger, userId, cameraId }) => {
-  logger && logger(`fileService.createDefaultCameraFiles`);
+const createCameraDefaultFiles = async ({ logger, userId, cameraId }) => {
+  logger && logger(`fileService.createCameraDefaultFiles`);
 
-  await storageService.createCameraDirs({
-    logger,
-    userId,
-    cameraId,
-  });
+  await storageService.createCameraPath({ logger, userId, cameraId });
 };
 
 const deleteCameraFiles = async ({ logger, userId, cameraId }) => {
@@ -211,7 +207,7 @@ const deleteCameraFiles = async ({ logger, userId, cameraId }) => {
 
   // delete camera files from storage
   try {
-    await storageService.removeCameraDir({ logger, userId, cameraId });
+    await storageService.removeCameraFiles({ logger, userId, cameraId });
   } catch (error) {
     console.log('error fileService.deleteCameraFiles', error);
   }
@@ -233,8 +229,8 @@ export default {
   deleteOne,
   deleteOneById,
   // deleteManyByIds,
-  createDefaultUserFiles,
+  createUserDefaultFiles,
   deleteUserFiles,
-  createDefaultCameraFiles,
+  createCameraDefaultFiles,
   deleteCameraFiles,
 };
