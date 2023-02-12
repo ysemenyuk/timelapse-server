@@ -5,7 +5,7 @@ import { pipeline } from 'stream/promises';
 import { type } from '../utils/constants.js';
 import { makeVideoFileName, makePhotoFileName, makePosterFileName } from '../utils/utils.js';
 
-//
+const { ObjectId } = mongodb;
 
 const map = {
   [type.VIDEO]: makeVideoFileName,
@@ -65,7 +65,7 @@ export default (mongoClient) => {
     logger && logger(`gridfs.storage.saveFile filePath: ${file.name}`);
 
     const fileName = createFileName(file);
-    const uploadStream = bucket.openUploadStream(fileName);
+    const uploadStream = bucket.openUploadStream(fileName, { metadata: { user: file.user, camera: file.camera } });
 
     try {
       if (stream) {
@@ -108,14 +108,20 @@ export default (mongoClient) => {
 
   // remove file
 
-  const removeFile = ({ logger, file }) => {
-    logger(`gridFs.storage.removeFile file.name: ${file.name}`);
+  const removeFile = async ({ logger, file }) => {
+    logger && logger(`gridFs.storage.removeFile file.name: ${file.name}`);
+
+    const fileName = createFileName(file);
+    const [metadata] = await bucket.find({ filename: fileName }).toArray();
+    // console.log('metadata', metadata);
+    const deleted = await bucket.delete(ObjectId(metadata._id));
+    return deleted;
   };
 
   // streams
 
   const openDownloadStream = ({ logger, file }) => {
-    logger(`gridFs.storage.openDownloadStream  file.name: ${file.name}`);
+    logger && logger(`gridFs.storage.openDownloadStream  file.name: ${file.name}`);
 
     const fileName = createFileName(file);
     const downloadStream = bucket.openDownloadStreamByName(fileName);
@@ -123,7 +129,7 @@ export default (mongoClient) => {
   };
 
   const openDownloadStreamByLink = ({ logger, fileLink }) => {
-    logger(`gridFs.storage.openDownloadStreamByLink fileName: ${fileLink}`);
+    logger && logger(`gridFs.storage.openDownloadStreamByLink fileName: ${fileLink}`);
 
     const fileName = _.trimStart(fileLink, '/g/');
     const downloadStream = bucket.openDownloadStreamByName(fileName);
@@ -136,8 +142,13 @@ export default (mongoClient) => {
     logger && logger(`gridFs.storage.fileStat file.name: ${file.name}`);
   };
 
-  const isFileExist = ({ logger, file }) => {
+  const isFileExist = async ({ logger, file }) => {
     logger && logger(`gridFs.storage.isFileExist file.name: ${file.name}`);
+
+    const fileName = createFileName(file);
+    const arr = await bucket.find({ filename: fileName }).toArray();
+    // console.log('arr', arr);
+    return Boolean(arr.length);
   };
 
   return {

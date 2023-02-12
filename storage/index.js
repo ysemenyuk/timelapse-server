@@ -116,10 +116,10 @@ class Storage {
     return stat;
   }
 
-  isFileExist({ logger, file }) {
+  async isFileExist({ logger, file }) {
     logger && logger(`storage.service.isFileExist file.name: ${file.name}`);
 
-    const isFileExist = this.storage.isFileExist({ logger, file });
+    const isFileExist = await this.storage.isFileExist({ logger, file });
     return isFileExist;
   }
 }

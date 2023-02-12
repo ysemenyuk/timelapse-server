@@ -4,7 +4,7 @@ import { exec } from 'child_process';
 
 const execp = util.promisify(exec);
 
-const makeVideoFileFromPhotos = async ({ pathToDir, fps }) => {
+const makeVideoFromPhotos = async ({ pathToDir, fps }) => {
   const videoFileName = `tmp-video.mp4`;
   const pathToVideoFile = path.join(pathToDir, videoFileName);
 
@@ -32,7 +32,7 @@ const makeVideoPoster = async ({ pathToDir, videoName }) => {
   //   console.log('start makeVideoPoster pathToPosterFile -', pathToPosterFile);
 
   try {
-    await execp(`ffmpeg -y -i ${pathToVideoFile} -ss 00:00:1 -frames:v 1 ${pathToPosterFile}`);
+    await execp(`ffmpeg -y -i ${pathToVideoFile} -ss 00:00:01 -frames:v 1 ${pathToPosterFile}`);
   } catch (error) {
     console.log('ffmpeg error:', error);
     throw error;
@@ -55,4 +55,4 @@ const getVideoInfo = async ({ pathToDir, videoName }) => {
   }
 };
 
-export default { makeVideoFileFromPhotos, makeVideoPoster, getVideoInfo };
+export default { makeVideoFromPhotos, makeVideoPoster, getVideoInfo };

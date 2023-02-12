@@ -190,7 +190,7 @@ export default () => {
     return stat;
   };
 
-  const isFileExist = ({ logger, file }) => {
+  const isFileExist = async ({ logger, file }) => {
     logger && logger(`disk.storage.isFileExist file.name: ${file.name}`);
 
     const filePath = createFilePath(file);

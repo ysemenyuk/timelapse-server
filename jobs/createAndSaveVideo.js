@@ -14,11 +14,13 @@ const sleep = (time, message = 'Hello') =>
 
 const createAndSaveVideo = async ({ logger, userId, cameraId, taskId, create, videoSettings }) => {
   //
+  console.log('videoSettings', videoSettings);
+
   const { customName, duration, fps, startDate, endDate, timeRangeType, customTimeStart, customTimeEnd } =
     videoSettings;
 
   const isCustomTime = timeRangeType === 'customTime';
-  //
+
   // create tmp-dir on disk
   const tmpdir = await diskService.createTmpDir({ logger });
   console.log('tmpdir', tmpdir);
@@ -38,28 +40,32 @@ const createAndSaveVideo = async ({ logger, userId, cameraId, taskId, create, vi
   const samplingOfPhotos = makeUniformSample(photos, duration, fps);
   console.log('samplingOfPhotos.length', samplingOfPhotos.length);
 
-  // filter if exist in storage
-  const filtered = samplingOfPhotos.filter((photo) => storageService.isFileExist({ file: photo }));
-  console.log('filtered.length', filtered.length);
+  // isFileExistInStorage
+  const checkedp = samplingOfPhotos.map(async (file) => {
+    const isFileExistInStorage = await storageService.isFileExist({ file });
+    if (isFileExistInStorage) {
+      return file;
+    }
+    return null;
+  });
+  const checked = await Promise.all(checkedp);
+  const existing = checked.filter((file) => file);
+  console.log('existing.length', existing.length);
+  //
 
   // download and rename files in tmp-dir from storage
-  const promises = filtered.map(async (photo, index) => {
-    // if (!storageService.isFileExist({ file: photo })) {
-    //   return null;
-    // }
+  const savedp = existing.map(async (photo, index) => {
     const stream = storageService.openDownloadStream({ file: photo });
     const fileName = `img-${makeNumber(index)}.jpg`;
     const saved = await diskService.saveFile({ dir: tmpdir, fileName, stream });
     return saved;
   });
-  console.log('promises.length', promises.length);
-
-  const saved = await Promise.all(promises);
+  const saved = await Promise.all(savedp);
   console.log('saved.length', saved.length);
 
   // create tmp-video on disk
 
-  const tmpvideo = await ffmpegService.makeVideoFileFromPhotos({ pathToDir: tmpdir, fps: fps });
+  const tmpvideo = await ffmpegService.makeVideoFromPhotos({ pathToDir: tmpdir, fps: fps });
   console.log('tmpvideo', tmpvideo);
 
   // info
