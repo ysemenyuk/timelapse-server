@@ -4,32 +4,42 @@ import File from '../models/File.js';
 import { type } from '../utils/constants.js';
 import storageService from '../storage/index.js';
 
-const getStartDateTime = (date) => new Date(`${date} 00:00:00`);
-const getEndDateTime = (date) => addHours(new Date(`${date} 00:00:00`), 24);
+const getGteDateTime = (date) => new Date(`${date} 00:00:00`);
+const getLteDateTime = (date) => addHours(new Date(`${date} 00:00:00`), 24);
 
-const createQuery = (cameraId, query) => {
-  const { type, createType, oneDate, startDate, endDate, startTime, endTime } = query;
+const makeFilter = (camera, query) => {
+  const { type, date, date_gte, date_lte, time_gte, time_lte } = query;
   // console.log(1111, 'query', query);
 
-  const createdBy = createType && createType.split(',');
+  const createType = query.createType && query.createType.split(',');
 
-  let date;
+  let dateRange;
 
-  if (oneDate) {
-    date = { $gte: getStartDateTime(oneDate), $lt: getEndDateTime(oneDate) };
+  if (date) {
+    dateRange = { $gte: getGteDateTime(date), $lte: getLteDateTime(date) };
   }
 
-  if (startDate && endDate) {
-    date = { $gte: getStartDateTime(startDate), $lt: getEndDateTime(endDate) };
+  if (date_gte && date_lte) {
+    dateRange = { $gte: getGteDateTime(date_gte), $lte: getLteDateTime(date_lte) };
   }
 
   let timeString;
 
-  if (startTime && endTime) {
-    timeString = { $gte: `${startTime}:00`, $lt: `${endTime}:00` };
+  if (time_gte && time_lte) {
+    timeString = { $gte: `${time_gte}:00`, $lte: `${time_lte}:00` };
   }
 
-  return _.pickBy({ camera: cameraId, type, createType: createdBy, date, timeString }, _.identity);
+  return _.pickBy({ camera, type, createType, date: dateRange, timeString }, _.identity);
+};
+
+const makeOptions = (query) => {
+  // const { skip, limit } = query;
+  // console.log(2222, 'query', query);
+  const limit = parseInt(query.limit, 10) || 10;
+  const skip = parseInt(query.skip, 10);
+  const populate = query.populate;
+
+  return _.pickBy({ limit, skip, populate }, _.identity);
 };
 
 // get
@@ -37,8 +47,8 @@ const createQuery = (cameraId, query) => {
 const getFilesForVideo = async ({ logger, cameraId, query }) => {
   logger && logger(`fileService.getFilesForVideo`);
 
-  const queryObject = createQuery(cameraId, query);
-  const files = await File.find(queryObject).sort({ _id: 1 });
+  const filter = makeFilter(cameraId, query);
+  const files = await File.find(filter).sort({ _id: 1 });
 
   return files;
 };
@@ -46,8 +56,14 @@ const getFilesForVideo = async ({ logger, cameraId, query }) => {
 const getManyByQuery = async ({ logger, cameraId, query }) => {
   logger && logger(`fileService.getManyByQuery`);
 
-  const queryObject = createQuery(cameraId, query);
-  const files = await File.find(queryObject).populate('poster');
+  const filter = makeFilter(cameraId, query);
+  const options = makeOptions(query);
+
+  const total = await File.countDocuments(filter);
+  const files = await File.find(filter, null, options);
+
+  return { total, files };
+
   // const files = await File.aggregate([
   //   {
   //     $addFields: {
@@ -63,14 +79,13 @@ const getManyByQuery = async ({ logger, cameraId, query }) => {
   //   { $match: { type: 'video', time: { $gte: '09:25:00' } } },
   // ]);
   // console.log('files', files);
-  return files;
 };
 
 const getCountByQuery = async ({ logger, cameraId, query }) => {
   logger && logger(`fileService.getCountByQuery`);
 
-  const queryObject = createQuery(cameraId, query);
-  const count = await File.countDocuments(queryObject);
+  const filter = makeFilter(cameraId, query);
+  const count = await File.countDocuments(filter);
   return count;
 };
 
