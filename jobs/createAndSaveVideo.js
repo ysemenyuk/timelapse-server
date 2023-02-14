@@ -28,9 +28,9 @@ const createAndSaveVideo = async ({ logger, userId, cameraId, taskId, create, vi
   // getFile from DB
   const query = {
     type: 'photo',
-    startDate: startDate,
-    endDate: endDate,
-    ...(isCustomTime && { startTime: customTimeStart, endTime: customTimeEnd }),
+    date_gte: startDate,
+    date_lte: endDate,
+    ...(isCustomTime && { time_gte: customTimeStart, time_lte: customTimeEnd }),
   };
 
   const photos = await fileService.getFilesForVideo({ logger, cameraId, query });

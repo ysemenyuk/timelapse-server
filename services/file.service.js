@@ -32,16 +32,6 @@ const makeFilter = (camera, query) => {
   return _.pickBy({ camera, type, createType, date: dateRange, timeString }, _.identity);
 };
 
-const makeOptions = (query) => {
-  // const { skip, limit } = query;
-  // console.log(2222, 'query', query);
-  const limit = parseInt(query.limit, 10) || 10;
-  const skip = parseInt(query.skip, 10);
-  const populate = query.populate;
-
-  return _.pickBy({ limit, skip, populate }, _.identity);
-};
-
 // get
 
 const getFilesForVideo = async ({ logger, cameraId, query }) => {
@@ -57,28 +47,20 @@ const getManyByQuery = async ({ logger, cameraId, query }) => {
   logger && logger(`fileService.getManyByQuery`);
 
   const filter = makeFilter(cameraId, query);
-  const options = makeOptions(query);
-
   const total = await File.countDocuments(filter);
-  const files = await File.find(filter, null, options);
 
-  return { total, files };
+  const page = parseInt(query.page, 10);
+  const limit = parseInt(query.limit, 10);
 
-  // const files = await File.aggregate([
-  //   {
-  //     $addFields: {
-  //       time: {
-  //         $dateToString: {
-  //           date: '$date',
-  //           format: '%H:%M:%S',
-  //           timezone: '+03:00',
-  //         },
-  //       },
-  //     },
-  //   },
-  //   { $match: { type: 'video', time: { $gte: '09:25:00' } } },
-  // ]);
-  // console.log('files', files);
+  const skip = (page - 1) * limit;
+  const pages = Math.ceil(total / limit);
+
+  const populate = 'poster'; //query.populate
+
+  const options = _.pickBy({ limit, skip, populate }, _.identity);
+
+  const items = await File.find(filter, null, options);
+  return { page, pages, total, items };
 };
 
 const getCountByQuery = async ({ logger, cameraId, query }) => {
@@ -187,25 +169,21 @@ const deleteOneById = async ({ logger, itemId }) => {
 const createUserDefaultFiles = async ({ logger, userId }) => {
   logger && logger(`fileService.createUserDefaultFiles`);
 
-  await storageService.createUserPath({
-    logger,
-    userId,
-  });
+  await storageService.createUserPath({ logger, userId });
 };
 
 const deleteUserFiles = async ({ logger, userId }) => {
   logger && logger(`fileService.deleteUserFiles`);
 
-  // delete camera files from storage
+  // delete files from storage
   try {
     await storageService.removeUserFiles({ logger, userId });
   } catch (error) {
     console.log('error fileService.deleteUserFiles', error);
   }
 
-  // delete camera files from DB
+  // delete files from DB
   const deletedFromDb = await File.deleteMany({ user: userId });
-  // console.log('deletedFromDb', deletedFromDb);
   return deletedFromDb;
 };
 
@@ -220,16 +198,15 @@ const createCameraDefaultFiles = async ({ logger, userId, cameraId }) => {
 const deleteCameraFiles = async ({ logger, userId, cameraId }) => {
   logger && logger(`fileService.deleteCameraFiles`);
 
-  // delete camera files from storage
+  // delete files from storage
   try {
     await storageService.removeCameraFiles({ logger, userId, cameraId });
   } catch (error) {
     console.log('error fileService.deleteCameraFiles', error);
   }
 
-  // delete camera files from DB
+  // delete files from DB
   const deletedFromDb = await File.deleteMany({ user: userId, camera: cameraId });
-  // console.log('deletedFromDb', deletedFromDb.deletedCount);
   return deletedFromDb;
 };
 
