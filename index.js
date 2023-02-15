@@ -17,6 +17,7 @@ import dateInfoRouter from './routes/dateInfo.router.js';
 import diskStorageRouter from './routes/storage.router.js';
 import userRouter from './routes/user.router.js';
 import storage from './storage/index.js';
+import nms from './nms.js';
 
 const mode = process.env.NODE_ENV || 'development';
 const PORT = process.env.PORT || 4000;
@@ -68,6 +69,8 @@ const startServer = async () => {
 
     app.socket = socket;
     app.worker = worker;
+
+    nms.run();
 
     app.use('/files', diskStorageRouter);
 

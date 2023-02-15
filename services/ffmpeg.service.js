@@ -4,14 +4,14 @@ import { exec } from 'child_process';
 
 const execp = util.promisify(exec);
 
-const makeVideoFromPhotos = async ({ pathToDir, fps }) => {
+const makeVideoFromPhotos = async ({ pathToDir, fps = 25, quality = '1920x1080' }) => {
   const videoFileName = `tmp-video.mp4`;
   const pathToVideoFile = path.join(pathToDir, videoFileName);
 
   console.log('ffmpeg start makeVideoFile -', new Date().toLocaleString());
 
   try {
-    await execp(`ffmpeg -y -r ${fps} -i ${pathToDir}\\img-%06d.jpg -s 1920x1080 -vcodec libx264 ${pathToVideoFile}`);
+    await execp(`ffmpeg -y -i ${pathToDir}\\img-%06d.jpg -r ${fps} -s ${quality} -vcodec libx264 ${pathToVideoFile}`);
     // console.log('ffmpeg result:', result);
   } catch (error) {
     console.log('ffmpeg error:', error);

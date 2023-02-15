@@ -6,7 +6,7 @@ const createOneSchema = yup.object({
   description: yup.string().required(),
   model: yup.string(),
   photoUrl: yup.string().url(),
-  rtspUrl: yup.string().url(),
+  rtspUrl: yup.string(),
   location: yup.object().shape({
     latitude: yup.number().required().positive(),
     longitude: yup.number().required().positive(),
