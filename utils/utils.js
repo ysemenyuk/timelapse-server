@@ -1,6 +1,8 @@
 import format from 'date-fns/format/index.js';
 import { type } from './constants.js';
 
+//
+
 export const isPhotoFile = (file) => {
   return file && file.type === type.PHOTO;
 };
@@ -64,35 +66,22 @@ export const makeNumber = (num) => {
   return num;
 };
 
+//
+
 export const dd = (num) => (num < 10 ? `0${num}` : `${num}`);
 
-// export const parseTime = (time) => {
-//   const year = time.getFullYear();
-//   const month = time.getMonth();
-//   const date = time.getDate();
-//   const hh = time.getHours();
-//   const mm = time.getMinutes();
-//   const ss = time.getSeconds();
+//
 
-//   return {
-//     year,
-//     month: dd(month + 1),
-//     date: dd(date),
-//     hh: dd(hh),
-//     mm: dd(mm),
-//     ss: dd(ss),
-//   };
-// };
+export const makeUniformSample = (photos, duration, fps = 25) => {
+  const all = photos.length;
+  const required = duration * fps;
+  const step = all / required;
 
-// export const msToTime = (duration) => {
-//   let milliseconds = parseInt((duration%1000))
-//   let seconds = parseInt((duration/1000)%60)
-//   let minutes = parseInt((duration/(1000*60))%60)
-//   let hours = parseInt((duration/(1000*60*60))%24);
+  const result = [];
 
-//   hours = (hours < 10) ? "0" + hours : hours;
-//   minutes = (minutes < 10) ? "0" + minutes : minutes;
-//   seconds = (seconds < 10) ? "0" + seconds : seconds;
+  for (let i = 0; i < required; i++) {
+    result.push(photos[Math.floor(i * step)]);
+  }
 
-//   return hours + ":" + minutes + ":" + seconds;
-// };
+  return result;
+};

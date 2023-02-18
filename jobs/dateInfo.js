@@ -14,9 +14,7 @@ export const createDateInfo = async ({ logger, userId, cameraId }) => {
     return;
   }
 
-  // const location = [55.970962, 37.17985];
   const metaData = await weatherApiService.getCurrentDateWeather([latitude, longitude]);
-  // console.log(99999, metaData);
 
   if (!metaData) {
     return;
@@ -36,9 +34,6 @@ export const createDateInfo = async ({ logger, userId, cameraId }) => {
 
 export const getDateInfo = async ({ logger, userId, cameraId }) => {
   const currentDateName = makeDateName(new Date());
-
-  // const metaData = await weatherApiService.getCurrentDateWeather({ location: [55.970962, 37.17985] });
-  // console.log(99999, metaData);
 
   const dateInfo = await dateInfoService.getOne({
     logger,

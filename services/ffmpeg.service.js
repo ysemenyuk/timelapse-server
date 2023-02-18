@@ -28,9 +28,6 @@ const makeVideoPoster = async ({ pathToDir, videoName }) => {
   const pathToVideoFile = path.join(pathToDir, videoName);
   const pathToPosterFile = path.join(pathToDir, posterFileName);
 
-  //   console.log('start makeVideoPoster pathToVideo -', pathToVideo);
-  //   console.log('start makeVideoPoster pathToPosterFile -', pathToPosterFile);
-
   try {
     await execp(`ffmpeg -y -i ${pathToVideoFile} -ss 00:00:01 -frames:v 1 ${pathToPosterFile}`);
   } catch (error) {

@@ -3,10 +3,13 @@ import cameraService from '../services/camera.service.js';
 import cameraApi from '../services/cameraApi.service.js';
 import { makeDateName, makePhotoFileName, makeTimeName } from '../utils/utils.js';
 import { fileType, type } from '../utils/constants.js';
+import { validatePhotoUrl } from '../validators/photoUrl.validator.yup.js';
 
 const createAndSavePhoto = async ({ logger, userId, cameraId, taskId, photoSettings, create }) => {
   const camera = await cameraService.getOneById({ cameraId });
   const url = photoSettings.photoUrl || camera.photoUrl;
+
+  await validatePhotoUrl(url);
 
   const bufferData = await cameraApi.getPhotoByHttpRequest(url, 'arraybuffer');
 

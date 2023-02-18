@@ -51,13 +51,4 @@ export default (agenda, socket, workerLogger) => {
 
     logger(`finish ${taskName.CREATE_VIDEO} job`);
   });
-
-  //
-  agenda.define(taskName.CREATE_VIDEOS_BY_TIME, async () => {
-    const logger = workerLogger.extend(taskName.CREATE_VIDEOS_BY_TIME);
-
-    logger(`start ${taskName.CREATE_VIDEOS_BY_TIME} job`);
-
-    logger(`finish ${taskName.CREATE_VIDEOS_BY_TIME} job`);
-  });
 };

@@ -8,8 +8,8 @@ const createOneSchema = yup.object({
   photoUrl: yup.string().url(),
   rtspUrl: yup.string(),
   location: yup.object().shape({
-    latitude: yup.number().required().positive(),
-    longitude: yup.number().required().positive(),
+    // latitude: yup.number().positive(),
+    // longitude: yup.number().positive(),
   }),
 });
 

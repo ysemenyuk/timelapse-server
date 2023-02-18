@@ -1,11 +1,9 @@
 import fileService from '../services/file.service.js';
-import { makeNumber, makePosterFileName, makeVideoFileName } from '../utils/utils.js';
+import { makeNumber, makePosterFileName, makeUniformSample, makeVideoFileName } from '../utils/utils.js';
 import { fileType, type } from '../utils/constants.js';
 import diskService from '../services/disk.service.js';
 import storageService from '../storage/index.js';
 import ffmpegService from '../services/ffmpeg.service.js';
-import makeUniformSample from './makeUniformSample.js';
-// import path from 'path';
 
 const sleep = (time, message = 'Hello') =>
   new Promise((resolve) => {
@@ -23,7 +21,7 @@ const createAndSaveVideo = async ({ logger, userId, cameraId, taskId, create, vi
 
   // create tmp-dir on disk
   const tmpdir = await diskService.createTmpDir({ logger });
-  console.log('tmpdir', tmpdir);
+  console.log('createTmpDir', tmpdir);
 
   // getFile from DB
   const query = {
@@ -79,8 +77,6 @@ const createAndSaveVideo = async ({ logger, userId, cameraId, taskId, create, vi
   // create poster and upload in storage
   // create video and upload in storage
 
-  await sleep(5 * 1000); // doing job
-
   const date = new Date();
 
   const posterFileName = makePosterFileName(date);
@@ -132,8 +128,10 @@ const createAndSaveVideo = async ({ logger, userId, cameraId, taskId, create, vi
   // console.log('video', video);
 
   // remove tmp-dir from disk
-  const deleted = await diskService.removeDir({ logger, dir: tmpdir });
-  console.log('deleted', deleted);
+  await diskService.removeDir({ logger, dir: tmpdir });
+  console.log('removeTmpDir', tmpdir);
+
+  await sleep(10 * 1000); // doing job
 
   return video;
 };

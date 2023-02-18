@@ -64,6 +64,8 @@ const createOne = async ({ logger, userId, payload }) => {
 const updateOneById = async ({ logger, cameraId, payload }) => {
   logger && logger(`cameraService.updateOne`);
 
+  // TODO: validate payload
+
   await Camera.updateOne({ _id: cameraId }, payload);
   const updated = await Camera.findOne({ _id: cameraId }).populate(defaultPopulateItems);
   return updated;

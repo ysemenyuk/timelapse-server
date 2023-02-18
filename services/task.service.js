@@ -71,9 +71,10 @@ const createDefaultCameraTasks = async ({ logger, userId, cameraId }) => {
     type: taskType.REPEAT_EVERY,
     removable: false,
     photoSettings: {
-      startTime: '08:00',
-      stopTime: '20:00',
-      interval: 60,
+      interval: 60, // seconds
+      timeRangeType: 'customTime', // allTime, sunTime, customTime
+      customTimeStart: '08:00', // 08:00
+      customTimeStop: '20:00', // 20:00
     },
   });
 
