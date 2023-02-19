@@ -34,7 +34,7 @@ const createOne = async (req, res) => {
     userId: req.userId,
     cameraId: req.params.cameraId,
     payload,
-    worker: req.app.worker,
+    // worker: req.app.worker,
     logger: req.logger,
   });
 
@@ -51,7 +51,7 @@ const updateOne = async (req, res) => {
   const updated = await taskService.updateOneById({
     taskId: req.params.taskId,
     payload,
-    worker: req.app.worker,
+    // worker: req.app.worker,
     logger: req.logger,
   });
 
@@ -64,7 +64,7 @@ const deleteOne = async (req, res) => {
 
   const deleted = await taskService.deleteOneById({
     taskId: req.params.taskId,
-    worker: req.app.worker,
+    // worker: req.app.worker,
     logger: req.logger,
   });
 

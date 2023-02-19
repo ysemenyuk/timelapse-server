@@ -45,7 +45,7 @@ const createOne = async ({ logger, userId, payload }) => {
   });
 
   // create defaul tasks
-  await taskService.createDefaultCameraTasks({
+  await taskService.createCameraDefaultTasks({
     logger,
     userId,
     cameraId: camera._id,

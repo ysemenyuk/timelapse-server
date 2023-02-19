@@ -1,19 +1,19 @@
 import { Agenda } from 'agenda/es.js';
-// import mongodb from 'mongodb';
+import mongodb from 'mongodb';
 import jobs from './jobs/index.js';
 import debug from 'debug';
 import { taskName, taskStatus } from './utils/constants.js';
 
-// const { MongoClient } = mongodb;
+const { MongoClient } = mongodb;
 const logger = debug('worker');
 
-// const dbUri = process.env.MONGO_URI;
+const dbUri = process.env.MONGO_URI;
 const dbName = process.env.MONGO_DB_NAME;
 const jobTypes = ['photosJobs', 'videosJobs'];
 
 class Worker {
-  constructor(socket) {
-    this.socket = socket;
+  constructor() {
+    this.socket;
     this.mongoClient;
     this.agenda;
   }
@@ -22,21 +22,17 @@ class Worker {
     return this.agenda;
   }
 
-  async start(mongoClient) {
-    // this.mongoClient = new MongoClient(dbUri, {
-    //   useNewUrlParser: true,
-    //   useUnifiedTopology: true,
-    // });
+  async start(socket) {
+    this.socket = socket;
 
-    // await this.mongoClient.connect();
+    this.mongoClient = new MongoClient(dbUri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
 
-    this.mongoClient = mongoClient;
-
-    logger(`mongoClient successfully connect`);
+    await this.mongoClient.connect();
 
     this.agenda = new Agenda({ mongo: this.mongoClient.db(dbName) });
-
-    // console.log(111, this.agenda);
 
     jobTypes.forEach((type) => {
       jobs[type](this.agenda, this.socket, logger);
@@ -147,4 +143,6 @@ class Worker {
   }
 }
 
-export default Worker;
+const worker = new Worker();
+
+export default worker;

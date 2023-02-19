@@ -2,6 +2,8 @@ import cloudStorage from './cloud.storage.js';
 import diskStorage from './disk.storage.js';
 import gridfsStorage from './gridfs.storage.js';
 
+const storageType = process.env.STORAGE_TYPE;
+
 const mapping = {
   disk: diskStorage,
   cloud: cloudStorage,
@@ -13,8 +15,8 @@ class Storage {
     this.storage;
   }
 
-  start(mongoClient, storageType) {
-    this.storage = mapping[storageType](mongoClient);
+  async start() {
+    this.storage = await mapping[storageType]();
   }
 
   //

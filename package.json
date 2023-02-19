@@ -7,7 +7,7 @@
   "scripts": {
     "tgbot": "nodemon tg/telegraph.js",
     "start": "node index.js",
-    "dev": "DEBUG=request*,server*,agenda:db_init,agenda:create,agenda:job nodemon index.js",
+    "dev": "DEBUG=request*,server*,worker*,socket,agenda:db_init,agenda:create,agenda:job nodemon index.js",
     "windev": "set DEBUG=request*,server*,worker*,socket,agenda:db_init,agenda:create,agenda:job & nodemon index.js"
   },
   "author": "",

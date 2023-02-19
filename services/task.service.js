@@ -1,5 +1,6 @@
 import Task from '../models/Task.js';
 import { taskName, taskType } from '../utils/constants.js';
+import worker from '../worker.js';
 
 // get
 
@@ -19,7 +20,7 @@ const getOneById = async ({ logger, taskId }) => {
 
 // create
 
-const createOne = async ({ userId, cameraId, payload, worker, logger }) => {
+const createOne = async ({ userId, cameraId, payload, logger }) => {
   logger && logger(`taskService.createOne`);
 
   const task = new Task({
@@ -36,7 +37,7 @@ const createOne = async ({ userId, cameraId, payload, worker, logger }) => {
 
 // update
 
-const updateOneById = async ({ taskId, payload, worker, logger }) => {
+const updateOneById = async ({ taskId, payload, logger }) => {
   logger && logger(`taskService.updateOne`);
 
   const task = await Task.findOneAndUpdate({ _id: taskId }, payload, { new: true });
@@ -61,7 +62,7 @@ const deleteOneById = async ({ taskId, logger }) => {
 // camera default
 //
 
-const createDefaultCameraTasks = async ({ logger, userId, cameraId }) => {
+const createCameraDefaultTasks = async ({ logger, userId, cameraId }) => {
   logger && logger(`taskService.createDefaultTasks`);
 
   const photosByTimeTask = new Task({
@@ -98,6 +99,6 @@ export default {
   updateOneById,
   deleteOneById,
 
-  createDefaultCameraTasks,
+  createCameraDefaultTasks,
   deleteCameraTasks,
 };

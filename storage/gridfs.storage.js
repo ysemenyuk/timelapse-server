@@ -5,7 +5,8 @@ import { pipeline } from 'stream/promises';
 import { type } from '../utils/constants.js';
 import { makeVideoFileName, makePhotoFileName, makePosterFileName } from '../utils/utils.js';
 
-const { ObjectId } = mongodb;
+const dbUri = process.env.MONGO_URI;
+const { MongoClient, ObjectId } = mongodb;
 
 const map = {
   [type.VIDEO]: makeVideoFileName,
@@ -32,8 +33,15 @@ const stream2buffer = (stream) => {
 // main
 //
 
-export default (mongoClient) => {
+export default async () => {
   //
+  const mongoClient = new MongoClient(dbUri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
+
+  await mongoClient.connect();
+
   const database = mongoClient.db('myFirstDatabase');
   const bucket = new mongodb.GridFSBucket(database);
 

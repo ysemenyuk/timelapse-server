@@ -4,24 +4,17 @@ import debug from 'debug';
 const logger = debug('socket');
 
 class Socket {
-  constructor(httpServer) {
-    this.io = new Server(httpServer, {
-      cors: { origin: '*' },
-    });
-
+  constructor() {
+    this.socket;
     this.sessions = new Map();
   }
 
-  get instance() {
-    return this.io;
-  }
+  async start(httpServer) {
+    this.socket = new Server(httpServer, {
+      cors: { origin: '*' },
+    });
 
-  getUserSocket(userId) {
-    return this.sessions.get(userId.toString());
-  }
-
-  async start() {
-    this.io.use((socket, next) => {
+    this.socket.use((socket, next) => {
       const userId = socket.handshake.auth.userId;
 
       if (!userId) {
@@ -35,7 +28,7 @@ class Socket {
       next();
     });
 
-    this.io.on('connection', (socket) => {
+    this.socket.on('connection', (socket) => {
       logger('user connected', socket.handshake.auth.userId);
 
       this.sessions.set(socket.userId, socket);
@@ -51,6 +44,12 @@ class Socket {
       });
     });
   }
+
+  getUserSocket(userId) {
+    return this.sessions.get(userId.toString());
+  }
 }
 
-export default Socket;
+const socket = new Socket();
+
+export default socket;
