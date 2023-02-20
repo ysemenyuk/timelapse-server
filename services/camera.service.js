@@ -1,6 +1,10 @@
+import mongodb from 'mongodb';
 import Camera from '../models/Camera.js';
+// import File from '../models/File.js';
 import fileService from './file.service.js';
 import taskService from './task.service.js';
+
+const { ObjectId } = mongodb;
 
 const defaultPopulateItems = [
   'avatar',
@@ -15,6 +19,30 @@ const defaultPopulateItems = [
 
 const getAll = async ({ userId, logger, populateItems = defaultPopulateItems }) => {
   logger && logger(`cameraService.getAll`);
+
+  const stats = await Camera.aggregate([
+    { $match: { user: ObjectId(userId) } },
+    {
+      $lookup: {
+        from: 'files',
+        localField: '_id',
+        foreignField: 'camera',
+        pipeline: [{ $match: { type: 'video' } }],
+        as: 'videos',
+      },
+    },
+    {
+      $addFields: {
+        totalVideosSize: { $sum: '$videos.size' },
+        totalVideos: { $size: '$videos' },
+        firstVideo: { $first: '$videos' },
+        lastVideo: { $last: '$videos' },
+      },
+    },
+    { $project: { _id: 1, totalVideosSize: 1, totalVideos: 1, firstVideo: 1, lastVideo: 1 } },
+  ]);
+
+  console.log(123, stats);
 
   const cameras = await Camera.find({ user: userId }).populate(populateItems);
   return cameras;

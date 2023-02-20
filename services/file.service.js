@@ -55,7 +55,7 @@ const getManyByQuery = async ({ logger, cameraId, query }) => {
   const skip = (page - 1) * limit;
   const pages = Math.ceil(total / limit);
 
-  const populate = 'poster'; //query.populate
+  const populate = 'poster'; // query.populate
 
   const options = _.pickBy({ limit, skip, populate }, _.identity);
 

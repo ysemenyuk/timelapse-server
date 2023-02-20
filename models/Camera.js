@@ -29,7 +29,7 @@ CameraSchema.virtual('lastPhoto', {
   ref: 'File',
   localField: '_id',
   foreignField: 'camera',
-  match: { type: ['photo'], createType: ['byHand', 'byTime'] },
+  match: { type: ['photo'] },
   justOne: true,
   options: { sort: { _id: -1 } },
 });
@@ -38,7 +38,7 @@ CameraSchema.virtual('firstPhoto', {
   ref: 'File',
   localField: '_id',
   foreignField: 'camera',
-  match: { type: ['photo'], createType: ['byHand', 'byTime'] },
+  match: { type: ['photo'] },
   justOne: true,
   options: { sort: { _id: 1 } },
 });
@@ -49,14 +49,14 @@ CameraSchema.virtual('totalPhotos', {
   foreignField: 'camera',
   count: true,
   justOne: false,
-  match: { type: ['photo'], createType: { $in: ['byHand', 'byTime'] } },
+  match: { type: ['photo'] },
 });
 
 CameraSchema.virtual('lastVideo', {
   ref: 'File',
   localField: '_id',
   foreignField: 'camera',
-  match: { type: ['video'], createType: ['byHand', 'byTime'] },
+  match: { type: ['video'] },
   justOne: true,
   options: { sort: { _id: -1 } },
 });
@@ -65,7 +65,7 @@ CameraSchema.virtual('firstVideo', {
   ref: 'File',
   localField: '_id',
   foreignField: 'camera',
-  match: { type: ['video'], createType: ['byHand', 'byTime'] },
+  match: { type: ['video'] },
   justOne: true,
   options: { sort: { _id: 1 } },
 });
@@ -76,7 +76,7 @@ CameraSchema.virtual('totalVideos', {
   foreignField: 'camera',
   count: true,
   justOne: false,
-  match: { type: ['video'], createType: { $in: ['byHand', 'byTime'] } },
+  match: { type: ['video'] },
 });
 
 CameraSchema.virtual('photosByTimeTask', {
