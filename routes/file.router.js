@@ -12,7 +12,10 @@ router.use(cameraMiddleware);
 // /api/cameras/:cameraId/files
 
 router.get('/', asyncHandler(fileController.getAll));
+
 router.get('/count', asyncHandler(fileController.getCount));
+router.get('/countsByDates', asyncHandler(fileController.getCountsByDates));
+
 router.get('/:fileId', asyncHandler(fileController.getOne));
 
 router.post('/', asyncHandler(fileController.createOne));

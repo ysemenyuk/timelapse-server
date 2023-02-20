@@ -3,7 +3,7 @@ import fileService from '../services/file.service.js';
 const getAll = async (req, res) => {
   req.logger(`fileController.getAll`);
 
-  const files = await fileService.getManyByQuery({
+  const files = await fileService.getMany({
     logger: req.logger,
     cameraId: req.cameraId,
     query: req.query,
@@ -16,13 +16,26 @@ const getAll = async (req, res) => {
 const getCount = async (req, res) => {
   req.logger(`fileController.getCount`);
 
-  const count = await fileService.getCountByQuery({
+  const count = await fileService.getCount({
     logger: req.logger,
     cameraId: req.cameraId,
     query: req.query,
   });
 
   res.status(200).send({ count });
+  req.logResp(req);
+};
+
+const getCountsByDates = async (req, res) => {
+  req.logger(`fileController.getCountsByDates`);
+
+  const counts = await fileService.getCountsByDates({
+    logger: req.logger,
+    cameraId: req.cameraId,
+    query: req.query,
+  });
+
+  res.status(200).send({ counts });
   req.logResp(req);
 };
 
@@ -94,4 +107,4 @@ const deleteOne = async (req, res) => {
 //   req.logResp(req);
 // };
 
-export default { getAll, getCount, getOne, createOne, updateOne, deleteOne };
+export default { getAll, getCount, getCountsByDates, getOne, createOne, updateOne, deleteOne };

@@ -1,8 +1,11 @@
 import _ from 'lodash';
+import mongodb from 'mongodb';
 import { addHours } from 'date-fns';
 import File from '../models/File.js';
 import { type } from '../utils/constants.js';
 import storageService from '../storage/index.js';
+
+const { ObjectId } = mongodb;
 
 const getGteDateTime = (date) => new Date(`${date} 00:00:00`);
 const getLteDateTime = (date) => addHours(new Date(`${date} 00:00:00`), 24);
@@ -43,8 +46,8 @@ const getFilesForVideo = async ({ logger, cameraId, query }) => {
   return files;
 };
 
-const getManyByQuery = async ({ logger, cameraId, query }) => {
-  logger && logger(`fileService.getManyByQuery`);
+const getMany = async ({ logger, cameraId, query }) => {
+  logger && logger(`fileService.getMany`);
 
   const filter = makeFilter(cameraId, query);
   const total = await File.countDocuments(filter);
@@ -63,12 +66,39 @@ const getManyByQuery = async ({ logger, cameraId, query }) => {
   return { page, pages, total, items };
 };
 
-const getCountByQuery = async ({ logger, cameraId, query }) => {
+const getCount = async ({ logger, cameraId, query }) => {
   logger && logger(`fileService.getCountByQuery`);
 
   const filter = makeFilter(cameraId, query);
   const count = await File.countDocuments(filter);
   return count;
+};
+
+const getCountsByDates = async ({ logger, cameraId, query }) => {
+  logger && logger(`fileService.getCountByQuery`);
+
+  const match = _.pickBy(
+    {
+      camera: ObjectId(cameraId),
+      type: query.type || 'photo',
+    },
+    _.identity
+  );
+
+  const counts = await File.aggregate([
+    { $match: match },
+    {
+      $group: {
+        _id: '$dateString',
+        count: { $count: {} },
+      },
+    },
+    { $sort: { _id: 1 } },
+  ]);
+
+  console.log(222, counts);
+
+  return counts;
 };
 
 const getOneById = async ({ logger, itemId }) => {
@@ -212,8 +242,9 @@ const deleteCameraFiles = async ({ logger, userId, cameraId }) => {
 
 export default {
   getFilesForVideo,
-  getManyByQuery,
-  getCountByQuery,
+  getMany,
+  getCount,
+  getCountsByDates,
   getOneById,
   getOne,
   createFile,

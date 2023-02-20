@@ -1,6 +1,5 @@
 import mongodb from 'mongodb';
 import Camera from '../models/Camera.js';
-// import File from '../models/File.js';
 import fileService from './file.service.js';
 import taskService from './task.service.js';
 
@@ -42,7 +41,7 @@ const getAll = async ({ userId, logger, populateItems = defaultPopulateItems }) 
     { $project: { _id: 1, totalVideosSize: 1, totalVideos: 1, firstVideo: 1, lastVideo: 1 } },
   ]);
 
-  console.log(123, stats);
+  console.log(111, stats);
 
   const cameras = await Camera.find({ user: userId }).populate(populateItems);
   return cameras;
