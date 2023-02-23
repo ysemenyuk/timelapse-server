@@ -47,12 +47,12 @@ export default async () => {
 
   // create
 
-  const createUserPath = async ({ logger, userId }) => {
-    logger && logger(`gridfs.storage.createUserPath userId: ${userId}`);
+  const createUserPath = async () => {
+    // pass
   };
 
-  const createCameraPath = async ({ logger, userId, cameraId }) => {
-    logger && logger(`gridfs.storage.createCameraPath userId cameraId: ${userId} ${cameraId}`);
+  const createCameraPath = async () => {
+    // pass
   };
 
   // remove

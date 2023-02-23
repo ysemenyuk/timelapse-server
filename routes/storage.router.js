@@ -4,7 +4,7 @@ import { asyncHandler } from '../middleware/errorHandlerMiddleware.js';
 // import fileService from '../services/file.service.js';
 import imageService from '../services/image.service.js';
 import * as consts from '../utils/constants.js';
-import storageService from '../storage/index.js';
+import storageService from '../storage/storage.js';
 import { createFullPathOnDisk } from '../storage/disk.storage.js';
 
 const router = express.Router({ mergeParams: true });

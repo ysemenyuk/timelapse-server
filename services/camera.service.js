@@ -41,7 +41,7 @@ const getAll = async ({ userId, logger, populateItems = defaultPopulateItems }) 
     { $project: { _id: 1, totalVideosSize: 1, totalVideos: 1, firstVideo: 1, lastVideo: 1 } },
   ]);
 
-  console.log(111, stats);
+  console.log('cameraService.getAll stats', stats);
 
   const cameras = await Camera.find({ user: userId }).populate(populateItems);
   return cameras;

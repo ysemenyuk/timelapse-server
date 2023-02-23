@@ -1,9 +1,9 @@
-import fileService from '../services/file.service.js';
-import { makeNumber, makePosterFileName, makeUniformSample, makeVideoFileName } from '../utils/utils.js';
-import { fileType, type } from '../utils/constants.js';
-import diskService from '../services/disk.service.js';
-import storageService from '../storage/index.js';
-import ffmpegService from '../services/ffmpeg.service.js';
+import fileService from '../../services/file.service.js';
+import { makeNumber, makePosterFileName, makeUniformSample, makeVideoFileName } from '../../utils/utils.js';
+import { fileType, type } from '../../utils/constants.js';
+import diskService from '../../services/disk.service.js';
+import storageService from '../../storage/storage.js';
+import ffmpegService from '../../services/ffmpeg.service.js';
 
 const sleep = (time, message = 'Hello') =>
   new Promise((resolve) => {
@@ -131,7 +131,7 @@ const createAndSaveVideo = async ({ logger, userId, cameraId, taskId, create, vi
   await diskService.removeDir({ logger, dir: tmpdir });
   console.log('removeTmpDir', tmpdir);
 
-  await sleep(10 * 1000); // doing job
+  await sleep(1 * 1000); // doing job
 
   return video;
 };

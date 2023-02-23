@@ -1,8 +1,7 @@
-// import cameraService from '../services/camera.service.js';
-import cameraService from '../services/camera.service.js';
-import dateInfoService from '../services/dateInfo.service.js';
-import weatherApiService from '../services/weatherApi.service.js';
-import { makeDateName } from '../utils/utils.js';
+import cameraService from '../../services/camera.service.js';
+import dateInfoService from '../../services/dateInfo.service.js';
+import weatherApiService from '../../services/weatherApi.service.js';
+import { makeDateName } from '../../utils/utils.js';
 
 export const createDateInfo = async ({ logger, userId, cameraId }) => {
   const camera = await cameraService.getOneById({ cameraId });
@@ -11,13 +10,13 @@ export const createDateInfo = async ({ logger, userId, cameraId }) => {
   const isLocationExist = latitude && longitude;
 
   if (!isLocationExist) {
-    return;
+    return null;
   }
 
   const metaData = await weatherApiService.getCurrentDateWeather([latitude, longitude]);
 
   if (!metaData) {
-    return;
+    return null;
   }
 
   const currentDateName = makeDateName(new Date());
@@ -42,5 +41,13 @@ export const getDateInfo = async ({ logger, userId, cameraId }) => {
     name: currentDateName,
   });
 
+  return dateInfo;
+};
+
+export default async ({ logger, userId, cameraId }) => {
+  let dateInfo = await getDateInfo({ logger, userId, cameraId });
+  if (!dateInfo) {
+    dateInfo = await createDateInfo({ logger, userId, cameraId });
+  }
   return dateInfo;
 };

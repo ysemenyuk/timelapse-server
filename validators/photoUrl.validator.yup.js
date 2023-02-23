@@ -4,7 +4,7 @@ import { ValidateError } from '../middleware/errorHandlerMiddleware.js';
 const createOneSchema = yup.string().url().required();
 
 export const validatePhotoUrl = async (url) => {
-  console.log('- validatePhotoUrl url -', url);
+  // console.log('- validatePhotoUrl url -', url);
 
   try {
     await createOneSchema.validate(url);
@@ -13,5 +13,3 @@ export const validatePhotoUrl = async (url) => {
     throw new ValidateError('not valid url', error.message);
   }
 };
-
-// export default { validatePhotoUrl };

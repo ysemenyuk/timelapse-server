@@ -10,8 +10,8 @@ const TaskSchema = mongoose.Schema({
   finishedAt: { type: Date },
 
   name: { type: String }, // CreatePhoto, CreateVideo, CreatePhotosByTime, ...
-  type: { type: String }, // OneTime, RepeatEvery, RepeatAt
-  status: { type: String, default: 'Created' }, // Created, Ready, Running, Stopped, Successed, Failed, Canceled
+  type: { type: String }, // OneTime, RepeatEvery
+  status: { type: String, default: 'Created' }, // Created, Running, Stopped, Successed, Failed, Canceled
   removable: { type: Boolean, default: true },
   message: { type: String, default: '' },
 

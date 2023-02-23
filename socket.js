@@ -30,16 +30,12 @@ class Socket {
 
     this.socket.on('connection', (socket) => {
       logger('user connected', socket.handshake.auth.userId);
-
       this.sessions.set(socket.userId, socket);
 
       socket.emit('hello', socket.userId);
 
-      // console.log(111, this.sessions.has(socket.userId), socket.userId);
-
       socket.on('disconnect', () => {
         logger('user disconnect', socket.userId);
-
         this.sessions.delete(socket.userId);
       });
     });
@@ -47,6 +43,14 @@ class Socket {
 
   getUserSocket(userId) {
     return this.sessions.get(userId.toString());
+  }
+
+  send(userId, name, data) {
+    const userSocet = this.sessions.get(userId.toString());
+    if (!userSocet) {
+      return;
+    }
+    userSocet.emit(name, data);
   }
 }
 

@@ -14,13 +14,12 @@ const createOneSchema = yup.object({
 });
 
 const validateCamera = async (req, res, next) => {
-  console.log('- validateCamera createOne req.body -', req.body);
+  // console.log('- validateCamera createOne req.body -', req.body);
 
   try {
     await createOneSchema.validate(req.body);
   } catch (error) {
     console.log('- validateCamera error -', error);
-
     next(new ValidateError('not valid payload', error.message));
     return;
   }

@@ -1,6 +1,6 @@
 import Task from '../models/Task.js';
+import worker from '../worker/agenda.worker.js';
 import { taskName, taskType } from '../utils/constants.js';
-import worker from '../worker.js';
 
 // get
 
@@ -30,7 +30,7 @@ const createOne = async ({ userId, cameraId, payload, logger }) => {
   });
 
   await task.save();
-  await worker.create(task);
+  await worker.createTaskJob(task);
 
   return task;
 };
@@ -41,25 +41,33 @@ const updateOneById = async ({ taskId, payload, logger }) => {
   logger && logger(`taskService.updateOne`);
 
   const task = await Task.findOneAndUpdate({ _id: taskId }, payload, { new: true });
+  await worker.updateTaskJob(task);
 
-  await worker.update(task);
+  return task;
+};
 
+const updateStatusById = async ({ taskId, payload, logger }) => {
+  logger && logger(`taskService.updateStatusById`);
+
+  const task = await Task.findOneAndUpdate({ _id: taskId }, payload, { new: true });
   return task;
 };
 
 // delete
 
 const deleteOneById = async ({ taskId, logger }) => {
-  logger && logger(`taskService.deleteOne`);
+  logger && logger(`taskService.deleteOne`, taskId);
 
   // TODO: if not removable return error
+
+  await worker.removeTaskJobs(taskId);
 
   const deleted = await Task.findOneAndRemove({ _id: taskId });
   return deleted;
 };
 
 //
-// camera default
+// camera
 //
 
 const createCameraDefaultTasks = async ({ logger, userId, cameraId }) => {
@@ -80,12 +88,12 @@ const createCameraDefaultTasks = async ({ logger, userId, cameraId }) => {
   });
 
   await photosByTimeTask.save();
-
   return { photosByTimeTask };
 };
 
 const deleteCameraTasks = async ({ cameraId, logger }) => {
   logger && logger(`cameraFileService.deleteCameraTasks`);
+  // TODO: delete camera jobs
 
   const deleted = await Task.deleteMany({ camera: cameraId });
   return deleted;
@@ -94,11 +102,10 @@ const deleteCameraTasks = async ({ cameraId, logger }) => {
 export default {
   getAll,
   getOneById,
-
   createOne,
   updateOneById,
+  updateStatusById,
   deleteOneById,
-
   createCameraDefaultTasks,
   deleteCameraTasks,
 };

@@ -3,7 +3,7 @@ import mongodb from 'mongodb';
 import { addHours } from 'date-fns';
 import File from '../models/File.js';
 import { type } from '../utils/constants.js';
-import storageService from '../storage/index.js';
+import storageService from '../storage/storage.js';
 
 const { ObjectId } = mongodb;
 

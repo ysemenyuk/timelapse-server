@@ -3,23 +3,21 @@ import DateInfo from '../models/DateInfo.js';
 // get
 
 const getAll = async ({ cameraId, logger }) => {
-  logger && logger(`DateInfoService.getAll`);
+  logger && logger(`dateInfoService.getAll`);
 
   const datesInfo = await DateInfo.find({ camera: cameraId });
   return datesInfo;
 };
 
 const getOne = async ({ logger, cameraId, name }) => {
-  logger && logger(`DateInfoService.getOne`);
-
-  // console.log('dateInfo name', name);
+  logger && logger(`dateInfoService.getOne ${name}`);
 
   const dateInfo = await DateInfo.findOne({ camera: cameraId, name });
   return dateInfo;
 };
 
 const createOne = async ({ logger, userId, cameraId, ...payload }) => {
-  logger && logger(`DateInfoService.createOne`);
+  logger && logger(`dateInfoService.createOne`);
 
   const dateInfo = new DateInfo({
     user: userId,
@@ -28,7 +26,6 @@ const createOne = async ({ logger, userId, cameraId, ...payload }) => {
   });
 
   await dateInfo.save();
-  // console.log(5555, dateInfo);
   return dateInfo;
 };
 

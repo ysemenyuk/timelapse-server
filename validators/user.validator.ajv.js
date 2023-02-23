@@ -15,14 +15,13 @@ const userSchema = {
 };
 
 const validateUser = (req, res, next) => {
-  console.log('- validator logIn req.body -', req.body);
+  // console.log('- validator logIn req.body -', req.body);
 
   const validate = ajv.compile(userSchema);
   const valid = validate(req.body);
 
   if (!valid) {
     console.log('- logInValidate.errors -', validate.errors);
-
     next(ValidateError('not valid request', validate.errors));
     return;
   }
