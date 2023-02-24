@@ -11,7 +11,7 @@ export default (req, res, next) => {
 
   req.logResp = (req) => req.logger(`RES: ${req.method} -${req.originalUrl} -${res.statusCode}`);
 
-  req.logger(`REQ: ${req.method}-${req.originalUrl}`);
+  req.logger(`REQ: ${req.method} -${req.originalUrl}`);
 
   next();
 };

@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import _ from 'lodash';
-import jwt from '../libs/token.js';
+import jwt from './token.service.js';
 import { BadRequestError } from '../middleware/errorHandlerMiddleware.js';
 import User from '../models/User.js';
 import fileService from './file.service.js';

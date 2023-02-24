@@ -13,7 +13,7 @@ const defaultPopulateItems = [
   'firstVideo',
   'lastVideo',
   'totalVideos',
-  'photosByTimeTask',
+  // 'photosByTimeTask',
 ];
 
 const getAll = async ({ userId, logger, populateItems = defaultPopulateItems }) => {

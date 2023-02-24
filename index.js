@@ -62,9 +62,9 @@ const startServer = async () => {
 
     logger(`Mongoose successfully Connected`);
 
-    await socket.start(httpServer);
-    await worker.start(socket);
-    await storage.start();
+    await socket.start(httpServer, logger);
+    await worker.start(socket, logger);
+    await storage.start(logger);
 
     // nms.run();
 

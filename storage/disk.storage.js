@@ -3,10 +3,12 @@ import * as fsp from 'fs/promises';
 import { pipeline } from 'stream/promises';
 import path from 'path';
 import _ from 'lodash';
+import debug from 'debug';
 import { isPhotoFile } from '../utils/utils.js';
-import paths from './disk.paths.js';
+import diskpaths from './disk.paths.js';
 
 const pathToDiskSpace = process.env.DISK_PATH;
+const logger = debug('storage');
 
 const {
   createFilePath,
@@ -15,41 +17,54 @@ const {
   createPhotosDirPath,
   createVideosDirPath,
   createDateDirPath,
-} = paths;
+} = diskpaths;
 
-export const createFullPathOnDisk = (filePath) => path.join(pathToDiskSpace, filePath);
+export function createFullPath(filePath) {
+  return path.join(pathToDiskSpace, filePath);
+}
+
+async function createDir(dirPath) {
+  const fullPath = createFullPath(dirPath);
+  const created = await fsp.mkdir(fullPath);
+  return created;
+}
+
+async function removeDir(dirPath) {
+  const fullPath = createFullPath(dirPath);
+  const deleted = await fsp.rmdir(fullPath, { recursive: true });
+  return deleted;
+}
+
+function isDirExist(dirPath) {
+  const fullPath = createFullPath(dirPath);
+  return existsSync(fullPath);
+}
 
 //
 // main
 //
 
-export default () => {
-  const createFullPath = (filePath) => path.join(pathToDiskSpace, filePath);
+class DiskStorage {
+  constructor() {
+    //
+  }
 
-  const createDir = async (dirPath) => {
-    const fullPath = createFullPath(dirPath);
-    const created = await fsp.mkdir(fullPath);
-    return created;
-  };
-
-  const removeDir = async (dirPath) => {
-    const fullPath = createFullPath(dirPath);
-    const deleted = await fsp.rmdir(fullPath, { recursive: true });
-    return deleted;
-  };
+  start() {
+    logger(`storageType - disk, pathOnDisk - ${pathToDiskSpace}`);
+  }
 
   // create
 
-  const createUserPath = async ({ logger, userId }) => {
+  async createUserPath({ logger, userId }) {
     logger && logger(`disk.storage.createUserPath userId: ${userId}`);
 
     const userDirPath = createUserDirPath(userId);
     const userDir = await createDir(userDirPath);
 
     return userDir;
-  };
+  }
 
-  const createCameraPath = async ({ logger, userId, cameraId }) => {
+  async createCameraPath({ logger, userId, cameraId }) {
     logger && logger(`disk.storage.createCameraPath cameraId: ${cameraId}`);
 
     const cameraDirPath = createCameraDirPath(userId, cameraId);
@@ -61,36 +76,31 @@ export default () => {
     const cameraVideosDir = await createDir(cameraVideosDirPath);
 
     return { cameraDir, cameraPhotosDir, cameraVideosDir };
-  };
+  }
 
   // remove
 
-  const removeUserFiles = async ({ logger, userId }) => {
+  async removeUserFiles({ logger, userId }) {
     logger && logger(`disk.storage.removeUserFiles userId: ${userId}`);
 
     const userDirPath = createUserDirPath(userId);
     const deleted = await removeDir(userDirPath);
 
     return deleted;
-  };
+  }
 
-  const removeCameraFiles = async ({ logger, userId, cameraId }) => {
+  async removeCameraFiles({ logger, userId, cameraId }) {
     logger && logger(`disk.storage.removeCameraFiles userId cameraId: ${userId} ${cameraId}`);
 
     const cameraDirPath = createCameraDirPath(userId, cameraId);
     const deleted = await removeDir(cameraDirPath);
 
     return deleted;
-  };
+  }
 
   // save file
 
-  const isDirExist = (dirPath) => {
-    const fullPath = createFullPath(dirPath);
-    return existsSync(fullPath);
-  };
-
-  const saveFile = async ({ logger, file, data, stream }) => {
+  async saveFile({ logger, file, data, stream }) {
     logger && logger(`disk.storage.saveFile file.name: ${file.name}`);
 
     const dateDir = createDateDirPath(file.user, file.camera, file.date);
@@ -119,11 +129,11 @@ export default () => {
     const { size } = await fsp.stat(fullPath);
 
     return { link, size };
-  };
+  }
 
   // read file
 
-  const readFile = async ({ logger, file, type }) => {
+  async readFile({ logger, file, type }) {
     logger && logger(`disk.storage.readFile file.name: ${file.name}`);
 
     const filePath = createFilePath(file);
@@ -141,11 +151,11 @@ export default () => {
     } catch (error) {
       console.log('error readFile', error);
     }
-  };
+  }
 
   // remove file
 
-  const removeFile = async ({ logger, file }) => {
+  async removeFile({ logger, file }) {
     logger && logger(`disk.storage.removeFile file.name: ${file.name}`);
 
     const filePath = createFilePath(file);
@@ -153,11 +163,11 @@ export default () => {
 
     const deleted = await fsp.unlink(fullPath);
     return deleted;
-  };
+  }
 
   // streams
 
-  const openDownloadStream = ({ logger, file }) => {
+  openDownloadStream({ logger, file }) {
     logger && logger(`disk.storage.openDownloadStream file.name: ${file.name}`);
 
     const filePath = createFilePath(file);
@@ -165,9 +175,9 @@ export default () => {
 
     const stream = createReadStream(fullPath);
     return stream;
-  };
+  }
 
-  const openDownloadStreamByLink = ({ logger, fileLink }) => {
+  openDownloadStreamByLink({ logger, fileLink }) {
     logger && logger(`disk.storage.openDownloadStreamByLink fileLink: ${fileLink}`);
 
     // const fileName = _.last(fileLink.split('/'));
@@ -176,40 +186,27 @@ export default () => {
 
     const stream = createReadStream(fullPath);
     return stream;
-  };
+  }
 
   // stat
 
-  const getFileStat = async ({ logger, file }) => {
+  async getFileStat({ logger, file }) {
     logger && logger(`disk.storage.fileStat file.name: ${file.name}`);
 
     const filePath = createFilePath(file);
-    const fullPath = createFullPath(filePath);
+    const fullPath = this.createFullPath(filePath);
 
     const stat = await fsp.stat(fullPath);
     return stat;
-  };
+  }
 
-  const isFileExist = async ({ logger, file }) => {
+  isFileExist({ logger, file }) {
     logger && logger(`disk.storage.isFileExist file.name: ${file.name}`);
 
     const filePath = createFilePath(file);
-    const fullPath = createFullPath(filePath);
+    const fullPath = this.createFullPath(filePath);
     return existsSync(fullPath);
-  };
+  }
+}
 
-  return {
-    createFullPath,
-    createUserPath,
-    createCameraPath,
-    removeUserFiles,
-    removeCameraFiles,
-    saveFile,
-    readFile,
-    removeFile,
-    openDownloadStream,
-    openDownloadStreamByLink,
-    getFileStat,
-    isFileExist,
-  };
-};
+export default DiskStorage;

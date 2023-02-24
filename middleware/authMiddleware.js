@@ -1,4 +1,4 @@
-import jwt from '../libs/token.js';
+import jwt from '../services/token.service.js';
 
 export default (req, res, next) => {
   // console.log(req.headers.authorization);

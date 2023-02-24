@@ -5,7 +5,7 @@ import { asyncHandler } from '../middleware/errorHandlerMiddleware.js';
 import imageService from '../services/image.service.js';
 import * as consts from '../utils/constants.js';
 import storageService from '../storage/storage.js';
-import { createFullPathOnDisk } from '../storage/disk.storage.js';
+import { createFullPath } from '../storage/disk.storage.js';
 
 const router = express.Router({ mergeParams: true });
 
@@ -22,7 +22,7 @@ router.get(
 
     const fileLink = req._parsedUrl.pathname;
     const stream = storageService.openDownloadStreamByLink({
-      logger: req.logger,
+      // logger: req.logger,
       fileLink,
     });
 
@@ -54,7 +54,7 @@ router.get(
 
     const fileLink = req._parsedUrl.pathname;
     const stream = storageService.openDownloadStreamByLink({
-      logger: req.logger,
+      // logger: req.logger,
       fileLink,
     });
 
@@ -81,10 +81,10 @@ router.get(
   /u_[a-z0-9]+\/c_[a-z0-9]+\/.*\.jpg/,
   asyncHandler(async (req, res) => {
     req.logger(`disk.storage.router.get jpg ${req.url}`);
-    // console.log(1111, req._parsedUrl);
+    // console.log(1111, req._parsedUrl.path);
 
     const filePath = req._parsedUrl.pathname;
-    const fileFullPath = createFullPathOnDisk(filePath);
+    const fileFullPath = createFullPath(filePath);
 
     const isThumbnail = req.query && req.query.size && req.query.size === 'thumbnail';
 
@@ -107,10 +107,10 @@ router.get(
   /u_[a-z0-9]+\/c_[a-z0-9]+\/.*\.mp4/,
   asyncHandler(async (req, res) => {
     req.logger(`disk.storage.router.get mp4 ${req.url}`);
-    // console.log(222, req._parsedUrl);
+    // console.log(222, req._parsedUrl.path);
 
     const filePath = req._parsedUrl.pathname;
-    const fileFullPath = createFullPathOnDisk(filePath);
+    const fileFullPath = createFullPath(filePath);
 
     res.sendFile(fileFullPath);
     req.logResp(req);

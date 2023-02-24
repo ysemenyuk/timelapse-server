@@ -1,5 +1,6 @@
 import mongodb from 'mongodb';
 import _ from 'lodash';
+import debug from 'debug';
 import { Readable } from 'stream';
 import { pipeline } from 'stream/promises';
 import { type } from '../utils/constants.js';
@@ -7,6 +8,7 @@ import { makeVideoFileName, makePhotoFileName, makePosterFileName } from '../uti
 
 const dbUri = process.env.MONGO_URI;
 const { MongoClient, ObjectId } = mongodb;
+const logger = debug('storage');
 
 const map = {
   [type.VIDEO]: makeVideoFileName,
@@ -33,47 +35,55 @@ const stream2buffer = (stream) => {
 // main
 //
 
-export default async () => {
-  //
-  const mongoClient = new MongoClient(dbUri, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+class GridfsStorage {
+  constructor() {
+    this.mongoClient;
+    this.bucket;
+  }
 
-  await mongoClient.connect();
+  async start() {
+    this.mongoClient = new MongoClient(dbUri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
 
-  const database = mongoClient.db('myFirstDatabase');
-  const bucket = new mongodb.GridFSBucket(database);
+    await this.mongoClient.connect();
+
+    const database = this.mongoClient.db('myFirstDatabase');
+    this.bucket = new mongodb.GridFSBucket(database);
+
+    logger(`storageType - gridfs, database - "myFirstDatabase"`);
+  }
 
   // create
 
-  const createUserPath = async () => {
+  async createUserPath() {
     // pass
-  };
+  }
 
-  const createCameraPath = async () => {
+  async createCameraPath() {
     // pass
-  };
+  }
 
   // remove
 
-  const removeUserFiles = async ({ logger, userId }) => {
+  removeUserFiles({ logger, userId }) {
     logger && logger(`gridfs.storage.removeUserFiles userId: ${userId}`);
     // delete all user files
-  };
+  }
 
-  const removeCameraFiles = async ({ logger, userId, cameraId }) => {
+  removeCameraFiles({ logger, userId, cameraId }) {
     logger && logger(`gridfs.storage.removeCameraFiles userId cameraId: ${userId} ${cameraId}`);
     // delete all camera files
-  };
+  }
 
   // save file
 
-  const saveFile = async ({ logger, file, data, stream }) => {
+  async saveFile({ logger, file, data, stream }) {
     logger && logger(`gridfs.storage.saveFile filePath: ${file.name}`);
 
     const fileName = createFileName(file);
-    const uploadStream = bucket.openUploadStream(fileName, { metadata: { user: file.user, camera: file.camera } });
+    const uploadStream = this.bucket.openUploadStream(fileName, { metadata: { user: file.user, camera: file.camera } });
 
     try {
       if (stream) {
@@ -88,18 +98,18 @@ export default async () => {
     }
 
     const link = `/files/g/${fileName}`;
-    const [metadata] = await bucket.find({ filename: fileName }).toArray();
+    const [metadata] = await this.bucket.find({ filename: fileName }).toArray();
     // console.log('metadata', metadata);
 
     return { link, size: metadata.length };
-  };
+  }
 
   // read file
 
-  const readFile = async ({ logger, file, type = 'buffer' }) => {
+  async readFile({ logger, file, type = 'buffer' }) {
     logger && logger(`gridFs.storage.readFile file.name: ${file.name}`);
 
-    const stream = bucket.openDownloadStreamByName(file.name);
+    const stream = this.bucket.openDownloadStreamByName(file.name);
 
     try {
       if (type === 'stream') {
@@ -112,64 +122,52 @@ export default async () => {
     } catch (error) {
       console.log('error readFile', error);
     }
-  };
+  }
 
   // remove file
 
-  const removeFile = async ({ logger, file }) => {
+  async removeFile({ logger, file }) {
     logger && logger(`gridFs.storage.removeFile file.name: ${file.name}`);
 
     const fileName = createFileName(file);
-    const [metadata] = await bucket.find({ filename: fileName }).toArray();
+    const [metadata] = await this.bucket.find({ filename: fileName }).toArray();
     // console.log('metadata', metadata);
-    const deleted = await bucket.delete(ObjectId(metadata._id));
+    const deleted = await this.bucket.delete(ObjectId(metadata._id));
     return deleted;
-  };
+  }
 
   // streams
 
-  const openDownloadStream = ({ logger, file }) => {
+  openDownloadStream({ logger, file }) {
     logger && logger(`gridFs.storage.openDownloadStream  file.name: ${file.name}`);
 
     const fileName = createFileName(file);
-    const downloadStream = bucket.openDownloadStreamByName(fileName);
+    const downloadStream = this.bucket.openDownloadStreamByName(fileName);
     return downloadStream;
-  };
+  }
 
-  const openDownloadStreamByLink = ({ logger, fileLink }) => {
+  openDownloadStreamByLink({ logger, fileLink }) {
     logger && logger(`gridFs.storage.openDownloadStreamByLink fileName: ${fileLink}`);
 
     const fileName = _.trimStart(fileLink, '/g/');
-    const downloadStream = bucket.openDownloadStreamByName(fileName);
+    const downloadStream = this.bucket.openDownloadStreamByName(fileName);
     return downloadStream;
-  };
+  }
 
   //
 
-  const getFileStat = async ({ logger, file }) => {
+  getFileStat({ logger, file }) {
     logger && logger(`gridFs.storage.fileStat file.name: ${file.name}`);
-  };
+  }
 
-  const isFileExist = async ({ logger, file }) => {
+  async isFileExist({ logger, file }) {
     logger && logger(`gridFs.storage.isFileExist file.name: ${file.name}`);
 
     const fileName = createFileName(file);
-    const arr = await bucket.find({ filename: fileName }).toArray();
+    const arr = await this.bucket.find({ filename: fileName }).toArray();
     // console.log('arr', arr);
     return Boolean(arr.length);
-  };
+  }
+}
 
-  return {
-    createUserPath,
-    createCameraPath,
-    removeUserFiles,
-    removeCameraFiles,
-    saveFile,
-    readFile,
-    removeFile,
-    openDownloadStream,
-    openDownloadStreamByLink,
-    getFileStat,
-    isFileExist,
-  };
-};
+export default GridfsStorage;
