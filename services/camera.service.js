@@ -5,53 +5,125 @@ import taskService from './task.service.js';
 
 const { ObjectId } = mongodb;
 
-const defaultPopulateItems = [
-  'avatar',
-  'firstPhoto',
-  'lastPhoto',
-  'totalPhotos',
-  'firstVideo',
-  'lastVideo',
-  'totalVideos',
-  // 'photosByTimeTask',
-];
+// const defaultPopulateItems = [
+//   'avatar',
+//   'firstPhoto',
+//   'lastPhoto',
+//   'totalPhotos',
+//   'firstVideo',
+//   'lastVideo',
+//   'totalVideos',
+//   'photosByTimeTask',
+// ];
 
-const getAll = async ({ userId, logger, populateItems = defaultPopulateItems }) => {
+const addFields = (fields) => {
+  if (fields === 'stats') {
+    return [
+      {
+        $lookup: {
+          from: 'files',
+          localField: '_id',
+          foreignField: 'camera',
+          pipeline: [{ $match: { type: 'video' } }],
+          as: 'videos',
+        },
+      },
+      {
+        $addFields: {
+          stats: {
+            totalVideosSize: { $sum: '$videos.size' },
+            totalVideos: { $size: '$videos' },
+            firstVideo: { $first: '$videos' },
+            lastVideo: { $last: '$videos' },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: 'files',
+          localField: '_id',
+          foreignField: 'camera',
+          pipeline: [{ $match: { type: 'photo' } }],
+          as: 'photos',
+        },
+      },
+      {
+        $addFields: {
+          stats: {
+            totalPhotosSize: { $sum: '$photos.size' },
+            totalPhotos: { $size: '$photos' },
+            firstPhoto: { $first: '$photos' },
+            lastPhoto: { $last: '$photos' },
+          },
+        },
+      },
+      { $project: { videos: 0, photos: 0 } },
+    ];
+  }
+  return [];
+};
+
+const populateFields = (fields) => {
+  if (fields === 'avatar') {
+    return [
+      {
+        $lookup: {
+          from: 'files',
+          localField: 'avatar',
+          foreignField: '_id',
+          as: 'avatars',
+        },
+      },
+      {
+        $addFields: {
+          avatar: { $first: '$avatars' },
+        },
+      },
+      { $project: { avatars: 0 } },
+    ];
+  }
+  return [];
+};
+
+const getAll = async ({ userId, logger, query }) => {
   logger && logger(`cameraService.getAll`);
 
-  const stats = await Camera.aggregate([
+  const cameras = await Camera.aggregate([
     { $match: { user: ObjectId(userId) } },
-    {
-      $lookup: {
-        from: 'files',
-        localField: '_id',
-        foreignField: 'camera',
-        pipeline: [{ $match: { type: 'video' } }],
-        as: 'videos',
-      },
-    },
-    {
-      $addFields: {
-        totalVideosSize: { $sum: '$videos.size' },
-        totalVideos: { $size: '$videos' },
-        firstVideo: { $first: '$videos' },
-        lastVideo: { $last: '$videos' },
-      },
-    },
-    { $project: { _id: 1, totalVideosSize: 1, totalVideos: 1, firstVideo: 1, lastVideo: 1 } },
+    ...addFields(query.including),
+    ...populateFields('avatar'),
   ]);
-
-  console.log('cameraService.getAll stats', stats);
-
-  const cameras = await Camera.find({ user: userId }).populate(populateItems);
+  console.log('cameraService.getAll cameras', cameras);
   return cameras;
 };
 
-const getOneById = async ({ logger, cameraId, populateItems = defaultPopulateItems }) => {
+const getOne = async ({ logger, cameraId }) => {
+  logger && logger(`cameraService.getOne`);
+
+  const camera = await Camera.findOne({ _id: cameraId }).populate('avatar');
+  console.log('cameraService.getOne camera', camera);
+  return camera;
+};
+
+const getOneById = async ({ logger, cameraId }) => {
   logger && logger(`cameraService.getOneById`);
 
-  const camera = await Camera.findOne({ _id: cameraId }).populate(populateItems);
+  const camera = await Camera.findOne({ _id: cameraId });
   return camera;
+};
+
+//
+
+const getCameraStats = async ({ logger, cameraId }) => {
+  logger && logger(`cameraService.getCameraStats`);
+
+  const [stats] = await Camera.aggregate([
+    { $match: { _id: ObjectId(cameraId) } },
+    ...addFields('stats'),
+    { $project: { _id: 1, stats: 1 } },
+  ]);
+  console.log('cameraService.getCameraStats stats', stats);
+  return stats;
 };
 
 //
@@ -80,8 +152,9 @@ const createOne = async ({ logger, userId, payload }) => {
 
   await camera.save();
 
-  const createdCamera = await Camera.findOne({ _id: camera._id }).populate(defaultPopulateItems);
-  return createdCamera;
+  const created = await Camera.findOne({ _id: camera._id });
+  console.log('cameraService.createOne created', created);
+  return created;
 };
 
 //
@@ -89,12 +162,13 @@ const createOne = async ({ logger, userId, payload }) => {
 //
 
 const updateOneById = async ({ logger, cameraId, payload }) => {
-  logger && logger(`cameraService.updateOne`);
+  logger && logger(`cameraService.updateOneById`);
 
   // TODO: validate payload
 
   await Camera.updateOne({ _id: cameraId }, payload);
-  const updated = await Camera.findOne({ _id: cameraId }).populate(defaultPopulateItems);
+  const updated = await Camera.findOne({ _id: cameraId }).populate('avatar');
+  console.log('cameraService.updateOneById updated', updated);
   return updated;
 };
 
@@ -112,4 +186,4 @@ const deleteOneById = async ({ logger, userId, cameraId }) => {
   return deleted;
 };
 
-export default { getAll, getOneById, createOne, updateOneById, deleteOneById };
+export default { getAll, getOne, getOneById, getCameraStats, createOne, updateOneById, deleteOneById };

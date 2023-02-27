@@ -13,6 +13,7 @@ router.use(authMiddleware);
 
 router.get('/', asyncHandler(cameraController.getAll));
 router.get('/:cameraId', cameraMiddleware, asyncHandler(cameraController.getOne));
+router.get('/:cameraId/stats', cameraMiddleware, asyncHandler(cameraController.getCameraStats));
 
 router.post('/', cameraValidator.validateCamera, asyncHandler(cameraController.createOne));
 

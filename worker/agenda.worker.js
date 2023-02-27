@@ -1,6 +1,6 @@
 import { Agenda } from 'agenda/es.js';
 import mongodb from 'mongodb';
-import jobs from './jobs/index.js';
+import jobs from './jobs/jobs.js';
 import debug from 'debug';
 import { taskName, taskStatus } from '../utils/constants.js';
 

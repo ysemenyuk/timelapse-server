@@ -71,8 +71,8 @@ const getCount = async ({ logger, cameraId, query }) => {
 
   const filter = makeFilter(cameraId, query);
   const count = await File.countDocuments(filter);
-  console.log(111, count);
-  return count;
+  // console.log(111, count);
+  return { count };
 };
 
 const getCountsByDates = async ({ logger, cameraId, query }) => {
@@ -86,7 +86,7 @@ const getCountsByDates = async ({ logger, cameraId, query }) => {
     _.identity
   );
 
-  const result = await File.aggregate([
+  const counts = await File.aggregate([
     { $match: match },
     {
       $group: {
@@ -97,9 +97,9 @@ const getCountsByDates = async ({ logger, cameraId, query }) => {
     { $sort: { _id: 1 } },
   ]);
 
-  console.log(222, result);
+  // console.log(222, counts);
 
-  return result;
+  return counts;
 };
 
 const getOneById = async ({ logger, itemId }) => {

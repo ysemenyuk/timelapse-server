@@ -18,7 +18,7 @@ export const createPhotoJob = async (data, socket, workerLogger) => {
   try {
     const task = await taskService.getOneById({ taskId });
 
-    await taskService.updateOneById({
+    const rtask = await taskService.updateOneById({
       taskId,
       payload: {
         status: taskStatus.RUNNING,
@@ -26,7 +26,7 @@ export const createPhotoJob = async (data, socket, workerLogger) => {
       },
     });
 
-    socket.send(userId, 'update-task', { cameraId, userId, taskId });
+    socket.send(userId, 'update-task', { cameraId, userId, task: rtask });
 
     await createDateInfoIfNotExist({ logger, userId, cameraId });
 
@@ -39,9 +39,9 @@ export const createPhotoJob = async (data, socket, workerLogger) => {
       create: fileCreateType.BY_HAND,
     });
 
-    socket.send(userId, 'create-file', { cameraId, userId, fileId: photo._id });
+    socket.send(userId, 'create-file', { cameraId, userId, file: photo });
 
-    await taskService.updateOneById({
+    const stask = await taskService.updateOneById({
       taskId,
       payload: {
         status: taskStatus.SUCCESSED,
@@ -50,12 +50,12 @@ export const createPhotoJob = async (data, socket, workerLogger) => {
       },
     });
 
-    socket.send(userId, 'update-task', { cameraId, userId, taskId });
+    socket.send(userId, 'update-task', { cameraId, userId, task: stask });
     logger(`successed ${taskName.CREATE_PHOTO} job`);
   } catch (error) {
     // console.log('--- error CreatePhoto ---', error);
 
-    await taskService.updateOneById({
+    const etask = await taskService.updateOneById({
       taskId,
       payload: {
         status: taskStatus.FAILED,
@@ -64,7 +64,7 @@ export const createPhotoJob = async (data, socket, workerLogger) => {
       },
     });
 
-    socket.send(userId, 'update-task', { cameraId, userId, taskId });
+    socket.send(userId, 'update-task', { cameraId, userId, task: etask });
     logger(`error ${taskName.CREATE_PHOTO} job`);
   }
 

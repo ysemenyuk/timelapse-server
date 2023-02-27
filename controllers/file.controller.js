@@ -22,7 +22,7 @@ const getCount = async (req, res) => {
     query: req.query,
   });
 
-  res.status(200).send({ count });
+  res.status(200).send(count);
   req.logResp(req);
 };
 

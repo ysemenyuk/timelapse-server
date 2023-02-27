@@ -16,7 +16,7 @@ export const createVideoJob = async (data, socket, workerLogger) => {
     const task = await taskService.getOneById({ taskId });
     const { videoSettings } = task;
 
-    await taskService.updateOneById({
+    const rtask = await taskService.updateOneById({
       taskId,
       payload: {
         status: taskStatus.RUNNING,
@@ -24,9 +24,9 @@ export const createVideoJob = async (data, socket, workerLogger) => {
       },
     });
 
-    socket.send(userId, 'update-task', { cameraId, userId, taskId });
+    socket.send(userId, 'update-task', { cameraId, userId, task: rtask });
 
-    const file = await createAndSaveVideo({
+    const video = await createAndSaveVideo({
       logger,
       userId,
       cameraId,
@@ -34,23 +34,23 @@ export const createVideoJob = async (data, socket, workerLogger) => {
       create: fileCreateType.BY_HAND,
     });
 
-    socket.send(userId, 'create-file', { cameraId, userId, fileId: file._id });
+    socket.send(userId, 'create-file', { cameraId, userId, file: video });
 
-    await taskService.updateOneById({
+    const stask = await taskService.updateOneById({
       taskId,
       payload: {
         status: taskStatus.SUCCESSED,
         finishedAt: new Date(),
-        message: `File "${file.name}" successfully saved.`,
+        message: `File "${video.name}" successfully saved.`,
       },
     });
 
-    socket.send(userId, 'update-task', { cameraId, userId, taskId });
+    socket.send(userId, 'update-task', { cameraId, userId, task: stask });
     logger(`successed ${taskName.CREATE_VIDEO} job`);
   } catch (error) {
     // console.log('-- error createVideo job --', error);
 
-    await taskService.updateOneById({
+    const etask = await taskService.updateOneById({
       taskId,
       payload: {
         status: taskStatus.FAILED,
@@ -59,7 +59,7 @@ export const createVideoJob = async (data, socket, workerLogger) => {
       },
     });
 
-    socket.send(userId, 'update-task', { cameraId, userId, taskId });
+    socket.send(userId, 'update-task', { cameraId, userId, task: etask });
     logger(`error ${taskName.CREATE_VIDEO} job`);
   }
 

@@ -8,6 +8,7 @@ const getAll = async (req, res) => {
   const cameras = await cameraService.getAll({
     logger: req.logger,
     userId: req.userId,
+    query: req.query,
   });
 
   res.status(200).send(cameras);
@@ -17,9 +18,23 @@ const getAll = async (req, res) => {
 const getOne = async (req, res) => {
   req.logger(`cameraController.getOne`);
 
-  const camera = await cameraService.getOneById({
+  const camera = await cameraService.getOne({
     logger: req.logger,
     cameraId: req.cameraId,
+    query: req.query,
+  });
+
+  res.status(200).send(camera);
+  req.logResp(req);
+};
+
+const getCameraStats = async (req, res) => {
+  req.logger(`cameraController.getCameraStats`);
+
+  const camera = await cameraService.getCameraStats({
+    logger: req.logger,
+    cameraId: req.cameraId,
+    query: req.query,
   });
 
   res.status(200).send(camera);
@@ -76,4 +91,4 @@ const deleteOne = async (req, res) => {
   req.logResp(req);
 };
 
-export default { getAll, getOne, createOne, updateOne, deleteOne };
+export default { getAll, getOne, getCameraStats, createOne, updateOne, deleteOne };
