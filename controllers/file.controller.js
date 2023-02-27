@@ -35,7 +35,7 @@ const getCountsByDates = async (req, res) => {
     query: req.query,
   });
 
-  res.status(200).send({ counts });
+  res.status(200).send(counts);
   req.logResp(req);
 };
 
