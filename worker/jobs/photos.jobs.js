@@ -9,8 +9,8 @@ import { fromUnixTime } from 'date-fns';
 //
 //
 
-export const createPhotoJob = async (data, socket, workerLogger) => {
-  const logger = workerLogger.extend(taskName.CREATE_PHOTO);
+export const createPhotoJob = async (data, socket, wLogger) => {
+  const logger = wLogger.extend(taskName.CREATE_PHOTO);
   logger(`start ${taskName.CREATE_PHOTO} job`);
 
   const { cameraId, userId, taskId } = data;
@@ -25,6 +25,8 @@ export const createPhotoJob = async (data, socket, workerLogger) => {
         startedAt: new Date(),
       },
     });
+
+    // worker.socketNotification(userId, 'update-task', { cameraId, userId, task: rtask });
 
     socket.send(userId, 'update-task', { cameraId, userId, task: rtask });
 
@@ -106,8 +108,8 @@ const getTimeRange = (photoSettings, dateInfo) => {
 
 //
 
-export const createPhotosByTimeJob = async (data, socket, workerLogger) => {
-  const logger = workerLogger.extend(taskName.CREATE_PHOTOS_BY_TIME);
+export const createPhotosByTimeJob = async (data, socket, wLogger) => {
+  const logger = wLogger.extend(taskName.CREATE_PHOTOS_BY_TIME);
 
   logger(`start ${taskName.CREATE_PHOTOS_BY_TIME} job`);
 

@@ -93,7 +93,7 @@ const getAll = async ({ userId, logger, query }) => {
     ...addFields(query.including),
     ...populateFields('avatar'),
   ]);
-  console.log('cameraService.getAll cameras', cameras);
+  // console.log('cameraService.getAll cameras', cameras);
   return cameras;
 };
 
@@ -101,7 +101,7 @@ const getOne = async ({ logger, cameraId }) => {
   logger && logger(`cameraService.getOne`);
 
   const camera = await Camera.findOne({ _id: cameraId }).populate('avatar');
-  console.log('cameraService.getOne camera', camera);
+  // console.log('cameraService.getOne camera', camera);
   return camera;
 };
 
@@ -122,7 +122,7 @@ const getCameraStats = async ({ logger, cameraId }) => {
     ...addFields('stats'),
     { $project: { _id: 1, stats: 1 } },
   ]);
-  console.log('cameraService.getCameraStats stats', stats);
+  // console.log('cameraService.getCameraStats stats', stats);
   return stats;
 };
 
@@ -153,7 +153,7 @@ const createOne = async ({ logger, userId, payload }) => {
   await camera.save();
 
   const created = await Camera.findOne({ _id: camera._id });
-  console.log('cameraService.createOne created', created);
+  // console.log('cameraService.createOne created', created);
   return created;
 };
 
@@ -168,7 +168,7 @@ const updateOneById = async ({ logger, cameraId, payload }) => {
 
   await Camera.updateOne({ _id: cameraId }, payload);
   const updated = await Camera.findOne({ _id: cameraId }).populate('avatar');
-  console.log('cameraService.updateOneById updated', updated);
+  // console.log('cameraService.updateOneById updated', updated);
   return updated;
 };
 

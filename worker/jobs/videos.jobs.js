@@ -6,8 +6,8 @@ import createAndSaveVideo from './createAndSaveVideo.js';
 //
 //
 
-export const createVideoJob = async (data, socket, workerLogger) => {
-  const logger = workerLogger.extend(taskName.CREATE_VIDEO);
+export const createVideoJob = async (data, socket, wLogger) => {
+  const logger = wLogger.extend(taskName.CREATE_VIDEO);
   logger(`start ${taskName.CREATE_VIDEO} job`);
 
   const { cameraId, userId, taskId } = data;

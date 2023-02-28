@@ -16,12 +16,17 @@ import userRouter from './routes/user.router.js';
 import worker from './worker/agenda.worker.js';
 import storage from './storage/storage.js';
 import socket from './socket.js';
-
 // import nms from './nms.js';
+import { taskName } from './utils/constants.js';
+
+//
 
 const mode = process.env.NODE_ENV || 'development';
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.SPORT || 4000;
 const dbUri = process.env.MONGO_URI;
+const jobTypes = [taskName.CREATE_PHOTO, taskName.CREATE_VIDEO, taskName.CREATE_PHOTOS_BY_TIME];
+
+//
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -60,11 +65,11 @@ const startServer = async () => {
       useFindAndModify: false,
     });
 
-    logger(`Mongoose successfully Connected`);
+    logger(`Mongoose in server successfully Connected`);
 
-    await socket.start(httpServer, logger);
-    await worker.start(socket, logger);
-    await storage.start(logger);
+    await storage.start();
+    await socket.start(httpServer);
+    await worker.start(jobTypes);
 
     // nms.run();
 
@@ -75,5 +80,7 @@ const startServer = async () => {
     console.log('catch err', e);
   }
 };
+
+//
 
 startServer();
