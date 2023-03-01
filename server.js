@@ -13,9 +13,9 @@ import taskRouter from './routes/task.router.js';
 import dateInfoRouter from './routes/dateInfo.router.js';
 import diskStorageRouter from './routes/storage.router.js';
 import userRouter from './routes/user.router.js';
-import worker from './worker/agenda.worker.js';
+import worker from './worker/agenda.js';
 import storage from './storage/storage.js';
-import socket from './socket.js';
+import socket from './socket/socket.js';
 // import nms from './nms.js';
 import { taskName } from './utils/constants.js';
 

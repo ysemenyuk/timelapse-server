@@ -4,7 +4,7 @@ import { asyncHandler } from '../middleware/errorHandlerMiddleware.js';
 // import fileService from '../services/file.service.js';
 import imageService from '../services/image.service.js';
 import * as consts from '../utils/constants.js';
-import storageService from '../storage/storage.js';
+import storage from '../storage/storage.js';
 import { createFullPath } from '../storage/disk.storage.js';
 
 const router = express.Router({ mergeParams: true });
@@ -21,7 +21,7 @@ router.get(
     req.logger(`gridfs.storage.router.get jpg ${req.url}`);
 
     const fileLink = req._parsedUrl.pathname;
-    const stream = storageService.openDownloadStreamByLink({
+    const stream = storage.openDownloadStreamByLink({
       // logger: req.logger,
       fileLink,
     });
@@ -53,7 +53,7 @@ router.get(
     req.logger(`gridfs.storage.router.get mp4 ${req.url}`);
 
     const fileLink = req._parsedUrl.pathname;
-    const stream = storageService.openDownloadStreamByLink({
+    const stream = storage.openDownloadStreamByLink({
       // logger: req.logger,
       fileLink,
     });

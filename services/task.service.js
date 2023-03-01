@@ -1,5 +1,5 @@
 import Task from '../models/Task.js';
-import worker from '../worker/agenda.worker.js';
+import worker from '../worker/agenda.js';
 import { taskName, taskType } from '../utils/constants.js';
 
 // get

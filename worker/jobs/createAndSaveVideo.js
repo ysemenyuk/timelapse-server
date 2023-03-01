@@ -2,7 +2,7 @@ import fileService from '../../services/file.service.js';
 import { makeNumber, makePosterFileName, makeUniformSample, makeVideoFileName } from '../../utils/utils.js';
 import { fileType, type } from '../../utils/constants.js';
 import diskService from '../../services/disk.service.js';
-import storageService from '../../storage/storage.js';
+import storage from '../../storage/storage.js';
 import ffmpegService from '../../services/ffmpeg.service.js';
 
 const sleep = (time, message = 'Hello') =>
@@ -40,7 +40,7 @@ const createAndSaveVideo = async ({ logger, userId, cameraId, taskId, create, vi
 
   // isFileExistInStorage
   const checkedp = samplingOfPhotos.map(async (file) => {
-    const isFileExistInStorage = await storageService.isFileExist({ file });
+    const isFileExistInStorage = await storage.isFileExist({ file });
     if (isFileExistInStorage) {
       return file;
     }
@@ -53,7 +53,7 @@ const createAndSaveVideo = async ({ logger, userId, cameraId, taskId, create, vi
 
   // download and rename files in tmp-dir from storage
   const savedp = existing.map(async (photo, index) => {
-    const stream = storageService.openDownloadStream({ file: photo });
+    const stream = storage.openDownloadStream({ file: photo });
     const fileName = `img-${makeNumber(index)}.jpg`;
     const saved = await diskService.saveFile({ dir: tmpdir, fileName, stream });
     return saved;

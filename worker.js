@@ -2,9 +2,9 @@ import 'dotenv/config';
 import mongoose from 'mongoose';
 import debug from 'debug';
 import http from 'http';
-import worker from './worker/agenda.worker.js';
+import worker from './worker/agenda.js';
 import storage from './storage/storage.js';
-import socket from './socket.js';
+import socket from './socket/socket.js';
 import { taskName } from './utils/constants.js';
 
 const PORT = process.env.WPORT || 4001;

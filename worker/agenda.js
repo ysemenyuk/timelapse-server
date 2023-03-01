@@ -2,7 +2,7 @@ import { Agenda } from 'agenda/es.js';
 import mongodb from 'mongodb';
 import jobs from './jobs/jobs.js';
 import debug from 'debug';
-import socket from '../socket.js';
+import socket from '../socket/socket.js';
 import { taskStatus } from '../utils/constants.js';
 
 const { MongoClient, ObjectID } = mongodb;

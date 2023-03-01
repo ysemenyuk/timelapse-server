@@ -3,7 +3,7 @@ import mongodb from 'mongodb';
 import { addHours } from 'date-fns';
 import File from '../models/File.js';
 import { type } from '../utils/constants.js';
-import storageService from '../storage/storage.js';
+import storage from '../storage/storage.js';
 
 const { ObjectId } = mongodb;
 
@@ -126,7 +126,7 @@ const createFile = async ({ logger, data, stream, ...payload }) => {
   const file = new File({ ...payload });
 
   // save on storage
-  const fileInfo = await storageService.saveFile({
+  const fileInfo = await storage.saveFile({
     logger,
     file,
     data,
@@ -160,7 +160,7 @@ const deleteOne = async ({ logger, item }) => {
 
   // delete file from storage
   try {
-    await storageService.removeFile({ logger, file: item });
+    await storage.removeFile({ logger, file: item });
   } catch (error) {
     console.log('error deletedFromStorage', error);
   }
@@ -200,7 +200,7 @@ const deleteOneById = async ({ logger, itemId }) => {
 const createUserDefaultFiles = async ({ logger, userId }) => {
   logger && logger(`fileService.createUserDefaultFiles`);
 
-  await storageService.createUserPath({ logger, userId });
+  await storage.createUserPath({ logger, userId });
 };
 
 const deleteUserFiles = async ({ logger, userId }) => {
@@ -208,7 +208,7 @@ const deleteUserFiles = async ({ logger, userId }) => {
 
   // delete files from storage
   try {
-    await storageService.removeUserFiles({ logger, userId });
+    await storage.removeUserFiles({ logger, userId });
   } catch (error) {
     console.log('error fileService.deleteUserFiles', error);
   }
@@ -223,7 +223,7 @@ const deleteUserFiles = async ({ logger, userId }) => {
 const createCameraDefaultFiles = async ({ logger, userId, cameraId }) => {
   logger && logger(`fileService.createCameraDefaultFiles`);
 
-  await storageService.createCameraPath({ logger, userId, cameraId });
+  await storage.createCameraPath({ logger, userId, cameraId });
 };
 
 const deleteCameraFiles = async ({ logger, userId, cameraId }) => {
@@ -231,7 +231,7 @@ const deleteCameraFiles = async ({ logger, userId, cameraId }) => {
 
   // delete files from storage
   try {
-    await storageService.removeCameraFiles({ logger, userId, cameraId });
+    await storage.removeCameraFiles({ logger, userId, cameraId });
   } catch (error) {
     console.log('error fileService.deleteCameraFiles', error);
   }
