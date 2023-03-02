@@ -1,4 +1,4 @@
-import DateInfo from '../models/DateInfo.js';
+import DateInfo from '../db/models/DateInfo.js';
 
 // get
 

@@ -52,16 +52,16 @@ class GridfsStorage {
     const database = this.mongoClient.db('myFirstDatabase');
     this.bucket = new mongodb.GridFSBucket(database);
 
-    logger(`storageType - gridfs, database - "myFirstDatabase"`);
+    logger(`storageType - "gridfs", database - "myFirstDatabase"`);
   }
 
   // create
 
-  async createUserPath() {
+  async createUserFolder() {
     // pass
   }
 
-  async createCameraPath() {
+  async createCameraFolder() {
     // pass
   }
 

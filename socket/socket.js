@@ -54,6 +54,4 @@ class Socket {
   }
 }
 
-const socket = new Socket();
-
-export default socket;
+export default Socket;

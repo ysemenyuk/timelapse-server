@@ -25,7 +25,7 @@ export function createFullPath(filePath) {
 
 async function createDir(dirPath) {
   const fullPath = createFullPath(dirPath);
-  const created = await fsp.mkdir(fullPath);
+  const created = await fsp.mkdir(fullPath, { recursive: true });
   return created;
 }
 
@@ -50,32 +50,28 @@ class DiskStorage {
   }
 
   start() {
-    logger(`storageType - disk, pathOnDisk - ${pathToDiskSpace}`);
+    logger(`storageType - "disk", pathOnDisk - "${pathToDiskSpace}"`);
   }
 
   // create
 
-  async createUserPath({ logger, userId }) {
-    logger && logger(`disk.storage.createUserPath userId: ${userId}`);
+  async createUserFolder({ logger, userId }) {
+    logger && logger(`disk.storage.createUserFolder userId: ${userId}`);
 
     const userDirPath = createUserDirPath(userId);
-    const userDir = await createDir(userDirPath);
-
-    return userDir;
+    await createDir(userDirPath);
   }
 
-  async createCameraPath({ logger, userId, cameraId }) {
-    logger && logger(`disk.storage.createCameraPath cameraId: ${cameraId}`);
+  async createCameraFolder({ logger, userId, cameraId }) {
+    logger && logger(`disk.storage.createCameraFolder cameraId: ${cameraId}`);
 
     const cameraDirPath = createCameraDirPath(userId, cameraId);
     const cameraPhotosDirPath = createPhotosDirPath(userId, cameraId);
     const cameraVideosDirPath = createVideosDirPath(userId, cameraId);
 
-    const cameraDir = await createDir(cameraDirPath);
-    const cameraPhotosDir = await createDir(cameraPhotosDirPath);
-    const cameraVideosDir = await createDir(cameraVideosDirPath);
-
-    return { cameraDir, cameraPhotosDir, cameraVideosDir };
+    await createDir(cameraDirPath);
+    await createDir(cameraPhotosDirPath);
+    await createDir(cameraVideosDirPath);
   }
 
   // remove

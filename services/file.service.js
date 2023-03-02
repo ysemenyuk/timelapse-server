@@ -1,9 +1,9 @@
 import _ from 'lodash';
 import mongodb from 'mongodb';
 import { addHours } from 'date-fns';
-import File from '../models/File.js';
+import File from '../db/models/File.js';
 import { type } from '../utils/constants.js';
-import storage from '../storage/storage.js';
+import storage from '../storage/index.js';
 
 const { ObjectId } = mongodb;
 
@@ -195,35 +195,16 @@ const deleteOneById = async ({ logger, itemId }) => {
 // default
 //
 
-// user
+const createUserFolder = async ({ logger, userId }) => {
+  logger && logger(`fileService.createUserFolder`);
 
-const createUserDefaultFiles = async ({ logger, userId }) => {
-  logger && logger(`fileService.createUserDefaultFiles`);
-
-  await storage.createUserPath({ logger, userId });
+  await storage.createUserFolder({ logger, userId });
 };
 
-const deleteUserFiles = async ({ logger, userId }) => {
-  logger && logger(`fileService.deleteUserFiles`);
+const createCameraFolder = async ({ logger, userId, cameraId }) => {
+  logger && logger(`fileService.createCameraFolder`);
 
-  // delete files from storage
-  try {
-    await storage.removeUserFiles({ logger, userId });
-  } catch (error) {
-    console.log('error fileService.deleteUserFiles', error);
-  }
-
-  // delete files from DB
-  const deletedFromDb = await File.deleteMany({ user: userId });
-  return deletedFromDb;
-};
-
-// camera
-
-const createCameraDefaultFiles = async ({ logger, userId, cameraId }) => {
-  logger && logger(`fileService.createCameraDefaultFiles`);
-
-  await storage.createCameraPath({ logger, userId, cameraId });
+  await storage.createCameraFolder({ logger, userId, cameraId });
 };
 
 const deleteCameraFiles = async ({ logger, userId, cameraId }) => {
@@ -253,8 +234,7 @@ export default {
   deleteOne,
   deleteOneById,
   // deleteManyByIds,
-  createUserDefaultFiles,
-  deleteUserFiles,
-  createCameraDefaultFiles,
+  createUserFolder,
+  createCameraFolder,
   deleteCameraFiles,
 };

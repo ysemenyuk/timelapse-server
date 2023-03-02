@@ -2,17 +2,18 @@ import 'dotenv/config';
 import mongoose from 'mongoose';
 import debug from 'debug';
 import http from 'http';
-import worker from './worker/agenda.js';
-import storage from './storage/storage.js';
-import socket from './socket/socket.js';
+import worker from './worker/index.js';
+import storage from './storage/index.js';
+import socket from './socket/index.js';
 import { taskName } from './utils/constants.js';
 
-const PORT = process.env.WPORT || 4001;
+const PORT = process.env.WORKER_PORT;
 const dbUri = process.env.MONGO_URI;
+
 const jobTypes = [taskName.CREATE_PHOTO, taskName.CREATE_VIDEO, taskName.CREATE_PHOTOS_BY_TIME];
 
-const httpServer = http.createServer();
 const logger = debug('worker');
+const httpServer = http.createServer();
 
 //
 
@@ -26,7 +27,7 @@ const startWorker = async () => {
       useFindAndModify: false,
     });
 
-    logger(`Mongoose in worker successfully Connected`);
+    logger(`Mongoose successfully connected`);
 
     await storage.start();
     await socket.start(httpServer);

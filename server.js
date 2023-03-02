@@ -1,6 +1,5 @@
 import 'dotenv/config';
 import express from 'express';
-import mongoose from 'mongoose';
 import debug from 'debug';
 import http from 'http';
 import cors from 'cors';
@@ -11,36 +10,35 @@ import cameraRouter from './routes/camera.router.js';
 import fileRouter from './routes/file.router.js';
 import taskRouter from './routes/task.router.js';
 import dateInfoRouter from './routes/dateInfo.router.js';
-import diskStorageRouter from './routes/storage.router.js';
+import storageRouter from './routes/storage.router.js';
 import userRouter from './routes/user.router.js';
-import worker from './worker/agenda.js';
-import storage from './storage/storage.js';
-import socket from './socket/socket.js';
-// import nms from './nms.js';
+import db from './db/index.js';
+import worker from './worker/index.js';
+import storage from './storage/index.js';
+import socket from './socket/index.js';
 import { taskName } from './utils/constants.js';
 
 //
 
-const mode = process.env.NODE_ENV || 'development';
-const PORT = process.env.SPORT || 4000;
-const dbUri = process.env.MONGO_URI;
+const mode = process.env.NODE_ENV;
+const PORT = process.env.SERVER_PORT;
+
 const jobTypes = [taskName.CREATE_PHOTO, taskName.CREATE_VIDEO, taskName.CREATE_PHOTOS_BY_TIME];
 
 //
 
-const app = express();
-const httpServer = http.createServer(app);
 const logger = debug('server');
 
-if (mode === 'development') {
-  app.use(debugMiddleware);
-}
+const app = express();
+const httpServer = http.createServer(app);
+
+app.use(debugMiddleware);
 
 app.use(cors());
 app.use(express.json());
 app.use(fileUpload());
 
-app.use('/files', diskStorageRouter);
+app.use('/files', storageRouter);
 app.use('/api/cameras/:cameraId/tasks', taskRouter);
 app.use('/api/cameras/:cameraId/files', fileRouter);
 app.use('/api/cameras/:cameraId/date-info', dateInfoRouter);
@@ -59,14 +57,7 @@ const startServer = async () => {
   try {
     logger(`Starting server`);
 
-    await mongoose.connect(dbUri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      useFindAndModify: false,
-    });
-
-    logger(`Mongoose in server successfully Connected`);
-
+    await db.connect();
     await storage.start();
     await socket.start(httpServer);
     await worker.start(jobTypes);

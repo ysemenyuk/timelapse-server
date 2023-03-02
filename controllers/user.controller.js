@@ -41,7 +41,7 @@ const auth = async (req, res) => {
 const getOne = async (req, res) => {
   req.logger(`userController.getOne`);
 
-  const user = await userService.getById({
+  const user = await userService.getOneById({
     userId: req.userId,
     logger: req.logger,
   });

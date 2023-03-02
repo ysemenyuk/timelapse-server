@@ -2,13 +2,19 @@ import bcrypt from 'bcryptjs';
 import _ from 'lodash';
 import jwt from './token.service.js';
 import { BadRequestError } from '../middleware/errorHandlerMiddleware.js';
-import User from '../models/User.js';
+import { userRepo } from '../db/index.js';
 import fileService from './file.service.js';
+
+//
+
+const filterProps = (user) => _.pick(user, ['_id', 'name', 'email', 'avatar']);
+
+//
 
 const singUp = async ({ email, password, logger }) => {
   logger(`userService.singUp email: ${email}`);
 
-  const user = await User.findOne({ email });
+  const user = await userRepo.findOne({ email });
 
   if (user) {
     logger(`userService.singUp email ${email} - already exist`);
@@ -16,25 +22,26 @@ const singUp = async ({ email, password, logger }) => {
   }
 
   const hashPassword = await bcrypt.hash(password, 8);
-
-  const newUser = new User({ email, password: hashPassword });
+  const newUser = userRepo.createOne({ email, password: hashPassword });
 
   // crete user folder
-  await fileService.createUserDefaultFiles({
+  await fileService.createUserFolder({
     logger,
     userId: newUser._id,
   });
 
+  await newUser.save();
   const token = jwt.sign(newUser._id);
 
-  await newUser.save();
-  return { token, user: _.pick(newUser, ['_id', 'name', 'email', 'avatar']) };
+  return { token, user: filterProps(newUser) };
 };
+
+//
 
 const logIn = async ({ email, password, logger }) => {
   logger(`userService.logIn email: ${email}`);
 
-  const user = await User.findOne({ email });
+  const user = await userRepo.findOne({ email });
 
   if (!user) {
     logger(`userService.logIn email ${email} - User not found`);
@@ -50,31 +57,39 @@ const logIn = async ({ email, password, logger }) => {
 
   const token = jwt.sign(user._id);
 
-  return { token, user: _.pick(user, ['_id', 'name', 'email', 'avatar']) };
+  return { token, user: filterProps(user) };
 };
+
+//
 
 const auth = async ({ userId, logger }) => {
   logger(`userService.auth userId: ${userId}`);
 
-  const user = await User.findById(userId);
+  const user = await userRepo.findOneById(userId);
   const token = jwt.sign(user._id);
 
-  return { token, user: _.pick(user, ['_id', 'name', 'email', 'avatar']) };
+  return { token, user: filterProps(user) };
 };
 
-const getById = async ({ userId, logger }) => {
-  logger(`user.repository.getById userId: ${userId}`);
+//
 
-  const user = await User.findById(userId);
-  return { user: _.pick(user, ['_id', 'name', 'email', 'avatar']) };
+const getOneById = async ({ userId, logger }) => {
+  logger(`userService.getById userId: ${userId}`);
+
+  const user = await userRepo.findOneById(userId);
+  return { user: filterProps(user) };
 };
 
-const getByEmail = async ({ email, logger }) => {
-  logger(`userService.getByEmail email: ${email}`);
+//
 
-  const user = await User.findOne({ email });
-  return { user: _.pick(user, ['_id', 'name', 'email', 'avatar']) };
+const getOneByEmail = async ({ email, logger }) => {
+  logger(`userService.getOneByEmail email: ${email}`);
+
+  const user = await userRepo.findOne({ email });
+  return { user: filterProps(user) };
 };
+
+//
 
 const updateOne = async ({ userId, payload, logger }) => {
   logger(`userService.updateOne userId: ${userId}`);
@@ -86,22 +101,19 @@ const updateOne = async ({ userId, payload, logger }) => {
   const hashPassword = password && (await bcrypt.hash(password, 8));
   const fields = _.pickBy({ name, email, password: hashPassword }, _.identity);
 
-  const updated = await User.findOneAndUpdate({ _id: userId }, fields, { new: true });
+  const updated = await userRepo.updateOneById(userId, fields);
   return updated;
 };
+
+//
 
 const deleteOne = async ({ userId, logger }) => {
   logger(`userService.deleteOne userId: ${userId}`);
 
-  // delete user files
-  await fileService.deleteUserFiles({
-    logger,
-    userId,
-  });
+  // TODO: delete user cameras, files, tasks, jobs
 
-  const user = await User.findById(userId);
-  const deleted = await user.remove();
+  const deleted = await userRepo.deleteOneById(userId);
   return deleted;
 };
 
-export default { singUp, logIn, auth, getById, getByEmail, updateOne, deleteOne };
+export default { singUp, logIn, auth, getOneById, getOneByEmail, updateOne, deleteOne };

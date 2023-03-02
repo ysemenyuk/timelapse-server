@@ -1,5 +1,5 @@
 import mongodb from 'mongodb';
-import Camera from '../models/Camera.js';
+import Camera from '../db/models/Camera.js';
 import fileService from './file.service.js';
 import taskService from './task.service.js';
 
@@ -85,6 +85,10 @@ const populateFields = (fields) => {
   return [];
 };
 
+//
+//
+//
+
 const getAll = async ({ userId, logger, query }) => {
   logger && logger(`cameraService.getAll`);
 
@@ -136,15 +140,15 @@ const createOne = async ({ logger, userId, payload }) => {
   const camera = new Camera({ user: userId, avatar: null, ...payload });
   // console.log('camera', camera);
 
-  // create default folders
-  await fileService.createCameraDefaultFiles({
+  // create camera folders
+  await fileService.createCameraFolder({
     logger,
     userId,
     cameraId: camera._id,
   });
 
-  // create defaul tasks
-  await taskService.createCameraDefaultTasks({
+  // create camera tasks
+  await taskService.createCameraTasks({
     logger,
     userId,
     cameraId: camera._id,
