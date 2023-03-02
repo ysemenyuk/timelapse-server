@@ -1,6 +1,6 @@
 import cameraService from '../../services/camera.service.js';
 import dateInfoService from '../../services/dateInfo.service.js';
-import weatherApiService from '../../services/weatherApi.service.js';
+import weatherService from '../../services/weather.service.js';
 import { makeDateName } from '../../utils/utils.js';
 
 export const createDateInfo = async ({ logger, userId, cameraId }) => {
@@ -13,17 +13,18 @@ export const createDateInfo = async ({ logger, userId, cameraId }) => {
     return null;
   }
 
-  const metaData = await weatherApiService.getCurrentDateWeather([latitude, longitude]);
+  const metaData = await weatherService.getCurrentDateWeather([latitude, longitude]);
 
   if (!metaData) {
     return null;
   }
 
   const currentDateName = makeDateName(new Date());
+
   const dateInfo = await dateInfoService.createOne({
     logger,
-    user: userId,
-    camera: cameraId,
+    userId,
+    cameraId,
     name: currentDateName,
     weather: metaData,
   });

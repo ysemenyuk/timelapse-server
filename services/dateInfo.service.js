@@ -2,7 +2,7 @@ import DateInfo from '../db/models/DateInfo.js';
 
 // get
 
-const getAll = async ({ cameraId, logger }) => {
+const getAll = async ({ logger, cameraId }) => {
   logger && logger(`dateInfoService.getAll`);
 
   const datesInfo = await DateInfo.find({ camera: cameraId });
