@@ -63,7 +63,6 @@ class Worker {
 
   async createTaskJob(task) {
     await this.removeTaskJobs(task.id);
-
     if (task.type === 'OneTime') {
       await this.createOneTimeTaskJob(task);
     }
@@ -111,7 +110,8 @@ class Worker {
   async updateRepeatEveryTaskJob(task) {
     await this.removeTaskJobs(task._id);
     if (task.status === taskStatus.RUNNING) {
-      await this.createRepeatEveryTaskJob(task);
+      const interval = `${task.photoSettings.interval} seconds`;
+      await this.createRepeatEveryTaskJob(task, interval);
     }
   }
 

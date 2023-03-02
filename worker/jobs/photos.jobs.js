@@ -140,7 +140,7 @@ export const createPhotosByTimeJob = async (data, socket, wLogger) => {
     });
 
     logger(`successed ${taskName.CREATE_PHOTOS_BY_TIME} job`);
-    socket.send(userId, 'create-file', { cameraId, userId, fileId: photo._id });
+    socket.send(userId, 'create-file', { cameraId, userId, file: photo });
   } catch (error) {
     // console.log('--- error CreatePhotosByTime ---', error);
 
