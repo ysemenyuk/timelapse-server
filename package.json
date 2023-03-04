@@ -1,12 +1,12 @@
 {
   "name": "timelapse",
-  "version": "1.0.0",
-  "description": "",
+  "version": "1.0.1",
+  "description": "timelapse api",
   "main": "./index.js",
   "type": "module",
   "scripts": {
     "tgbot": "nodemon tg/telegraph.js",
-    "start": "node index.js",
+    "start": "node server.js",
     "dev:server": "DEBUG=request*,server*,worker*,socket,storage,agenda:db_init,agenda:create,agenda:job nodemon server.js",
     "dev:server:win": "set DEBUG=request*,server*,worker*,socket,storage,agenda:db_init,agenda:create,agenda:job & nodemon server.js",
     "dev:worker:win": "set DEBUG=worker*,socket,storage,agenda:db_init,agenda:create,agenda:job & nodemon worker.js"
