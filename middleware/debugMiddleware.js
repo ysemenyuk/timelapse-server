@@ -7,11 +7,11 @@ export default (req, res, next) => {
   const requestId = uuidv4();
 
   req.requestId = requestId;
-  req.logger = logger.extend(requestId);
+  req.reqLogger = logger.extend(requestId);
 
-  req.logResp = (req) => req.logger(`RES: ${req.method} -${req.originalUrl} -${res.statusCode}`);
+  req.resLogger = (req) => req.reqLogger(`RES: ${req.method} -${req.originalUrl} -${res.statusCode}`);
 
-  req.logger(`REQ: ${req.method} -${req.originalUrl}`);
+  req.reqLogger(`REQ: ${req.method} -${req.originalUrl}`);
 
   next();
 };

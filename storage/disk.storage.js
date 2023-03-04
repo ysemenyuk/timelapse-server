@@ -8,7 +8,6 @@ import { isPhotoFile } from '../utils/utils.js';
 import diskpaths from './disk.paths.js';
 
 const pathToDiskSpace = process.env.DISK_PATH;
-const logger = debug('storage');
 
 const {
   createFilePath,
@@ -46,11 +45,12 @@ function isDirExist(dirPath) {
 
 class DiskStorage {
   constructor() {
-    //
+    this.logger;
   }
 
   start() {
-    logger(`storageType - "disk", pathOnDisk - "${pathToDiskSpace}"`);
+    this.logger = debug('storage');
+    this.logger(`storageType - "disk", pathOnDisk - "${pathToDiskSpace}"`);
   }
 
   // create

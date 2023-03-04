@@ -18,11 +18,11 @@ const router = express.Router({ mergeParams: true });
 router.get(
   /g+\/u_[a-z0-9]+\/c_[a-z0-9]+\/.*\.jpg/,
   asyncHandler(async (req, res, next) => {
-    req.logger(`gridfs.storage.router.get jpg ${req.url}`);
+    req.reqLogger(`gridfs.storage.router.get jpg ${req.url}`);
 
     const fileLink = req._parsedUrl.pathname;
     const stream = storage.openDownloadStreamByLink({
-      // logger: req.logger,
+      // logger: req.reqLogger,
       fileLink,
     });
 
@@ -36,11 +36,11 @@ router.get(
 
     stream.on('error', (err) => {
       next(err);
-      req.logResp(req);
+      req.resLogger(req);
     });
 
     stream.on('end', () => {
-      req.logResp(req);
+      req.resLogger(req);
     });
   })
 );
@@ -50,11 +50,11 @@ router.get(
 router.get(
   /g+\/u_[a-z0-9]+\/c_[a-z0-9]+\/.*\.mp4/,
   asyncHandler(async (req, res, next) => {
-    req.logger(`gridfs.storage.router.get mp4 ${req.url}`);
+    req.reqLogger(`gridfs.storage.router.get mp4 ${req.url}`);
 
     const fileLink = req._parsedUrl.pathname;
     const stream = storage.openDownloadStreamByLink({
-      // logger: req.logger,
+      // logger: req.reqLogger,
       fileLink,
     });
 
@@ -62,11 +62,11 @@ router.get(
 
     stream.on('error', (err) => {
       next(err);
-      req.logResp(req);
+      req.resLogger(req);
     });
 
     stream.on('end', () => {
-      req.logResp(req);
+      req.resLogger(req);
     });
   })
 );
@@ -80,7 +80,7 @@ router.get(
 router.get(
   /u_[a-z0-9]+\/c_[a-z0-9]+\/.*\.jpg/,
   asyncHandler(async (req, res) => {
-    req.logger(`disk.storage.router.get jpg ${req.url}`);
+    req.reqLogger(`disk.storage.router.get jpg ${req.url}`);
     // console.log(1111, req._parsedUrl.path);
 
     const filePath = req._parsedUrl.pathname;
@@ -92,12 +92,12 @@ router.get(
       res.set('Content-Type', 'image/jpg');
       const buffer = await imageService.resizeToBuffer(fileFullPath, consts.THUMBNAIL_SIZE);
       res.send(buffer);
-      req.logResp(req);
+      req.resLogger(req);
       return;
     }
 
     res.sendFile(fileFullPath);
-    req.logResp(req);
+    req.resLogger(req);
   })
 );
 
@@ -106,33 +106,33 @@ router.get(
 router.get(
   /u_[a-z0-9]+\/c_[a-z0-9]+\/.*\.mp4/,
   asyncHandler(async (req, res) => {
-    req.logger(`disk.storage.router.get mp4 ${req.url}`);
+    req.reqLogger(`disk.storage.router.get mp4 ${req.url}`);
     // console.log(222, req._parsedUrl.path);
 
     const filePath = req._parsedUrl.pathname;
     const fileFullPath = createFullPath(filePath);
 
     res.sendFile(fileFullPath);
-    req.logResp(req);
+    req.resLogger(req);
   })
 );
 
 // router.get(
 //   '/:link',
 //   asyncHandler(async (req, res) => {
-//     req.logger(`disk.storage.router.get`);
+//     req.reqLogger(`disk.storage.router.get`);
 //     console.log('req.params.link', req.params.link);
 
 //     const file = await fileService.getOneById({
 //       link: req.params.link,
-//       logger: req.logger,
+//       logger: req.reqLogger,
 //     });
 
 //     console.log('file', file);
 
 //     // if (!file) {
 //     //   res.sendStatus(404);
-//     //   req.logResp(req);
+//     //   req.resLogger(req);
 //     //   return;
 //     // }
 //   })

@@ -34,8 +34,6 @@ export const createVideoJob = async (data, socket, wLogger) => {
       create: fileCreateType.BY_HAND,
     });
 
-    socket.send(userId, 'create-file', { cameraId, userId, file: video });
-
     const stask = await taskService.updateOneById({
       taskId,
       payload: {
@@ -46,9 +44,10 @@ export const createVideoJob = async (data, socket, wLogger) => {
     });
 
     socket.send(userId, 'update-task', { cameraId, userId, task: stask });
+    socket.send(userId, 'create-file', { cameraId, userId, file: video });
     logger(`successed ${taskName.CREATE_VIDEO} job`);
   } catch (error) {
-    // console.log('-- error createVideo job --', error);
+    console.log('-- error createVideo job --', error);
 
     const etask = await taskService.updateOneById({
       taskId,

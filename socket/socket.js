@@ -1,15 +1,16 @@
 import { Server } from 'socket.io';
 import debug from 'debug';
 
-const logger = debug('socket');
-
 class Socket {
   constructor() {
+    this.logger;
     this.socket;
     this.sessions = new Map();
   }
 
   async start(httpServer) {
+    this.logger = debug('socket');
+
     this.socket = new Server(httpServer, {
       cors: { origin: '*' },
     });
@@ -29,14 +30,18 @@ class Socket {
     });
 
     this.socket.on('connection', (socket) => {
-      logger('user connected', socket.handshake.auth.userId);
+      this.logger('client connected', socket.handshake.auth.userId);
       this.sessions.set(socket.userId, socket);
 
-      socket.emit('hello', socket.userId);
-
       socket.on('disconnect', () => {
-        logger('user disconnect', socket.userId);
+        this.logger('client disconnect', socket.userId);
         this.sessions.delete(socket.userId);
+      });
+
+      socket.on('worker', (mess) => {
+        this.logger('worker mess.name to mess.userId:', mess.name, mess.userId.toString());
+        const { userId, name, data } = mess;
+        this.send(userId, name, data);
       });
     });
   }
@@ -47,10 +52,9 @@ class Socket {
 
   send(userId, name, data) {
     const userSocet = this.sessions.get(userId.toString());
-    if (!userSocet) {
-      return;
+    if (userSocet) {
+      userSocet.emit(name, data);
     }
-    userSocet.emit(name, data);
   }
 }
 

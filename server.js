@@ -27,8 +27,6 @@ const jobTypes = [taskName.CREATE_PHOTO, taskName.CREATE_VIDEO, taskName.CREATE_
 
 //
 
-const logger = debug('server');
-
 const app = express();
 const httpServer = http.createServer(app);
 
@@ -54,13 +52,15 @@ app.use((req, res) => {
 //
 
 const startServer = async () => {
+  const logger = debug('server');
+
   try {
     logger(`Starting server`);
 
     await db.connect();
     await storage.start();
     await socket.start(httpServer);
-    await worker.start(jobTypes);
+    await worker.start(jobTypes, socket);
 
     // nms.run();
 

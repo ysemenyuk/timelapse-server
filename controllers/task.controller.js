@@ -1,31 +1,31 @@
 import taskService from '../services/task.service.js';
 
 const getAll = async (req, res) => {
-  req.logger('cameraTask.controller getAll');
+  req.reqLogger('cameraTask.controller getAll');
 
   const tasks = await taskService.getAll({
     cameraId: req.params.cameraId,
-    logger: req.logger,
+    logger: req.reqLogger,
   });
 
   res.status(200).send(tasks);
-  req.logResp(req);
+  req.resLogger(req);
 };
 
 const getOne = async (req, res) => {
-  req.logger(`cameraTask.controller getOne`);
+  req.reqLogger(`cameraTask.controller getOne`);
 
   const task = await taskService.getOneById({
     taskId: req.params.taskId,
-    logger: req.logger,
+    logger: req.reqLogger,
   });
 
   res.status(200).send(task);
-  req.logResp(req);
+  req.resLogger(req);
 };
 
 const createOne = async (req, res) => {
-  req.logger(`cameraTask.controller createOne`);
+  req.reqLogger(`cameraTask.controller createOne`);
 
   // TODO: check req.body take fields by schema!
   const payload = req.body;
@@ -35,15 +35,15 @@ const createOne = async (req, res) => {
     cameraId: req.params.cameraId,
     payload,
     // worker: req.app.worker,
-    logger: req.logger,
+    logger: req.reqLogger,
   });
 
   res.status(201).send(task);
-  req.logResp(req);
+  req.resLogger(req);
 };
 
 const updateOne = async (req, res) => {
-  req.logger(`cameraTask.controller updateOne`);
+  req.reqLogger(`cameraTask.controller updateOne`);
 
   // TODO: check req.body take fields by schema!
   const payload = req.body;
@@ -51,23 +51,23 @@ const updateOne = async (req, res) => {
   const updated = await taskService.updateOneById({
     taskId: req.params.taskId,
     payload,
-    logger: req.logger,
+    logger: req.reqLogger,
   });
 
   res.status(201).send(updated);
-  req.logResp(req);
+  req.resLogger(req);
 };
 
 const deleteOne = async (req, res) => {
-  req.logger(`cameraTask.controller deleteOne`);
+  req.reqLogger(`cameraTask.controller deleteOne`);
 
   const deleted = await taskService.deleteOneById({
     taskId: req.params.taskId,
-    logger: req.logger,
+    logger: req.reqLogger,
   });
 
   res.status(204).send(deleted);
-  req.logResp(req);
+  req.resLogger(req);
 };
 
 export default {

@@ -1,6 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
 import winston from 'winston';
-// import colors from 'colors';
 
 const { createLogger, format, transports } = winston;
 
@@ -8,14 +7,12 @@ const logConfiguration = {
   transports: [new transports.Console()],
   format: format.combine(
     format.colorize(),
-    format.simple()
-    // format.timestamp({ format: 'YYYY/MM/DD HH:mm:ss' }),
-    // format.errors({ stack: true }),
-    // format.label({ label: `timelapse🏷️` }),
-    // format.prettyPrint()
-    // format.printf(
-    //   (info) => `${info.level} - ${[info.timestamp]}  ${info.requestId || ''} - ${info.message}`
-    // )
+    format.simple(),
+    format.timestamp({ format: 'YYYY/MM/DD HH:mm:ss' }),
+    format.errors({ stack: true }),
+    format.label({ label: `timelapse🏷️` }),
+    format.prettyPrint(),
+    format.printf((info) => `${info.level} - ${[info.timestamp]}  ${info.requestId || ''} - ${info.message}`)
   ),
 };
 
@@ -27,11 +24,11 @@ export default (req, res, next) => {
   req.requestId = requestId;
   req.winston = logger.child({ requestId });
 
-  req.logger = (message) => req.winston.info(message);
+  req.reqLogger = (message) => req.winston.info(message);
 
-  req.logResp = (req) => req.winston.info(`RES: ${req.method} -${req.originalUrl} -${res.statusCode}`);
+  req.resLogger = (req) => req.winston.info(`RES: ${req.method} -${req.originalUrl} -${res.statusCode}`);
 
-  // req.logger(`REQ: ${req.method} - ${req.originalUrl}`);
+  req.reqLogger(`REQ: ${req.method} -${req.originalUrl}`);
 
   next();
 };

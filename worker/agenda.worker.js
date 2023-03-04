@@ -2,11 +2,9 @@ import { Agenda } from 'agenda/es.js';
 import mongodb from 'mongodb';
 import jobs from './jobs/jobs.js';
 import debug from 'debug';
-import socket from '../socket/index.js';
 import { taskStatus } from '../utils/constants.js';
 
 const { MongoClient, ObjectID } = mongodb;
-const logger = debug('worker');
 
 const dbUri = process.env.MONGO_URI;
 const dbName = process.env.MONGO_DB_NAME;
@@ -14,35 +12,37 @@ const dbName = process.env.MONGO_DB_NAME;
 class Worker {
   constructor() {
     this.socket;
-    this.mongoClient;
+    this.logger;
     this.agenda;
   }
 
-  async start(jobTypes) {
+  async start(jobTypes, socket) {
     this.socket = socket;
-    this.mongoClient = new MongoClient(dbUri, {
+    this.logger = debug('worker');
+
+    const mongoClient = new MongoClient(dbUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
 
-    await this.mongoClient.connect();
+    await mongoClient.connect();
 
-    this.agenda = new Agenda({ mongo: this.mongoClient.db(dbName) });
+    this.agenda = new Agenda({ mongo: mongoClient.db(dbName) });
 
     jobTypes.forEach((type) => {
       this.agenda.define(type, async (job) => {
         const data = job.attrs.data;
-        await jobs[type](data, this.socket, logger, this);
+        await jobs[type](data, this.socket, this.logger, this);
       });
     });
 
     if (jobTypes.length) {
       await this.agenda.start();
-      logger(`agenda successfully started`);
+      this.logger(`agenda successfully started`);
     }
 
     const currentjobs = await this.agenda.jobs();
-    logger(`agenda currentjobs: ${currentjobs.length}`);
+    this.logger(`agenda currentjobs: ${currentjobs.length}`);
 
     if (currentjobs.length) {
       // await Promise.all(currentjobs.map(async (job) => await job.remove()));

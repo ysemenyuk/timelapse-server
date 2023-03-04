@@ -8,7 +8,6 @@ import { makeVideoFileName, makePhotoFileName, makePosterFileName } from '../uti
 
 const dbUri = process.env.MONGO_URI;
 const { MongoClient, ObjectId } = mongodb;
-const logger = debug('storage');
 
 const map = {
   [type.VIDEO]: makeVideoFileName,
@@ -37,22 +36,24 @@ const stream2buffer = (stream) => {
 
 class GridfsStorage {
   constructor() {
-    this.mongoClient;
+    this.logger;
     this.bucket;
   }
 
   async start() {
-    this.mongoClient = new MongoClient(dbUri, {
+    this.logger = debug('storage');
+
+    const mongoClient = new MongoClient(dbUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
 
-    await this.mongoClient.connect();
+    await mongoClient.connect();
 
-    const database = this.mongoClient.db('myFirstDatabase');
+    const database = mongoClient.db('myFirstDatabase');
     this.bucket = new mongodb.GridFSBucket(database);
 
-    logger(`storageType - "gridfs", database - "myFirstDatabase"`);
+    this.logger(`storageType - "gridfs", database - "myFirstDatabase"`);
   }
 
   // create

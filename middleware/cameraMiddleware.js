@@ -1,23 +1,23 @@
 import cameraService from '../services/camera.service.js';
 
 export default async (req, res, next) => {
-  req.logger(`cameraMiddleware cameraId: ${req.params.cameraId}`);
+  req.reqLogger(`cameraMiddleware cameraId: ${req.params.cameraId}`);
 
   try {
     const camera = await cameraService.getOneById({
       cameraId: req.params.cameraId,
-      logger: req.logger,
+      logger: req.reqLogger,
     });
 
     if (!camera) {
       res.sendStatus(404);
-      req.logResp(req);
+      req.resLogger(req);
       return;
     }
 
     if (camera.user.toString() !== req.userId) {
       res.sendStatus(401);
-      req.logResp(req);
+      req.resLogger(req);
       return;
     }
 
