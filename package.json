@@ -5,28 +5,27 @@
   "main": "./index.js",
   "type": "module",
   "scripts": {
-    "tgbot": "nodemon tg/telegraph.js",
-    "start": "node server.js",
-    "dev:server": "DEBUG=request*,server*,worker*,socket,storage,agenda:db_init,agenda:create,agenda:job nodemon src/server.js",
-    "dev:server:win": "set DEBUG=request*,server*,worker*,socket,storage,agenda:db_init,agenda:create,agenda:job & nodemon src/server.js",
-    "dev:worker:win": "set DEBUG=worker*,socket,storage,agenda:db_init,agenda:create,agenda:job & nodemon src/worker.js"
+    "tgbot": "nodemon src/tg/telegraph.js",
+    "start": "nodemon src/server.js",
+    "dev:server:win": "set DEBUG=http:server*,storage,worker,socket,socket.io:server*,agenda:db_init,agenda:create,agenda:job & nodemon src/server.js",
+    "dev:worker:win": "set DEBUG=worker:server*,storage,worker,socket,socket.io:server*,agenda:db_init,agenda:create,agenda:job & nodemon src/worker.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "agenda": "^4.2.1",
+    "agenda": "^4.4.0",
     "ajv": "^8.5.0",
     "ajv-formats": "^2.1.0",
     "aws-sdk": "^2.1065.0",
-    "axios": "^0.21.1",
+    "axios": "^0.21.4",
     "bcryptjs": "^2.4.3",
     "busboy": "^0.3.1",
     "colors": "^1.4.0",
     "core-js": "^3.13.1",
     "cors": "^2.8.5",
     "date-fns": "^2.29.3",
-    "debug": "^4.3.1",
-    "express": "^4.17.1",
+    "debug": "^4.3.4",
+    "express": "^4.18.2",
     "express-async-handler": "^1.1.4",
     "express-fileupload": "^1.2.1",
     "express-validator": "^6.11.1",
@@ -34,8 +33,8 @@
     "lodash": "^4.17.21",
     "mime": "^3.0.0",
     "moment": "^2.29.4",
-    "mongodb": "^3.6.9",
-    "mongoose": "^5.13.15",
+    "mongodb": "^3.7.3",
+    "mongoose": "^5.13.16",
     "node-media-server": "^2.4.9",
     "node-telegram-bot-api": "^0.61.0",
     "prettier": "^2.6.2",
@@ -49,7 +48,7 @@
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",
-    "concurrently": "^6.0.2",
+    "concurrently": "^6.5.1",
     "dotenv": "^8.6.0",
     "eslint": "^8.7.0",
     "eslint-config-airbnb": "^19.0.2",
@@ -57,7 +56,7 @@
     "eslint-plugin-import": "^2.25.3",
     "eslint-plugin-json": "^3.1.0",
     "morgan": "^1.10.0",
-    "nodemon": "^2.0.20"
+    "nodemon": "^2.0.21"
   },
   "packageManager": "yarn@3.2.0"
 }

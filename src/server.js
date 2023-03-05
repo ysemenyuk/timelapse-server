@@ -28,7 +28,7 @@ const jobTypes = [];
 //
 
 const startServer = async () => {
-  const logger = debug('server');
+  const logger = debug('http:server');
   const app = express();
   const httpServer = http.createServer(app);
 

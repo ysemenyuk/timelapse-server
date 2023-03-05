@@ -53,7 +53,7 @@ const jobTypes = [taskName.CREATE_PHOTO, taskName.CREATE_VIDEO, taskName.CREATE_
 //
 
 const startWorker = async () => {
-  const logger = debug('worker');
+  const logger = debug('worker:server');
   const httpServer = http.createServer();
 
   try {
