@@ -29,34 +29,27 @@ class Worker {
 
     this.agenda = new Agenda({ mongo: mongoClient.db(dbName) });
 
-    jobTypes.forEach((type) => {
-      this.agenda.define(type, async (job) => {
-        const data = job.attrs.data;
-        await jobs[type](data, this.socket, this.logger, this);
-      });
-    });
-
     if (jobTypes.length) {
+      jobTypes.forEach((type) => {
+        this.agenda.define(type, async (job) => {
+          const data = job.attrs.data;
+          await jobs[type](data, this.socket, this.logger, this);
+        });
+      });
+
       await this.agenda.start();
       this.logger(`agenda successfully started`);
+
+      const currentjobs = await this.agenda.jobs();
+      this.logger(`agenda currentjobs: ${currentjobs.length}`);
+
+      if (currentjobs.length) {
+        // await Promise.all(currentjobs.map(async (job) => await job.remove()));
+        // currentjobs.forEach((job) => {
+        //   console.log(job.attrs);
+        // });
+      }
     }
-
-    const currentjobs = await this.agenda.jobs();
-    this.logger(`agenda currentjobs: ${currentjobs.length}`);
-
-    if (currentjobs.length) {
-      // await Promise.all(currentjobs.map(async (job) => await job.remove()));
-      // currentjobs.forEach((job) => {
-      //   console.log(job.attrs);
-      // });
-    }
-  }
-
-  //
-
-  async socketNotification(userId, name, message) {
-    const job = this.agenda.create('socketNotification', { userId, name, message });
-    await job.save();
   }
 
   //
@@ -72,22 +65,22 @@ class Worker {
     }
   }
 
-  createJobByTask(task) {
+  async createOneTimeTaskJob(task) {
+    const job = this.createJob(task);
+    await job.save();
+  }
+
+  async createRepeatEveryTaskJob(task, interval) {
+    const job = this.createJob(task);
+    await job.repeatEvery(interval).save();
+  }
+
+  createJob(task) {
     return this.agenda.create(task.name, {
       userId: task.user,
       cameraId: task.camera,
       taskId: task._id,
     });
-  }
-
-  async createOneTimeTaskJob(task) {
-    const job = this.createJobByTask(task);
-    await job.save();
-  }
-
-  async createRepeatEveryTaskJob(task, interval) {
-    const job = this.createJobByTask(task);
-    await job.repeatEvery(interval).save();
   }
 
   //

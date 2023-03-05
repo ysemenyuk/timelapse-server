@@ -7,9 +7,9 @@
   "scripts": {
     "tgbot": "nodemon tg/telegraph.js",
     "start": "node server.js",
-    "dev:server": "DEBUG=request*,server*,worker*,socket,storage,agenda:db_init,agenda:create,agenda:job nodemon server.js",
-    "dev:server:win": "set DEBUG=request*,server*,worker*,socket,storage,agenda:db_init,agenda:create,agenda:job & nodemon server.js",
-    "dev:worker:win": "set DEBUG=worker*,socket,storage,agenda:db_init,agenda:create,agenda:job & nodemon worker.js"
+    "dev:server": "DEBUG=request*,server*,worker*,socket,storage,agenda:db_init,agenda:create,agenda:job nodemon src/server.js",
+    "dev:server:win": "set DEBUG=request*,server*,worker*,socket,storage,agenda:db_init,agenda:create,agenda:job & nodemon src/server.js",
+    "dev:worker:win": "set DEBUG=worker*,socket,storage,agenda:db_init,agenda:create,agenda:job & nodemon src/worker.js"
   },
   "author": "",
   "license": "ISC",

@@ -16,43 +16,40 @@ import db from './db/index.js';
 import worker from './worker/index.js';
 import storage from './storage/index.js';
 import socket from './socket/index.js';
-import { taskName } from './utils/constants.js';
+// import { taskName } from './utils/constants.js';
 
 //
 
 const mode = process.env.NODE_ENV;
 const PORT = process.env.SERVER_PORT;
 
-const jobTypes = [taskName.CREATE_PHOTO, taskName.CREATE_VIDEO, taskName.CREATE_PHOTOS_BY_TIME];
-
-//
-
-const app = express();
-const httpServer = http.createServer(app);
-
-app.use(debugMiddleware);
-
-app.use(cors());
-app.use(express.json());
-app.use(fileUpload());
-
-app.use('/files', storageRouter);
-app.use('/api/cameras/:cameraId/tasks', taskRouter);
-app.use('/api/cameras/:cameraId/files', fileRouter);
-app.use('/api/cameras/:cameraId/date-info', dateInfoRouter);
-app.use('/api/cameras', cameraRouter);
-app.use('/api/users', userRouter);
-
-app.use(errorHandlerMiddleware);
-
-app.use((req, res) => {
-  res.status(404).send('Sorry cant find that!');
-});
+const jobTypes = [];
 
 //
 
 const startServer = async () => {
   const logger = debug('server');
+  const app = express();
+  const httpServer = http.createServer(app);
+
+  app.use(debugMiddleware);
+
+  app.use(cors());
+  app.use(express.json());
+  app.use(fileUpload());
+
+  app.use('/files', storageRouter);
+  app.use('/api/cameras/:cameraId/tasks', taskRouter);
+  app.use('/api/cameras/:cameraId/files', fileRouter);
+  app.use('/api/cameras/:cameraId/date-info', dateInfoRouter);
+  app.use('/api/cameras', cameraRouter);
+  app.use('/api/users', userRouter);
+
+  app.use(errorHandlerMiddleware);
+
+  app.use((req, res) => {
+    res.status(404).send('Sorry cant find that!');
+  });
 
   try {
     logger(`Starting server`);
