@@ -1,8 +1,8 @@
+import 'dotenv/config';
 import moment from 'moment';
 import fs from 'fs';
 import path from 'path';
 import mongoose from 'mongoose';
-import 'dotenv/config';
 import CameraFile from '../models/CameraFile.js';
 
 const dbUri = process.env.MONGO_URI;

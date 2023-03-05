@@ -2,7 +2,7 @@ import User from '../models/User.js';
 
 // create
 
-const createOne = async (payload) => {
+const create = async (payload) => {
   const task = new User(payload);
   await task.save();
   return task;
@@ -40,7 +40,7 @@ const deleteOneById = async (id) => {
 };
 
 export default {
-  createOne,
+  create,
   find,
   findOne,
   findOneById,

@@ -22,7 +22,7 @@ const singUp = async ({ email, password, logger }) => {
   }
 
   const hashPassword = await bcrypt.hash(password, 8);
-  const newUser = userRepo.createOne({ email, password: hashPassword });
+  const newUser = userRepo.create({ email, password: hashPassword });
 
   // crete user folder
   await fileService.createUserFolder({

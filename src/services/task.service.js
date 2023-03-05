@@ -7,7 +7,7 @@ import { taskName, taskType } from '../utils/constants.js';
 const createOne = async ({ logger, userId, cameraId, payload }) => {
   logger && logger(`taskService.createOne`);
 
-  const task = await taskRepo.createOne({
+  const task = await taskRepo.create({
     user: userId,
     camera: cameraId,
     ...payload,
@@ -65,7 +65,7 @@ const deleteOneById = async ({ taskId, logger }) => {
 const createCameraTasks = async ({ logger, userId, cameraId }) => {
   logger && logger(`taskService.createCameraTasks`);
 
-  const photosByTimeTask = await taskRepo.createOne({
+  const photosByTimeTask = await taskRepo.create({
     user: userId,
     camera: cameraId,
     name: taskName.CREATE_PHOTOS_BY_TIME,

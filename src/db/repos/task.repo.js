@@ -2,7 +2,7 @@ import Task from '../models/Task.js';
 
 // create
 
-const createOne = async (payload) => {
+const create = async (payload) => {
   const task = new Task(payload);
   await task.save();
   return task;
@@ -40,7 +40,7 @@ const deleteMany = async (conditions) => {
 };
 
 export default {
-  createOne,
+  create,
   find,
   findOneById,
   updateOneById,
