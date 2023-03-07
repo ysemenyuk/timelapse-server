@@ -1,7 +1,7 @@
-import { ValidateError } from '../middleware/errorHandlerMiddleware.js';
+import { ValidateError } from '../errors.js';
 import { taskNameSchema, taskSchemaByName } from './task.schema.js';
 
-const validateTask = async (req, res, next) => {
+export default async (req, res, next) => {
   // console.log('- validateTask createOne req.body -', req.body);
 
   try {
@@ -15,5 +15,3 @@ const validateTask = async (req, res, next) => {
 
   next();
 };
-
-export default { validateTask };

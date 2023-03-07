@@ -1,11 +1,12 @@
-import _ from 'lodash';
-import cameraController from './camera.controller.js';
-import taskController from './task.controller.js';
-
-const controllers = { cameraController, taskController };
+// import _ from 'lodash';
+import UserController from './user.controller.js';
+import TaskController from './task.controller.js';
 
 export default (services) => {
-  const container = {};
-  _.forEach(controllers, (name, Controller) => _.set(container, name, new Controller(services)));
+  const container = {
+    userController: new UserController(services.userService),
+    taskConroller: new TaskController(services.taskService),
+  };
+
   return container;
 };

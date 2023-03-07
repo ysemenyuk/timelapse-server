@@ -1,19 +1,4 @@
-class BadRequestError extends Error {
-  constructor(message) {
-    super(message);
-    this.name = 'BadRequestError';
-    this.status = 400;
-  }
-}
-
-class ValidateError extends Error {
-  constructor(message, errors) {
-    super(message);
-    this.name = 'ValidateError';
-    this.status = 400;
-    this.errors = errors;
-  }
-}
+import { BadRequestError, ValidateError } from '../errors.js';
 
 // eslint-disable-next-line no-unused-vars
 export default (err, req, res, next) => {
@@ -29,5 +14,3 @@ export default (err, req, res, next) => {
 
   return res.status(500).send({ message: 'Server error' });
 };
-
-export { BadRequestError, ValidateError };

@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import mongodb from 'mongodb';
 import { addHours } from 'date-fns';
-import File from '../db/models/File.js';
+import File from '../db/mongodb/models/File.js';
 import { type } from '../utils/constants.js';
 import storage from '../storageService/index.js';
 

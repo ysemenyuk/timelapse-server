@@ -5,12 +5,8 @@ import express from 'express';
 // import taskValidator from '../validators/task.validator.yup.js';
 import { asyncHandler } from '../utils/utils.js';
 
-export default (controllers, middlewares, validators) => {
+export default ({ taskController }, { authMiddleware, cameraMiddleware }, { taskValidator }) => {
   const router = express.Router({ mergeParams: true });
-
-  const { authMiddleware, cameraMiddleware } = middlewares;
-  const { taskValidator } = validators;
-  const { taskController } = controllers;
 
   router.use(authMiddleware);
   router.use(cameraMiddleware);
@@ -20,9 +16,9 @@ export default (controllers, middlewares, validators) => {
   router.get('/', asyncHandler(taskController.getAll));
   router.get('/:taskId', asyncHandler(taskController.getOne));
 
-  router.post('/', taskValidator.validateTask, asyncHandler(taskController.createOne));
+  router.post('/', taskValidator, asyncHandler(taskController.createOne));
 
-  router.put('/:taskId', taskValidator.validateTask, asyncHandler(taskController.updateOne));
+  router.put('/:taskId', taskValidator, asyncHandler(taskController.updateOne));
 
   router.delete('/:taskId', asyncHandler(taskController.deleteOne));
 

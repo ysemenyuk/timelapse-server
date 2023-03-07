@@ -1,5 +1,5 @@
 import mongodb from 'mongodb';
-import Camera from '../db/models/Camera.js';
+import Camera from '../db/mongodb/models/Camera.js';
 import fileService from './file.service.js';
 import taskService from './task.service.js';
 

@@ -1,23 +1,26 @@
 import mongoose from 'mongoose';
 import debug from 'debug';
 
-const dbUri = process.env.MONGO_URI;
+import userRepo from './repos/user.repo.js';
+import taskRepo from './repos/task.repo.js';
+
+const repos = { userRepo, taskRepo };
 
 class MongoDB {
   constructor() {
-    //
+    this.logger = debug('mongo');
   }
 
-  async connect() {
-    const logger = debug('mongo');
-
-    await mongoose.connect(dbUri, {
+  async connect(config) {
+    await mongoose.connect(config.dbUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       useFindAndModify: false,
     });
 
-    logger(`Mongoose successfully connected`);
+    this.logger(`Mongoose successfully connected`);
+
+    return repos;
   }
 }
 

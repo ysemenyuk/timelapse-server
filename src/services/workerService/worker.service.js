@@ -2,27 +2,27 @@ import { Agenda } from 'agenda/es.js';
 import mongodb from 'mongodb';
 import jobs from './jobs/jobs.js';
 import debug from 'debug';
-import { taskStatus } from '../utils/constants.js';
+import { taskStatus } from '../../utils/constants.js';
 
 const { MongoClient, ObjectID } = mongodb;
 
-const dbUri = process.env.MONGO_URI;
-const dbName = process.env.MONGO_DB_NAME;
+// const dbUri = process.env.MONGO_URI;
+// const dbName = process.env.MONGO_DB_NAME;
 
-class Worker {
+export default class Worker {
   constructor() {
     this.logger = debug('worker');
   }
 
-  async init() {
-    const mongoClient = new MongoClient(dbUri, {
+  async init(config) {
+    const mongoClient = new MongoClient(config.dbUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
 
     await mongoClient.connect();
 
-    this.agenda = new Agenda({ mongo: mongoClient.db(dbName) });
+    this.agenda = new Agenda({ mongo: mongoClient.db(config.dbName) });
 
     await this.agenda.start();
     this.logger(`agenda successfully started`);
@@ -119,5 +119,3 @@ class Worker {
     }
   }
 }
-
-export default Worker;

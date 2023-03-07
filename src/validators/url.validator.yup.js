@@ -1,9 +1,9 @@
 import * as yup from 'yup';
-import { ValidateError } from '../middleware/errorHandlerMiddleware.js';
+import { ValidateError } from '../errors.js';
 
 const createOneSchema = yup.string().url().required();
 
-export const validatePhotoUrl = async (url) => {
+export default async (url) => {
   // console.log('- validatePhotoUrl url -', url);
 
   try {

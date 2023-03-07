@@ -1,10 +1,10 @@
 import 'dotenv/config';
-import http from 'http';
 import debug from 'debug';
-import initDb from './db/index.js';
-import initServices from './services/index.js';
+import config from './config.js';
 import { taskName } from './utils/constants.js';
-import config from './consfig.js';
+import initDb from './db/index.js';
+import initSocketService from './services/socketService/index.js';
+import initServices from './services/index.js';
 
 const jobTypes = [taskName.CREATE_PHOTO, taskName.CREATE_VIDEO, taskName.CREATE_PHOTOS_BY_TIME];
 
@@ -12,20 +12,18 @@ const jobTypes = [taskName.CREATE_PHOTO, taskName.CREATE_VIDEO, taskName.CREATE_
 
 const startWorker = async () => {
   const logger = debug('worker:server');
-  const httpServer = http.createServer();
 
   try {
     logger(`Starting worker`);
 
-    const repos = await initDb(config);
-    const services = initServices(repos);
+    const { repos } = await initDb(config);
+    const services = await initServices(repos);
 
-    const { socketService, storageService, workerService } = services;
+    const { httpServer, socketService } = initSocketService(config);
 
-    await socketService.init(httpServer);
-    await storageService.init();
-    await workerService.init();
-    await workerService.startJobs(jobTypes, services);
+    services.socketService = socketService;
+
+    await services.workerService.startJobs(jobTypes, services);
 
     httpServer.listen(config.port, () => {
       logger(`workerServer running in ${config.mode} mode on port ${config.port}`);

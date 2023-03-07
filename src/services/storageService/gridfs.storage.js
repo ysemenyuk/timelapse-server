@@ -34,12 +34,12 @@ const stream2buffer = (stream) => {
 // main
 //
 
-class GridfsStorage {
+export default class GridfsStorage {
   constructor() {
     this.logger = debug('storage');
   }
 
-  async init() {
+  async start() {
     const mongoClient = new MongoClient(dbUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
@@ -167,5 +167,3 @@ class GridfsStorage {
     return Boolean(arr.length);
   }
 }
-
-export default GridfsStorage;

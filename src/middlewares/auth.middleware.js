@@ -1,8 +1,5 @@
-import jwt from '../services/token.service.js';
-
-export default (req, res, next) => {
+export default (userService) => (req, res, next) => {
   // console.log(req.headers.authorization);
-
   try {
     if (!req.headers.authorization) {
       req.reqLogger('authMiddleware no token');
@@ -11,7 +8,7 @@ export default (req, res, next) => {
 
     const token = req.headers.authorization.split(' ')[1];
 
-    const { userId } = jwt.verify(token);
+    const { userId } = userService.verify(token);
     req.userId = userId;
 
     req.reqLogger(`authMiddleware token ok userId: ${userId}`);

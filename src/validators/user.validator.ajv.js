@@ -1,6 +1,6 @@
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
-import { ValidateError } from '../middleware/errorHandlerMiddleware.js';
+import { ValidateError } from '../errors.js';
 
 const ajv = new Ajv();
 addFormats(ajv);
@@ -14,7 +14,7 @@ const userSchema = {
   required: ['email', 'password'],
 };
 
-const validateUser = (req, res, next) => {
+export default (req, res, next) => {
   // console.log('- validator logIn req.body -', req.body);
 
   const validate = ajv.compile(userSchema);
@@ -28,5 +28,3 @@ const validateUser = (req, res, next) => {
 
   next();
 };
-
-export default { validateUser };

@@ -1,4 +1,4 @@
-import Task from '../models/Task.js';
+import Task from '../mongodb/models/Task.js';
 
 // create
 

@@ -1,5 +1,5 @@
 import * as yup from 'yup';
-import { ValidateError } from '../middleware/errorHandlerMiddleware.js';
+import { ValidateError } from '../errors.js';
 
 const createOneSchema = yup.object({
   name: yup.string().required(),
@@ -13,7 +13,7 @@ const createOneSchema = yup.object({
   }),
 });
 
-const validateCamera = async (req, res, next) => {
+export default async (req, res, next) => {
   // console.log('- validateCamera createOne req.body -', req.body);
 
   try {
@@ -26,5 +26,3 @@ const validateCamera = async (req, res, next) => {
 
   next();
 };
-
-export default { validateCamera };

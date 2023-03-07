@@ -6,8 +6,8 @@ const storageTypeMap = {
   gridfs: GridfsStorage,
 };
 
-export default async (storageType) => {
-  const storage = new storageTypeMap[storageType]();
+export default async (config) => {
+  const storage = new storageTypeMap[config.storageType]();
   await storage.start();
-  return storage;
+  return storageTypeMap[config.storageType];
 };

@@ -5,12 +5,8 @@ import express from 'express';
 // import cameraController from '../controllers/camera.controller.js';
 import { asyncHandler } from '../utils/utils.js';
 
-export default (controllers, middlewares, validators) => {
+export default ({ cameraController }, { authMiddleware, cameraMiddleware }, { cameraValidator }) => {
   const router = express.Router({ mergeParams: true });
-
-  const { authMiddleware, cameraMiddleware } = middlewares;
-  const { cameraValidator } = validators;
-  const { cameraController } = controllers;
 
   router.use(authMiddleware);
 
@@ -20,9 +16,9 @@ export default (controllers, middlewares, validators) => {
   router.get('/:cameraId', cameraMiddleware, asyncHandler(cameraController.getOne));
   router.get('/:cameraId/stats', cameraMiddleware, asyncHandler(cameraController.getCameraStats));
 
-  router.post('/', cameraValidator.validateCamera, asyncHandler(cameraController.createOne));
+  router.post('/', cameraValidator, asyncHandler(cameraController.createOne));
 
-  router.put('/:cameraId', cameraMiddleware, cameraValidator.validateCamera, asyncHandler(cameraController.updateOne));
+  router.put('/:cameraId', cameraMiddleware, cameraValidator, asyncHandler(cameraController.updateOne));
 
   router.delete('/:cameraId', cameraMiddleware, asyncHandler(cameraController.deleteOne));
 
