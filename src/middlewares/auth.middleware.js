@@ -1,4 +1,4 @@
-import userService from '../services/index.js';
+import { userService } from '../services/index.js';
 
 export default (req, res, next) => {
   // console.log(req.headers.authorization);

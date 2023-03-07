@@ -4,9 +4,9 @@ import debug from 'debug';
 import http from 'http';
 import cors from 'cors';
 import fileUpload from 'express-fileupload';
-import middlewares from './middlewares/index.js';
+import { debugMiddleware, errorHandlerMiddleware } from './middlewares/index.js';
 import routers from './routes/index.js';
-import db from './db/index.js';
+import MongoDB from './db/index.js';
 import { workerService, storageService } from './services/index.js';
 import config from './config.js';
 
@@ -16,8 +16,9 @@ const startServer = async () => {
   const logger = debug('http:server');
   const app = express();
   const httpServer = http.createServer(app);
+  const db = new MongoDB();
 
-  app.use(middlewares.debugMiddleware);
+  app.use(debugMiddleware);
 
   app.use(cors());
   app.use(express.json());
@@ -30,7 +31,7 @@ const startServer = async () => {
   app.use('/api/cameras', routers.cameraRouter);
   app.use('/api/users', routers.userRouter);
 
-  app.use(middlewares.errorHandlerMiddleware);
+  app.use(errorHandlerMiddleware);
 
   app.use('/*', (req, res) => {
     res.status(404).send('Sorry cant find that!');
@@ -39,9 +40,9 @@ const startServer = async () => {
   try {
     logger(`Starting server`);
 
-    await db.connect();
-    await storageService.init();
-    await workerService.init();
+    await db.connect(config);
+    await storageService.init(config);
+    await workerService.init(config);
 
     // nms.run();
 

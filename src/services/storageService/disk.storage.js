@@ -6,7 +6,7 @@ import _ from 'lodash';
 import debug from 'debug';
 import { isPhotoFile } from '../../utils/utils.js';
 import diskpaths from './disk.paths.js';
-import config from '../config.js';
+import config from '../../config.js';
 
 const {
   createFilePath,

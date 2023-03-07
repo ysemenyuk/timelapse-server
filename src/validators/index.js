@@ -3,9 +3,4 @@ import taskValidator from './task.validator.yup.js';
 import urlValidator from './url.validator.yup.js';
 import userValidator from './user.validator.ajv.js';
 
-export default {
-  cameraValidator,
-  taskValidator,
-  urlValidator,
-  userValidator,
-};
+export { cameraValidator, taskValidator, urlValidator, userValidator };

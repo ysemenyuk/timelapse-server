@@ -4,10 +4,4 @@ import cameraController from './camera.controller.js';
 import fileController from './file.controller.js';
 import dateInfoController from './dateInfo.controller.js';
 
-export default {
-  userController,
-  taskController,
-  cameraController,
-  fileController,
-  dateInfoController,
-};
+export { userController, taskController, cameraController, fileController, dateInfoController };

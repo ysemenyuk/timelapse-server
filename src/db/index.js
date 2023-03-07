@@ -1,9 +1,11 @@
 import MongoDB from './mongo.db.js';
+
 import userRepo from './repos/user.repo.js';
 import taskRepo from './repos/task.repo.js';
+import cameraRepo from './repos/camera.repo.js';
+import fileRepo from './repos/file.repo.js';
+import dateInfoRepo from './repos/dateInfo.repo.js';
 
-const db = new MongoDB();
+export { userRepo, taskRepo, cameraRepo, fileRepo, dateInfoRepo };
 
-export { userRepo, taskRepo };
-
-export default db;
+export default MongoDB;

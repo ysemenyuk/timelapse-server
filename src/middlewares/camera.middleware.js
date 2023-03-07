@@ -1,4 +1,4 @@
-import cameraService from '../services/index.js';
+import { cameraService } from '../services/index.js';
 
 export default async (req, res, next) => {
   req.reqLogger(`cameraMiddleware cameraId: ${req.params.cameraId}`);

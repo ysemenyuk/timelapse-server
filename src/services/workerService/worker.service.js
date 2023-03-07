@@ -1,7 +1,7 @@
 import { Agenda } from 'agenda/es.js';
 import mongodb from 'mongodb';
 import debug from 'debug';
-import jobs from '../../jobs/jobs.js.js';
+import jobs from '../../jobs/jobs.js';
 import { taskStatus } from '../../utils/constants.js';
 
 const { MongoClient, ObjectID } = mongodb;

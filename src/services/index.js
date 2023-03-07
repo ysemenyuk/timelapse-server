@@ -15,15 +15,24 @@ import weatherService from './weather.service.js';
 
 const StorageService = getStorageService(config.storageType);
 
-export default {
-  storageService: new StorageService(),
-  workerService: new WorkerService(),
-  socketService: new SocketService(),
-  taskService: new TaskService(),
-  userService: new UserService(),
-  cameraService: new CameraService(),
-  fileService: new FileService(),
-  dateInfoService: new DateInfoService(),
+const storageService = new StorageService();
+const workerService = new WorkerService();
+const socketService = new SocketService();
+const taskService = new TaskService();
+const userService = new UserService();
+const cameraService = new CameraService();
+const fileService = new FileService();
+const dateInfoService = new DateInfoService();
+
+export {
+  storageService,
+  workerService,
+  socketService,
+  taskService,
+  userService,
+  cameraService,
+  fileService,
+  dateInfoService,
   fsService,
   httpService,
   imageService,

@@ -54,7 +54,7 @@ export default class UserService {
     }
 
     const hashPassword = await this.getHashPassword(password);
-    const newUser = userRepo.create({ email, password: hashPassword });
+    const newUser = await userRepo.create({ email, password: hashPassword });
 
     // crete user folder
     await fileService.createUserFolder({
@@ -62,7 +62,6 @@ export default class UserService {
       userId: newUser._id,
     });
 
-    await newUser.save();
     const token = this.sign(newUser._id);
 
     return { token, user: filterProps(newUser) };
@@ -73,7 +72,7 @@ export default class UserService {
   async logIn({ email, password, logger }) {
     logger(`userService.logIn email: ${email}`);
 
-    const user = await userRepo.findOne({ email }, fields);
+    const user = await userRepo.findOne({ email });
 
     if (!user) {
       logger(`userService.logIn email ${email} - User not found`);
@@ -89,7 +88,7 @@ export default class UserService {
 
     const token = this.sign(user._id);
 
-    return { token, user };
+    return { token, user: filterProps(user) };
   }
 
   //

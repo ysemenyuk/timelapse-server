@@ -1,23 +1,18 @@
 import mongoose from 'mongoose';
 import debug from 'debug';
 
-const dbUri = process.env.MONGO_URI;
-const logger = debug('mongo');
-
-class MongoDB {
+export default class MongoDB {
   constructor() {
-    //
+    this.logger = debug('mongo');
   }
 
-  async connect() {
-    await mongoose.connect(dbUri, {
+  async connect(config) {
+    await mongoose.connect(config.dbUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       useFindAndModify: false,
     });
 
-    logger(`Mongoose successfully connected`);
+    this.logger(`Mongoose successfully connected`);
   }
 }
-
-export default MongoDB;
