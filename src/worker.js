@@ -16,42 +16,6 @@ const jobTypes = [taskName.CREATE_PHOTO, taskName.CREATE_VIDEO, taskName.CREATE_
 
 //
 
-// class Socket {
-//   constructor() {
-//     this.logger;
-//     this.socket;
-//     this.sessions = new Map();
-//   }
-
-//   async start() {
-//     this.logger = debug('socket');
-
-//     this.socket = io('http://localhost:4000', { autoConnect: true });
-//     this.socket.auth = { userId: 'worker', token: 'token' };
-//     this.socket.connect();
-
-//     this.socket.on('connect', () => {
-//       this.logger('socket.on connect', this.socket.connected);
-//     });
-
-//     this.socket.on('connect_error', (err) => {
-//       this.logger('socket.on connect_error', { err: err.message });
-//     });
-//   }
-
-//   send(userId, name, data) {
-//     this.logger('socket.connected', this.socket.connected);
-
-//     if (this.socket.connected) {
-//       const mess = { userId, name, data };
-//       this.socket.emit('worker', mess);
-//       this.logger('socket.emit', userId, name);
-//     }
-//   }
-// }
-
-//
-
 const startWorker = async () => {
   const logger = debug('worker:server');
   const httpServer = http.createServer();
@@ -70,7 +34,7 @@ const startWorker = async () => {
 
     await storage.start();
     await socket.start(httpServer);
-    await worker.start(jobTypes, socket);
+    await worker.startJobs(jobTypes, socket);
 
     httpServer.listen(PORT, () => {
       logger(`workerServer running in ${mode} mode on port ${PORT}`);

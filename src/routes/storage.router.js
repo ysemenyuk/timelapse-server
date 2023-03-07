@@ -1,6 +1,6 @@
 import express from 'express';
 // import _ from 'lodash';
-import { asyncHandler } from '../middleware/errorHandlerMiddleware.js';
+import { asyncHandler } from '../middlewares/errorHandler.middleware.js';
 // import fileService from '../services/file.service.js';
 import imageService from '../services/image.service.js';
 import * as consts from '../utils/constants.js';

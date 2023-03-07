@@ -1,5 +1,5 @@
 import * as yup from 'yup';
-import { ValidateError } from '../middleware/errorHandlerMiddleware.js';
+import { ValidateError } from '../errors.js';
 
 const createOneSchema = yup.object({
   name: yup.string().required(),

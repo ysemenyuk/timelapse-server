@@ -1,4 +1,4 @@
-import { ValidateError } from '../middleware/errorHandlerMiddleware.js';
+import { ValidateError } from '../errors.js';
 import { taskNameSchema, taskSchemaByName } from './task.schema.js';
 
 const validateTask = async (req, res, next) => {

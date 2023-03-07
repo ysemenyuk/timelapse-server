@@ -1,119 +1,152 @@
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import _ from 'lodash';
-import jwt from './token.service.js';
-import { BadRequestError } from '../middleware/errorHandlerMiddleware.js';
 import { userRepo } from '../db/index.js';
-import fileService from './file.service.js';
+import { fileService } from './index.js';
+import { BadRequestError } from '../errors.js';
+import config from '../config.js';
+
+const fields = ['_id', 'name', 'email', 'avatar'];
+const filterProps = (user) => _.pick(user, fields);
 
 //
 
-const filterProps = (user) => _.pick(user, ['_id', 'name', 'email', 'avatar']);
-
-//
-
-const singUp = async ({ email, password, logger }) => {
-  logger(`userService.singUp email: ${email}`);
-
-  const user = await userRepo.findOne({ email });
-
-  if (user) {
-    logger(`userService.singUp email ${email} - already exist`);
-    throw new BadRequestError(`User with email ${email} already exist`);
+export default class UserService {
+  constructor() {
+    this.userRepo = userRepo;
+    this.fileService = fileService;
   }
 
-  const hashPassword = await bcrypt.hash(password, 8);
-  const newUser = userRepo.create({ email, password: hashPassword });
+  //
 
-  // crete user folder
-  await fileService.createUserFolder({
-    logger,
-    userId: newUser._id,
-  });
-
-  await newUser.save();
-  const token = jwt.sign(newUser._id);
-
-  return { token, user: filterProps(newUser) };
-};
-
-//
-
-const logIn = async ({ email, password, logger }) => {
-  logger(`userService.logIn email: ${email}`);
-
-  const user = await userRepo.findOne({ email });
-
-  if (!user) {
-    logger(`userService.logIn email ${email} - User not found`);
-    throw new BadRequestError(`Invalid email`);
+  sign(userId) {
+    return jwt.sign({ userId }, config.secretkey, { expiresIn: '1h' });
   }
 
-  const isPassValid = bcrypt.compareSync(password, user.password);
-
-  if (!isPassValid) {
-    logger(`userService.logIn email ${email} - Invalid password`);
-    throw new BadRequestError(`Invalid password`);
+  verify(token) {
+    return jwt.verify(token, config.secretkey);
   }
 
-  const token = jwt.sign(user._id);
+  async getHashPassword(pass) {
+    if (!pass) {
+      return null;
+    }
+    const salt = await bcrypt.genSalt(10);
+    const hashPassword = await bcrypt.hash(pass, salt);
 
-  return { token, user: filterProps(user) };
-};
+    return hashPassword;
+  }
 
-//
+  async comparePasswords(password, hashPassword) {
+    const isValid = await bcrypt.compare(password, hashPassword);
+    return isValid;
+  }
 
-const auth = async ({ userId, logger }) => {
-  logger(`userService.auth userId: ${userId}`);
+  //
 
-  const user = await userRepo.findOneById(userId);
-  const token = jwt.sign(user._id);
+  async singUp({ email, password, logger }) {
+    logger(`userService.singUp email: ${email}`);
 
-  return { token, user: filterProps(user) };
-};
+    const user = await this.userRepo.findOne({ email });
 
-//
+    if (user) {
+      logger(`userService.singUp email ${email} - already exist`);
+      throw new BadRequestError(`User with email ${email} already exist`);
+    }
 
-const getOneById = async ({ userId, logger }) => {
-  logger(`userService.getById userId: ${userId}`);
+    const hashPassword = await this.getHashPassword(password);
+    const newUser = this.userRepo.create({ email, password: hashPassword });
 
-  const user = await userRepo.findOneById(userId);
-  return { user: filterProps(user) };
-};
+    // crete user folder
+    await this.fileService.createUserFolder({
+      logger,
+      userId: newUser._id,
+    });
 
-//
+    await newUser.save();
+    const token = this.sign(newUser._id);
 
-const getOneByEmail = async ({ email, logger }) => {
-  logger(`userService.getOneByEmail email: ${email}`);
+    return { token, user: filterProps(newUser) };
+  }
 
-  const user = await userRepo.findOne({ email });
-  return { user: filterProps(user) };
-};
+  //
 
-//
+  async logIn({ email, password, logger }) {
+    logger(`userService.logIn email: ${email}`);
 
-const updateOne = async ({ userId, payload, logger }) => {
-  logger(`userService.updateOne userId: ${userId}`);
+    const user = await this.userRepo.findOne({ email }, fields);
 
-  const { name, email, password } = payload;
+    if (!user) {
+      logger(`userService.logIn email ${email} - User not found`);
+      throw new BadRequestError(`Invalid email`);
+    }
 
-  // TODO: check email if exist
+    const isPassValid = await this.comparePasswords(password, user.password);
 
-  const hashPassword = password && (await bcrypt.hash(password, 8));
-  const fields = _.pickBy({ name, email, password: hashPassword }, _.identity);
+    if (!isPassValid) {
+      logger(`userService.logIn email ${email} - Invalid password`);
+      throw new BadRequestError(`Invalid password`);
+    }
 
-  const updated = await userRepo.updateOneById(userId, fields);
-  return updated;
-};
+    const token = this.sign(user._id);
 
-//
+    return { token, user };
+  }
 
-const deleteOne = async ({ userId, logger }) => {
-  logger(`userService.deleteOne userId: ${userId}`);
+  //
 
-  // TODO: delete user cameras, files, tasks, jobs
+  async auth({ userId, logger }) {
+    logger(`userService.auth userId: ${userId}`);
 
-  const deleted = await userRepo.deleteOneById(userId);
-  return deleted;
-};
+    const user = await this.userRepo.findOneById(userId, fields);
+    const token = this.sign(user._id);
 
-export default { singUp, logIn, auth, getOneById, getOneByEmail, updateOne, deleteOne };
+    return { token, user };
+  }
+
+  //
+
+  async getOneById({ userId, logger }) {
+    logger(`userService.getById userId: ${userId}`);
+
+    const user = await this.userRepo.findOneById(userId, fields);
+    return { user };
+  }
+
+  //
+
+  async getOneByEmail({ email, logger }) {
+    logger(`userService.getOneByEmail email: ${email}`);
+
+    const user = await this.userRepo.findOne({ email }, fields);
+    return { user };
+  }
+
+  //
+
+  async updateOne({ userId, payload, logger }) {
+    logger(`userService.updateOne userId: ${userId}`);
+
+    const { name, email, password } = payload;
+
+    // TODO: check email if exist
+
+    const hashPassword = await this.getHashPassword(password);
+
+    const fields = _.pickBy({ name, email, password: hashPassword }, _.identity);
+
+    const updated = await this.userRepo.updateOneById(userId, fields);
+    return { user: filterProps(updated) };
+  }
+
+  //
+
+  async deleteOne({ userId, logger }) {
+    logger(`userService.deleteOne userId: ${userId}`);
+
+    // TODO: delete user cameras, files, tasks, jobs
+
+    const deleted = await this.userRepo.deleteOneById(userId);
+    return deleted;
+  }
+}

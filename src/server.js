@@ -4,8 +4,8 @@ import debug from 'debug';
 import http from 'http';
 import cors from 'cors';
 import fileUpload from 'express-fileupload';
-import debugMiddleware from './middleware/debugMiddleware.js';
-import { errorHandlerMiddleware } from './middleware/errorHandlerMiddleware.js';
+import debugMiddleware from './middlewares/debug.middleware.js';
+import { errorHandlerMiddleware } from './middlewares/errorHandler.middleware.js';
 import cameraRouter from './routes/camera.router.js';
 import fileRouter from './routes/file.router.js';
 import taskRouter from './routes/task.router.js';
@@ -15,15 +15,11 @@ import userRouter from './routes/user.router.js';
 import db from './db/index.js';
 import worker from './worker/index.js';
 import storage from './storage/index.js';
-import socket from './socket/index.js';
-// import { taskName } from './utils/constants.js';
 
 //
 
 const mode = process.env.NODE_ENV;
 const PORT = process.env.SERVER_PORT;
-
-const jobTypes = [];
 
 //
 
@@ -56,8 +52,7 @@ const startServer = async () => {
 
     await db.connect();
     await storage.start();
-    await socket.start(httpServer);
-    await worker.start(jobTypes, socket);
+    await worker.start();
 
     // nms.run();
 

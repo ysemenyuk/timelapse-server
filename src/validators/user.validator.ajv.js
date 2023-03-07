@@ -1,6 +1,6 @@
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
-import { ValidateError } from '../middleware/errorHandlerMiddleware.js';
+import { ValidateError } from '../errors.js';
 
 const ajv = new Ajv();
 addFormats(ajv);

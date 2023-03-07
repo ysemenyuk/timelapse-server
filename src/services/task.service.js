@@ -1,104 +1,102 @@
-import worker from '../worker/index.js';
+import { workerService } from './index.js';
 import { taskRepo } from '../db/index.js';
 import { taskName, taskType } from '../utils/constants.js';
 
-// create
+export default class TaskService {
+  constructor() {
+    this.taskRepo = taskRepo;
+    this.workerService = workerService;
+  }
 
-const createOne = async ({ logger, userId, cameraId, payload }) => {
-  logger && logger(`taskService.createOne`);
+  // create
 
-  const task = await taskRepo.create({
-    user: userId,
-    camera: cameraId,
-    ...payload,
-  });
+  async createOne({ logger, userId, cameraId, payload }) {
+    logger && logger(`taskService.createOne`);
 
-  await worker.createTaskJob(task);
+    const task = await this.taskRepo.create({
+      user: userId,
+      camera: cameraId,
+      ...payload,
+    });
 
-  return task;
-};
+    await this.workerService.createTaskJob(task);
 
-// get
+    return task;
+  }
 
-const getAll = async ({ logger, cameraId }) => {
-  logger && logger(`taskService.getAll`);
+  // get
 
-  const tasks = await taskRepo.find({ camera: cameraId });
-  return tasks;
-};
+  async getAll({ logger, cameraId }) {
+    logger && logger(`taskService.getAll`);
 
-const getOneById = async ({ logger, taskId }) => {
-  logger && logger(`taskService.getOne`);
+    const tasks = await this.taskRepo.find({ camera: cameraId });
+    return tasks;
+  }
 
-  const task = await taskRepo.findOneById(taskId);
-  return task;
-};
+  async getOneById({ logger, taskId }) {
+    logger && logger(`taskService.getOne`);
 
-// update
+    const task = await this.taskRepo.findOneById(taskId);
+    return task;
+  }
 
-const updateOneById = async ({ logger, taskId, payload }) => {
-  logger && logger(`taskService.updateOne`);
+  // update
 
-  const task = await taskRepo.updateOneById(taskId, payload);
-  await worker.updateTaskJob(task);
+  async updateOneById({ logger, taskId, payload }) {
+    logger && logger(`taskService.updateOne`);
 
-  return task;
-};
+    const task = await this.taskRepo.updateOneById(taskId, payload);
+    await this.workerService.updateTaskJob(task);
 
-// delete
+    return task;
+  }
 
-const deleteOneById = async ({ taskId, logger }) => {
-  logger && logger(`taskService.deleteOne`, taskId);
+  // delete
 
-  // TODO: if not removable return error
+  async deleteOneById({ taskId, logger }) {
+    logger && logger(`taskService.deleteOne`, taskId);
 
-  const deleted = await taskRepo.deleteOneById(taskId);
-  await worker.removeTaskJobs(taskId);
+    // TODO: if not removable return error
 
-  return deleted;
-};
+    const deleted = await this.taskRepo.deleteOneById(taskId);
+    await this.workerService.removeTaskJobs(taskId);
 
-//
-// camera
-//
+    return deleted;
+  }
 
-const createCameraTasks = async ({ logger, userId, cameraId }) => {
-  logger && logger(`taskService.createCameraTasks`);
+  //
+  // camera
+  //
 
-  const photosByTimeTask = await taskRepo.create({
-    user: userId,
-    camera: cameraId,
-    name: taskName.CREATE_PHOTOS_BY_TIME,
-    type: taskType.REPEAT_EVERY,
-    removable: false,
-    photoSettings: {
-      interval: 60, // seconds
-      timeRangeType: 'customTime', // allTime, sunTime, customTime
-      customTimeStart: '08:00', // 08:00
-      customTimeStop: '20:00', // 20:00
-    },
-  });
+  async createCameraTasks({ logger, userId, cameraId }) {
+    logger && logger(`taskService.createCameraTasks`);
 
-  const actualVideoByTimeTask = {};
+    const photosByTimeTask = await this.taskRepo.create({
+      user: userId,
+      camera: cameraId,
+      name: taskName.CREATE_PHOTOS_BY_TIME,
+      type: taskType.REPEAT_EVERY,
+      removable: false,
+      photoSettings: {
+        // default settings
+        interval: 60,
+        timeRangeType: 'customTime',
+        customTimeStart: '08:00',
+        customTimeStop: '20:00',
+      },
+    });
 
-  return { photosByTimeTask, actualVideoByTimeTask };
-};
+    const actualVideoByTimeTask = {};
 
-const deleteCameraTasks = async ({ cameraId, logger }) => {
-  logger && logger(`taskService.deleteCameraTasks`);
+    return { photosByTimeTask, actualVideoByTimeTask };
+  }
 
-  const deleted = await taskRepo.deleteMany({ camera: cameraId });
-  await worker.removeCameraJobs(cameraId);
+  async deleteCameraTasks({ cameraId, logger }) {
+    logger && logger(`taskService.deleteCameraTasks`);
 
-  return deleted;
-};
+    const deleted = await this.taskRepo.deleteMany({ camera: cameraId });
+    await this.workerService.removeCameraJobs(cameraId);
 
-export default {
-  createOne,
-  getAll,
-  getOneById,
-  updateOneById,
-  deleteOneById,
-  createCameraTasks,
-  deleteCameraTasks,
-};
+    return deleted;
+  }
+}
