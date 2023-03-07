@@ -3,10 +3,10 @@ import _ from 'lodash';
 import debug from 'debug';
 import { Readable } from 'stream';
 import { pipeline } from 'stream/promises';
-import { type } from '../utils/constants.js';
-import { makeVideoFileName, makePhotoFileName, makePosterFileName } from '../utils/utils.js';
+import { type } from '../../utils/constants.js';
+import { makeVideoFileName, makePhotoFileName, makePosterFileName } from '../../utils/utils.js';
+import config from '../../config.js';
 
-const dbUri = process.env.MONGO_URI;
 const { MongoClient, ObjectId } = mongodb;
 
 const map = {
@@ -36,14 +36,13 @@ const stream2buffer = (stream) => {
 
 class GridfsStorage {
   constructor() {
-    this.logger;
-    this.bucket;
+    this.logger = debug('storage');
   }
 
-  async start() {
+  async init() {
     this.logger = debug('storage');
 
-    const mongoClient = new MongoClient(dbUri, {
+    const mongoClient = new MongoClient(config.dbUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });

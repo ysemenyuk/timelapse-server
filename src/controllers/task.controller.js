@@ -1,4 +1,4 @@
-import taskService from '../services/task.service.js';
+import { taskService } from '../services/index.js';
 
 const getAll = async (req, res) => {
   req.reqLogger('cameraTask.controller getAll');

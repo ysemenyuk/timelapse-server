@@ -1,11 +1,13 @@
 import express from 'express';
-// import _ from 'lodash';
-import { asyncHandler } from '../middlewares/errorHandler.middleware.js';
-// import fileService from '../services/file.service.js';
-import imageService from '../services/image.service.js';
+import path from 'path';
+import { storageService, imageService } from '../services/index.js';
+import { asyncHandler } from '../utils/utils.js';
 import * as consts from '../utils/constants.js';
-import storage from '../storage/index.js';
-import { createFullPath } from '../storage/disk.storage.js';
+import config from '../config.js';
+
+function createFullPath(filePath) {
+  return path.join(config.pathToDiskSpace, filePath);
+}
 
 const router = express.Router({ mergeParams: true });
 
@@ -21,7 +23,7 @@ router.get(
     req.reqLogger(`gridfs.storage.router.get jpg ${req.url}`);
 
     const fileLink = req._parsedUrl.pathname;
-    const stream = storage.openDownloadStreamByLink({
+    const stream = storageService.openDownloadStreamByLink({
       // logger: req.reqLogger,
       fileLink,
     });
@@ -53,7 +55,7 @@ router.get(
     req.reqLogger(`gridfs.storage.router.get mp4 ${req.url}`);
 
     const fileLink = req._parsedUrl.pathname;
-    const stream = storage.openDownloadStreamByLink({
+    const stream = storageService.openDownloadStreamByLink({
       // logger: req.reqLogger,
       fileLink,
     });
@@ -116,26 +118,5 @@ router.get(
     req.resLogger(req);
   })
 );
-
-// router.get(
-//   '/:link',
-//   asyncHandler(async (req, res) => {
-//     req.reqLogger(`disk.storage.router.get`);
-//     console.log('req.params.link', req.params.link);
-
-//     const file = await fileService.getOneById({
-//       link: req.params.link,
-//       logger: req.reqLogger,
-//     });
-
-//     console.log('file', file);
-
-//     // if (!file) {
-//     //   res.sendStatus(404);
-//     //   req.resLogger(req);
-//     //   return;
-//     // }
-//   })
-// );
 
 export default router;

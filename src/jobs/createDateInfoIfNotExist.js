@@ -1,7 +1,5 @@
-import cameraService from '../../services/camera.service.js';
-import dateInfoService from '../../services/dateInfo.service.js';
-import weatherService from '../../services/weather.service.js';
-import { makeDateName } from '../../utils/utils.js';
+import { cameraService, dateInfoService, weatherService } from '../services/camera.service.js';
+import { makeDateName } from '../utils/utils.js';
 
 export const createDateInfo = async ({ logger, userId, cameraId }) => {
   const camera = await cameraService.getOneById({ cameraId });

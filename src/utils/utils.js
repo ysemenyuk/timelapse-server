@@ -3,6 +3,10 @@ import { type } from './constants.js';
 
 //
 
+export const asyncHandler = (handler) => (req, res, next) => handler(req, res, next).catch(next);
+
+//
+
 export const isPhotoFile = (file) => {
   return file && file.type === type.PHOTO;
 };

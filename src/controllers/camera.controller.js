@@ -1,4 +1,4 @@
-import cameraService from '../services/camera.service.js';
+import { cameraService } from '../services/index.js';
 
 // get
 

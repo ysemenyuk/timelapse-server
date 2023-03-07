@@ -1,36 +1,37 @@
-import DateInfo from '../db/models/DateInfo.js';
+import { dateInfoRepo } from '../db/index.js';
 
-// get
+export default class DateInfoService {
+  constructor() {
+    this.dateInfoRepo = dateInfoRepo;
+  }
 
-const getAll = async ({ logger, cameraId }) => {
-  logger && logger(`dateInfoService.getAll`);
+  // create
 
-  const datesInfo = await DateInfo.find({ camera: cameraId });
-  return datesInfo;
-};
+  async createOne({ logger, userId, cameraId, ...payload }) {
+    logger && logger(`dateInfoService.createOne`);
 
-const getOne = async ({ logger, cameraId, name }) => {
-  logger && logger(`dateInfoService.getOne ${name}`);
+    const dateInfo = await dateInfoRepo.create({
+      user: userId,
+      camera: cameraId,
+      ...payload,
+    });
 
-  const dateInfo = await DateInfo.findOne({ camera: cameraId, name });
-  return dateInfo;
-};
+    return dateInfo;
+  }
 
-const createOne = async ({ logger, userId, cameraId, ...payload }) => {
-  logger && logger(`dateInfoService.createOne`);
+  // get
 
-  const dateInfo = new DateInfo({
-    user: userId,
-    camera: cameraId,
-    ...payload,
-  });
+  async getAll({ logger, cameraId }) {
+    logger && logger(`dateInfoService.getAll`);
 
-  await dateInfo.save();
-  return dateInfo;
-};
+    const datesInfo = await dateInfoRepo.find({ camera: cameraId });
+    return datesInfo;
+  }
 
-export default {
-  getAll,
-  getOne,
-  createOne,
-};
+  async getOne({ logger, cameraId, name }) {
+    logger && logger(`dateInfoService.getOne ${name}`);
+
+    const dateInfo = await dateInfoRepo.findOne({ camera: cameraId, name });
+    return dateInfo;
+  }
+}

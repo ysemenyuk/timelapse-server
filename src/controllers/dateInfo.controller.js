@@ -1,4 +1,4 @@
-import dateInfoService from '../services/dateInfo.service.js';
+import { dateInfoService } from '../services/index.js';
 
 const getAll = async (req, res) => {
   req.reqLogger('dateInfo.controller getAll');

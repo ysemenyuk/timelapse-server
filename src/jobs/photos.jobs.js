@@ -1,9 +1,9 @@
-import taskService from '../../services/task.service.js';
-import { makeTimeName } from '../../utils/utils.js';
-import { fileCreateType, taskName, taskStatus } from '../../utils/constants.js';
+import { fromUnixTime } from 'date-fns';
+import { taskService } from '../services/index.js';
+import { makeTimeName } from '../utils/utils.js';
+import { fileCreateType, taskName, taskStatus } from '../utils/constants.js';
 import createAndSavePhoto from './createAndSavePhoto.js';
 import createDateInfoIfNotExist from './createDateInfoIfNotExist.js';
-import { fromUnixTime } from 'date-fns';
 
 //
 //

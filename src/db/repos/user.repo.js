@@ -3,33 +3,33 @@ import User from '../models/User.js';
 // create
 
 const create = async (payload) => {
-  const task = new User(payload);
-  await task.save();
-  return task;
+  const user = new User(payload);
+  await user.save();
+  return user;
 };
 
 // find
 
-const find = async (filter) => {
-  const tasks = await User.find(filter);
-  return tasks;
+const find = async (filter, projection, options) => {
+  const users = await User.find(filter, projection, options);
+  return users;
 };
 
-const findOne = async (filter) => {
-  const task = await User.findOne(filter);
-  return task;
+const findOne = async (filter, projection, options) => {
+  const user = await User.findOne(filter, projection, options);
+  return user;
 };
 
-const findOneById = async (id) => {
-  const task = await User.findOne({ _id: id });
-  return task;
+const findOneById = async (id, projection, options) => {
+  const user = await User.findOne({ _id: id }, projection, options);
+  return user;
 };
 
 // update
 
 const updateOneById = async (id, payload) => {
-  const task = await User.findOneAndUpdate({ _id: id }, payload, { new: true });
-  return task;
+  const user = await User.findOneAndUpdate({ _id: id }, payload, { new: true });
+  return user;
 };
 
 // delete

@@ -1,11 +1,8 @@
 import _ from 'lodash';
-import mongodb from 'mongodb';
 import { addHours } from 'date-fns';
-import File from '../db/models/File.js';
 import { type } from '../utils/constants.js';
-import storage from '../storage/index.js';
-
-const { ObjectId } = mongodb;
+import { fileRepo } from '../db/index.js';
+import { storageService } from './index.js';
 
 const getGteDateTime = (date) => new Date(`${date} 00:00:00`);
 const getLteDateTime = (date) => addHours(new Date(`${date} 00:00:00`), 24);
@@ -35,13 +32,37 @@ const makeFilter = (camera, query) => {
   return _.pickBy({ camera, type, createType, date: dateRange, timeString }, _.identity);
 };
 
+//
+// create
+//
+
+const createFile = async ({ logger, data, stream, ...payload }) => {
+  logger && logger(`fileService.createFile`);
+
+  const file = await fileRepo.create({ ...payload });
+
+  // save on storage
+  const fileInfo = await storageService.saveFile({
+    logger,
+    file,
+    data,
+    stream,
+  });
+
+  const created = await fileRepo.updateOneById(file._id, fileInfo);
+  // console.log('created', created);
+  return created;
+};
+
+//
 // get
+//
 
 const getFilesForVideo = async ({ logger, cameraId, query }) => {
   logger && logger(`fileService.getFilesForVideo`);
 
   const filter = makeFilter(cameraId, query);
-  const files = await File.find(filter).sort({ _id: 1 });
+  const files = await fileRepo.find(filter);
 
   return files;
 };
@@ -50,7 +71,7 @@ const getMany = async ({ logger, cameraId, query }) => {
   logger && logger(`fileService.getMany`);
 
   const filter = makeFilter(cameraId, query);
-  const total = await File.countDocuments(filter);
+  const total = await fileRepo.countDocuments(filter);
 
   const page = parseInt(query.page, 10);
   const limit = parseInt(query.limit, 10);
@@ -62,7 +83,7 @@ const getMany = async ({ logger, cameraId, query }) => {
 
   const options = _.pickBy({ limit, skip, populate }, _.identity);
 
-  const items = await File.find(filter, null, options);
+  const items = await fileRepo.find(filter, null, options);
   return { page, pages, total, items };
 };
 
@@ -70,7 +91,7 @@ const getCount = async ({ logger, cameraId, query }) => {
   logger && logger(`fileService.getCountByQuery`);
 
   const filter = makeFilter(cameraId, query);
-  const count = await File.countDocuments(filter);
+  const count = await fileRepo.countDocuments(filter);
   // console.log(111, count);
   return { count };
 };
@@ -78,66 +99,24 @@ const getCount = async ({ logger, cameraId, query }) => {
 const getCountsByDates = async ({ logger, cameraId, query }) => {
   logger && logger(`fileService.getCountByQuery`);
 
-  const match = _.pickBy(
-    {
-      camera: ObjectId(cameraId),
-      type: query.type || 'photo',
-    },
-    _.identity
-  );
-
-  const counts = await File.aggregate([
-    { $match: match },
-    {
-      $group: {
-        _id: '$dateString',
-        files: { $count: {} },
-      },
-    },
-    { $sort: { _id: 1 } },
-  ]);
-
+  const counts = await fileRepo.countsByDates(cameraId, query);
   // console.log(222, counts);
 
   return counts;
 };
 
-const getOneById = async ({ logger, itemId }) => {
-  logger && logger(`fileService.getOneById`);
-
-  const file = await File.findOne({ _id: itemId }).populate('poster');
-  return file;
-};
-
 const getOne = async ({ logger, ...query }) => {
   logger && logger(`fileService.getOne`);
   // check query?
-  const file = await File.findOne({ ...query }).populate('poster');
+  const file = await fileRepo.findOne({ ...query });
   return file;
 };
 
-//
-// create
-//
+const getOneById = async ({ logger, itemId }) => {
+  logger && logger(`fileService.getOneById`);
 
-const createFile = async ({ logger, data, stream, ...payload }) => {
-  logger && logger(`fileService.createFile`);
-
-  const file = new File({ ...payload });
-
-  // save on storage
-  const fileInfo = await storage.saveFile({
-    logger,
-    file,
-    data,
-    stream,
-  });
-
-  await file.save();
-
-  const created = await File.findOneAndUpdate({ _id: file._id }, fileInfo, { new: true });
-  // console.log(5555, created);
-  return created;
+  const file = await fileRepo.findOne({ _id: itemId });
+  return file;
 };
 
 //
@@ -147,7 +126,7 @@ const createFile = async ({ logger, data, stream, ...payload }) => {
 const updateOneById = async ({ logger, itemId, payload }) => {
   logger && logger(`fileService.updateOneById`);
   // check payload?
-  const updated = await File.findOneAndUpdate({ _id: itemId }, payload, { new: true });
+  const updated = await fileRepo.updateOneById(itemId, payload);
   return updated;
 };
 
@@ -160,13 +139,13 @@ const deleteOne = async ({ logger, item }) => {
 
   // delete file from storage
   try {
-    await storage.removeFile({ logger, file: item });
+    await storageService.removeFile({ logger, file: item });
   } catch (error) {
     console.log('error deletedFromStorage', error);
   }
 
   // delete file from db
-  const deletedFromDb = await File.findOneAndDelete({ _id: item._id });
+  const deletedFromDb = await fileRepo.deleteOneById(item._id);
   return deletedFromDb;
 };
 
@@ -183,14 +162,6 @@ const deleteOneById = async ({ logger, itemId }) => {
   return deleted;
 };
 
-// const deleteManyByIds = async ({ logger, itemsIds }) => {
-//   logger && logger(`fileService.deleteManyByIds`);
-//   // delete camera files from storage
-//   // delete items from db
-//   const deletedFromDb = await File.deleteMany({ _id: { $in: itemsIds } });
-//   return deletedFromDb;
-// };
-
 //
 // default
 //
@@ -198,29 +169,33 @@ const deleteOneById = async ({ logger, itemId }) => {
 const createUserFolder = async ({ logger, userId }) => {
   logger && logger(`fileService.createUserFolder`);
 
-  await storage.createUserFolder({ logger, userId });
+  await storageService.createUserFolder({ logger, userId });
 };
 
-const createCameraFolder = async ({ logger, userId, cameraId }) => {
-  logger && logger(`fileService.createCameraFolder`);
+const createCameraFolders = async ({ logger, userId, cameraId }) => {
+  logger && logger(`fileService.createCameraFolders`);
 
-  await storage.createCameraFolder({ logger, userId, cameraId });
+  await storageService.createCameraFolder({ logger, userId, cameraId });
 };
+
+//
 
 const deleteCameraFiles = async ({ logger, userId, cameraId }) => {
   logger && logger(`fileService.deleteCameraFiles`);
 
   // delete files from storage
   try {
-    await storage.removeCameraFiles({ logger, userId, cameraId });
+    await storageService.removeCameraFiles({ logger, userId, cameraId });
   } catch (error) {
     console.log('error fileService.deleteCameraFiles', error);
   }
 
   // delete files from DB
-  const deletedFromDb = await File.deleteMany({ user: userId, camera: cameraId });
+  const deletedFromDb = await fileRepo.deleteMany({ user: userId, camera: cameraId });
   return deletedFromDb;
 };
+
+//
 
 export default {
   getFilesForVideo,
@@ -233,8 +208,7 @@ export default {
   updateOneById,
   deleteOne,
   deleteOneById,
-  // deleteManyByIds,
   createUserFolder,
-  createCameraFolder,
+  createCameraFolders,
   deleteCameraFiles,
 };

@@ -1,4 +1,4 @@
-import userService from '../services/user.service.js';
+import { userService } from '../services/index.js';
 
 const singUp = async (req, res) => {
   req.reqLogger(`userController.singUp /api/user/singup`);

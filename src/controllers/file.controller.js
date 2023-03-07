@@ -1,4 +1,4 @@
-import fileService from '../services/file.service.js';
+import { fileService } from '../services/index.js';
 
 const getAll = async (req, res) => {
   req.reqLogger(`fileController.getAll`);

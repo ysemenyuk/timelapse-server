@@ -4,8 +4,7 @@ import { taskName, taskType } from '../utils/constants.js';
 
 export default class TaskService {
   constructor() {
-    this.taskRepo = taskRepo;
-    this.workerService = workerService;
+    //
   }
 
   // create
@@ -13,13 +12,13 @@ export default class TaskService {
   async createOne({ logger, userId, cameraId, payload }) {
     logger && logger(`taskService.createOne`);
 
-    const task = await this.taskRepo.create({
+    const task = await taskRepo.create({
       user: userId,
       camera: cameraId,
       ...payload,
     });
 
-    await this.workerService.createTaskJob(task);
+    await workerService.createTaskJob(task);
 
     return task;
   }
@@ -29,14 +28,14 @@ export default class TaskService {
   async getAll({ logger, cameraId }) {
     logger && logger(`taskService.getAll`);
 
-    const tasks = await this.taskRepo.find({ camera: cameraId });
+    const tasks = await taskRepo.find({ camera: cameraId });
     return tasks;
   }
 
   async getOneById({ logger, taskId }) {
     logger && logger(`taskService.getOne`);
 
-    const task = await this.taskRepo.findOneById(taskId);
+    const task = await taskRepo.findOneById(taskId);
     return task;
   }
 
@@ -45,8 +44,8 @@ export default class TaskService {
   async updateOneById({ logger, taskId, payload }) {
     logger && logger(`taskService.updateOne`);
 
-    const task = await this.taskRepo.updateOneById(taskId, payload);
-    await this.workerService.updateTaskJob(task);
+    const task = await taskRepo.updateOneById(taskId, payload);
+    await workerService.updateTaskJob(task);
 
     return task;
   }
@@ -58,8 +57,8 @@ export default class TaskService {
 
     // TODO: if not removable return error
 
-    const deleted = await this.taskRepo.deleteOneById(taskId);
-    await this.workerService.removeTaskJobs(taskId);
+    const deleted = await taskRepo.deleteOneById(taskId);
+    await workerService.removeTaskJobs(taskId);
 
     return deleted;
   }
@@ -71,7 +70,7 @@ export default class TaskService {
   async createCameraTasks({ logger, userId, cameraId }) {
     logger && logger(`taskService.createCameraTasks`);
 
-    const photosByTimeTask = await this.taskRepo.create({
+    const photosByTimeTask = await taskRepo.create({
       user: userId,
       camera: cameraId,
       name: taskName.CREATE_PHOTOS_BY_TIME,
@@ -94,8 +93,8 @@ export default class TaskService {
   async deleteCameraTasks({ cameraId, logger }) {
     logger && logger(`taskService.deleteCameraTasks`);
 
-    const deleted = await this.taskRepo.deleteMany({ camera: cameraId });
-    await this.workerService.removeCameraJobs(cameraId);
+    const deleted = await taskRepo.deleteMany({ camera: cameraId });
+    await workerService.removeCameraJobs(cameraId);
 
     return deleted;
   }

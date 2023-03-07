@@ -3,7 +3,7 @@ import { ValidateError } from '../errors.js';
 
 const createOneSchema = yup.string().url().required();
 
-export const validateUrl = async (url) => {
+const validateUrl = async (url) => {
   // console.log('- validatePhotoUrl url -', url);
 
   try {
@@ -13,3 +13,5 @@ export const validateUrl = async (url) => {
     throw new ValidateError('not valid url', error.message);
   }
 };
+
+export default { validateUrl };

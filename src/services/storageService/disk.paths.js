@@ -1,4 +1,4 @@
-import { dirName, type } from '../utils/constants.js';
+import { dirName, type } from '../../utils/constants.js';
 import {
   makeDateName,
   makeUserDirName,
@@ -6,7 +6,7 @@ import {
   makeVideoFileName,
   makePhotoFileName,
   makePosterFileName,
-} from '../utils/utils.js';
+} from '../../utils/utils.js';
 
 //
 // dirs paths

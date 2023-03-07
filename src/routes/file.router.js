@@ -1,8 +1,7 @@
 import express from 'express';
-import authMiddleware from '../middlewares/auth.middleware.js';
-import cameraMiddleware from '../middlewares/camera.middleware.js';
-import { asyncHandler } from '../middlewares/errorHandler.middleware.js';
-import fileController from '../controllers/file.controller.js';
+import { fileController } from '../controllers/index.js';
+import { authMiddleware, cameraMiddleware } from '../middlewares/index.js';
+import { asyncHandler } from '../utils/utils.js';
 
 const router = express.Router({ mergeParams: true });
 

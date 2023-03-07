@@ -4,22 +4,11 @@ import debug from 'debug';
 import http from 'http';
 import cors from 'cors';
 import fileUpload from 'express-fileupload';
-import debugMiddleware from './middlewares/debug.middleware.js';
-import { errorHandlerMiddleware } from './middlewares/errorHandler.middleware.js';
-import cameraRouter from './routes/camera.router.js';
-import fileRouter from './routes/file.router.js';
-import taskRouter from './routes/task.router.js';
-import dateInfoRouter from './routes/dateInfo.router.js';
-import storageRouter from './routes/storage.router.js';
-import userRouter from './routes/user.router.js';
+import middlewares from './middlewares/index.js';
+import routers from './routes/index.js';
 import db from './db/index.js';
-import worker from './worker/index.js';
-import storage from './storage/index.js';
-
-//
-
-const mode = process.env.NODE_ENV;
-const PORT = process.env.SERVER_PORT;
+import { workerService, storageService } from './services/index.js';
+import config from './config.js';
 
 //
 
@@ -28,22 +17,22 @@ const startServer = async () => {
   const app = express();
   const httpServer = http.createServer(app);
 
-  app.use(debugMiddleware);
+  app.use(middlewares.debugMiddleware);
 
   app.use(cors());
   app.use(express.json());
   app.use(fileUpload());
 
-  app.use('/files', storageRouter);
-  app.use('/api/cameras/:cameraId/tasks', taskRouter);
-  app.use('/api/cameras/:cameraId/files', fileRouter);
-  app.use('/api/cameras/:cameraId/date-info', dateInfoRouter);
-  app.use('/api/cameras', cameraRouter);
-  app.use('/api/users', userRouter);
+  app.use('/files', routers.storageRouter);
+  app.use('/api/cameras/:cameraId/tasks', routers.taskRouter);
+  app.use('/api/cameras/:cameraId/files', routers.fileRouter);
+  app.use('/api/cameras/:cameraId/date-info', routers.dateInfoRouter);
+  app.use('/api/cameras', routers.cameraRouter);
+  app.use('/api/users', routers.userRouter);
 
-  app.use(errorHandlerMiddleware);
+  app.use(middlewares.errorHandlerMiddleware);
 
-  app.use((req, res) => {
+  app.use('/*', (req, res) => {
     res.status(404).send('Sorry cant find that!');
   });
 
@@ -51,13 +40,13 @@ const startServer = async () => {
     logger(`Starting server`);
 
     await db.connect();
-    await storage.start();
-    await worker.start();
+    await storageService.init();
+    await workerService.init();
 
     // nms.run();
 
-    httpServer.listen(PORT, () => {
-      logger(`httpServer running in ${mode} mode on port ${PORT}`);
+    httpServer.listen(config.serverPort, () => {
+      logger(`httpServer running in ${config.mode} mode on port ${config.serverPort}`);
     });
   } catch (e) {
     console.log('catch err', e);

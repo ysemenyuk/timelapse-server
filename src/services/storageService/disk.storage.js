@@ -4,10 +4,9 @@ import { pipeline } from 'stream/promises';
 import path from 'path';
 import _ from 'lodash';
 import debug from 'debug';
-import { isPhotoFile } from '../utils/utils.js';
+import { isPhotoFile } from '../../utils/utils.js';
 import diskpaths from './disk.paths.js';
-
-const pathToDiskSpace = process.env.DISK_PATH;
+import config from '../config.js';
 
 const {
   createFilePath,
@@ -19,7 +18,7 @@ const {
 } = diskpaths;
 
 export function createFullPath(filePath) {
-  return path.join(pathToDiskSpace, filePath);
+  return path.join(config.pathToDiskSpace, filePath);
 }
 
 async function createDir(dirPath) {
@@ -45,12 +44,11 @@ function isDirExist(dirPath) {
 
 class DiskStorage {
   constructor() {
-    this.logger;
+    this.logger = debug('storage');
   }
 
-  start() {
-    this.logger = debug('storage');
-    this.logger(`storageType - "disk", pathOnDisk - "${pathToDiskSpace}"`);
+  init() {
+    this.logger(`storageType - "disk", pathOnDisk - "${config.pathToDiskSpace}"`);
   }
 
   // create

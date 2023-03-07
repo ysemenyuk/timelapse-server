@@ -1,16 +1,13 @@
 import { Server } from 'socket.io';
 import debug from 'debug';
 
-class Socket {
+export default class SocketService {
   constructor() {
-    this.logger;
-    this.socket;
+    this.logger = debug('socket');
     this.sessions = new Map();
   }
 
-  async start(httpServer) {
-    this.logger = debug('socket');
-
+  async init(httpServer) {
     this.socket = new Server(httpServer, {
       cors: { origin: '*' },
     });
@@ -38,16 +35,12 @@ class Socket {
         this.sessions.delete(socket.userId);
       });
 
-      socket.on('worker', (mess) => {
-        this.logger('worker mess.name to mess.userId:', mess.name, mess.userId.toString());
+      socket.on('http-server', (mess) => {
+        this.logger('http-server mess.name to mess.userId:', mess.name, mess.userId.toString());
         const { userId, name, data } = mess;
         this.send(userId, name, data);
       });
     });
-  }
-
-  getUserSocket(userId) {
-    return this.sessions.get(userId.toString());
   }
 
   send(userId, name, data) {
@@ -57,5 +50,3 @@ class Socket {
     }
   }
 }
-
-export default Socket;

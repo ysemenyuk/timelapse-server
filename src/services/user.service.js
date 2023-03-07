@@ -13,8 +13,7 @@ const filterProps = (user) => _.pick(user, fields);
 
 export default class UserService {
   constructor() {
-    this.userRepo = userRepo;
-    this.fileService = fileService;
+    //
   }
 
   //
@@ -47,7 +46,7 @@ export default class UserService {
   async singUp({ email, password, logger }) {
     logger(`userService.singUp email: ${email}`);
 
-    const user = await this.userRepo.findOne({ email });
+    const user = await userRepo.findOne({ email });
 
     if (user) {
       logger(`userService.singUp email ${email} - already exist`);
@@ -55,10 +54,10 @@ export default class UserService {
     }
 
     const hashPassword = await this.getHashPassword(password);
-    const newUser = this.userRepo.create({ email, password: hashPassword });
+    const newUser = userRepo.create({ email, password: hashPassword });
 
     // crete user folder
-    await this.fileService.createUserFolder({
+    await fileService.createUserFolder({
       logger,
       userId: newUser._id,
     });
@@ -74,7 +73,7 @@ export default class UserService {
   async logIn({ email, password, logger }) {
     logger(`userService.logIn email: ${email}`);
 
-    const user = await this.userRepo.findOne({ email }, fields);
+    const user = await userRepo.findOne({ email }, fields);
 
     if (!user) {
       logger(`userService.logIn email ${email} - User not found`);
@@ -98,7 +97,7 @@ export default class UserService {
   async auth({ userId, logger }) {
     logger(`userService.auth userId: ${userId}`);
 
-    const user = await this.userRepo.findOneById(userId, fields);
+    const user = await userRepo.findOneById(userId, fields);
     const token = this.sign(user._id);
 
     return { token, user };
@@ -109,7 +108,7 @@ export default class UserService {
   async getOneById({ userId, logger }) {
     logger(`userService.getById userId: ${userId}`);
 
-    const user = await this.userRepo.findOneById(userId, fields);
+    const user = await userRepo.findOneById(userId, fields);
     return { user };
   }
 
@@ -118,7 +117,7 @@ export default class UserService {
   async getOneByEmail({ email, logger }) {
     logger(`userService.getOneByEmail email: ${email}`);
 
-    const user = await this.userRepo.findOne({ email }, fields);
+    const user = await userRepo.findOne({ email }, fields);
     return { user };
   }
 
@@ -135,7 +134,7 @@ export default class UserService {
 
     const fields = _.pickBy({ name, email, password: hashPassword }, _.identity);
 
-    const updated = await this.userRepo.updateOneById(userId, fields);
+    const updated = await userRepo.updateOneById(userId, fields);
     return { user: filterProps(updated) };
   }
 
@@ -146,7 +145,7 @@ export default class UserService {
 
     // TODO: delete user cameras, files, tasks, jobs
 
-    const deleted = await this.userRepo.deleteOneById(userId);
+    const deleted = await userRepo.deleteOneById(userId);
     return deleted;
   }
 }

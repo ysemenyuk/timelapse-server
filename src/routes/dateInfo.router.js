@@ -1,8 +1,7 @@
 import express from 'express';
-import dateInfoController from '../controllers/dateInfo.controller.js';
-import authMiddleware from '../middlewares/auth.middleware.js';
-import cameraMiddleware from '../middlewares/camera.middleware.js';
-import { asyncHandler } from '../middlewares/errorHandler.middleware.js';
+import { dateInfoController } from '../controllers/index.js';
+import { authMiddleware, cameraMiddleware } from '../middlewares/index.js';
+import { asyncHandler } from '../utils/utils.js';
 
 const router = express.Router({ mergeParams: true });
 

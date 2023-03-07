@@ -1,13 +1,9 @@
 import DiskStorage from './disk.storage.js';
 import GridfsStorage from './gridfs.storage.js';
 
-const storageType = process.env.STORAGE_TYPE;
-
-const mapping = {
+const storageTypeMap = {
   disk: DiskStorage,
   gridfs: GridfsStorage,
 };
 
-const storage = new mapping[storageType]();
-
-export default storage;
+export default (storageType) => storageTypeMap[storageType];
