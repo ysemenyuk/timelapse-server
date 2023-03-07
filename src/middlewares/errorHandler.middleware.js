@@ -1,5 +1,3 @@
-const asyncHandler = (handler) => (req, res, next) => handler(req, res, next).catch(next);
-
 class BadRequestError extends Error {
   constructor(message) {
     super(message);
@@ -18,7 +16,7 @@ class ValidateError extends Error {
 }
 
 // eslint-disable-next-line no-unused-vars
-const errorHandlerMiddleware = (err, req, res, next) => {
+export default (err, req, res, next) => {
   console.log('- errorHandlerMiddleware err -', err.message, err.status, err.errors);
 
   if (err instanceof BadRequestError) {
@@ -32,4 +30,4 @@ const errorHandlerMiddleware = (err, req, res, next) => {
   return res.status(500).send({ message: 'Server error' });
 };
 
-export { asyncHandler, errorHandlerMiddleware, BadRequestError, ValidateError };
+export { BadRequestError, ValidateError };

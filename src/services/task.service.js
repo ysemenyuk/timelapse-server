@@ -1,104 +1,114 @@
-import worker from '../worker/index.js';
-import { taskRepo } from '../db/index.js';
-import { taskName, taskType } from '../utils/constants.js';
+// import worker from '../worker/index.js';
+// import { taskRepo } from '../db/index.js';
+// import { taskName, taskType } from '../utils/constants.js';
 
-// create
+export default class Task {
+  constructor(repos) {
+    this.taskRepo = repos.taskRepo;
+  }
 
-const createOne = async ({ logger, userId, cameraId, payload }) => {
-  logger && logger(`taskService.createOne`);
+  init(services) {
+    this.workerService = services.workerService;
+  }
 
-  const task = await taskRepo.create({
-    user: userId,
-    camera: cameraId,
-    ...payload,
-  });
+  // create
 
-  await worker.createTaskJob(task);
+  async createOne({ logger, userId, cameraId, payload }) {
+    logger && logger(`taskService.createOne`);
 
-  return task;
-};
+    const task = await this.taskRepo.create({
+      user: userId,
+      camera: cameraId,
+      ...payload,
+    });
 
-// get
+    await this.workerService.createTaskJob(task);
 
-const getAll = async ({ logger, cameraId }) => {
-  logger && logger(`taskService.getAll`);
+    return task;
+  }
 
-  const tasks = await taskRepo.find({ camera: cameraId });
-  return tasks;
-};
+  // // get
 
-const getOneById = async ({ logger, taskId }) => {
-  logger && logger(`taskService.getOne`);
+  // const getAll = async ({ logger, cameraId }) => {
+  //   logger && logger(`taskService.getAll`);
 
-  const task = await taskRepo.findOneById(taskId);
-  return task;
-};
+  //   const tasks = await taskRepo.find({ camera: cameraId });
+  //   return tasks;
+  // };
 
-// update
+  // const getOneById = async ({ logger, taskId }) => {
+  //   logger && logger(`taskService.getOne`);
 
-const updateOneById = async ({ logger, taskId, payload }) => {
-  logger && logger(`taskService.updateOne`);
+  //   const task = await taskRepo.findOneById(taskId);
+  //   return task;
+  // };
 
-  const task = await taskRepo.updateOneById(taskId, payload);
-  await worker.updateTaskJob(task);
+  // // update
 
-  return task;
-};
+  // const updateOneById = async ({ logger, taskId, payload }) => {
+  //   logger && logger(`taskService.updateOne`);
 
-// delete
+  //   const task = await taskRepo.updateOneById(taskId, payload);
+  //   await worker.updateTaskJob(task);
 
-const deleteOneById = async ({ taskId, logger }) => {
-  logger && logger(`taskService.deleteOne`, taskId);
+  //   return task;
+  // };
 
-  // TODO: if not removable return error
+  // // delete
 
-  const deleted = await taskRepo.deleteOneById(taskId);
-  await worker.removeTaskJobs(taskId);
+  // const deleteOneById = async ({ taskId, logger }) => {
+  //   logger && logger(`taskService.deleteOne`, taskId);
 
-  return deleted;
-};
+  //   // TODO: if not removable return error
 
-//
-// camera
-//
+  //   const deleted = await taskRepo.deleteOneById(taskId);
+  //   await worker.removeTaskJobs(taskId);
 
-const createCameraTasks = async ({ logger, userId, cameraId }) => {
-  logger && logger(`taskService.createCameraTasks`);
+  //   return deleted;
+  // };
 
-  const photosByTimeTask = await taskRepo.create({
-    user: userId,
-    camera: cameraId,
-    name: taskName.CREATE_PHOTOS_BY_TIME,
-    type: taskType.REPEAT_EVERY,
-    removable: false,
-    photoSettings: {
-      interval: 60, // seconds
-      timeRangeType: 'customTime', // allTime, sunTime, customTime
-      customTimeStart: '08:00', // 08:00
-      customTimeStop: '20:00', // 20:00
-    },
-  });
+  // //
+  // // camera
+  // //
 
-  const actualVideoByTimeTask = {};
+  // const createCameraTasks = async ({ logger, userId, cameraId }) => {
+  //   logger && logger(`taskService.createCameraTasks`);
 
-  return { photosByTimeTask, actualVideoByTimeTask };
-};
+  //   const photosByTimeTask = await taskRepo.create({
+  //     user: userId,
+  //     camera: cameraId,
+  //     name: taskName.CREATE_PHOTOS_BY_TIME,
+  //     type: taskType.REPEAT_EVERY,
+  //     removable: false,
+  //     photoSettings: {
+  //       interval: 60, // seconds
+  //       timeRangeType: 'customTime', // allTime, sunTime, customTime
+  //       customTimeStart: '08:00', // 08:00
+  //       customTimeStop: '20:00', // 20:00
+  //     },
+  //   });
 
-const deleteCameraTasks = async ({ cameraId, logger }) => {
-  logger && logger(`taskService.deleteCameraTasks`);
+  //   const actualVideoByTimeTask = {};
 
-  const deleted = await taskRepo.deleteMany({ camera: cameraId });
-  await worker.removeCameraJobs(cameraId);
+  //   return { photosByTimeTask, actualVideoByTimeTask };
+  // };
 
-  return deleted;
-};
+  // const deleteCameraTasks = async ({ cameraId, logger }) => {
+  //   logger && logger(`taskService.deleteCameraTasks`);
 
-export default {
-  createOne,
-  getAll,
-  getOneById,
-  updateOneById,
-  deleteOneById,
-  createCameraTasks,
-  deleteCameraTasks,
-};
+  //   const deleted = await taskRepo.deleteMany({ camera: cameraId });
+  //   await worker.removeCameraJobs(cameraId);
+
+  //   return deleted;
+  // };
+}
+
+// export default {
+//   createOne,
+//   getAll,
+//   getOneById,
+//   updateOneById,
+//   deleteOneById,
+//   createCameraTasks,
+//   deleteCameraTasks,
+// };

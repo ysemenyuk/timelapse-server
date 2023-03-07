@@ -1,9 +1,15 @@
+import _ from 'lodash';
 import MongoDB from './mongo.db.js';
 import userRepo from './repos/user.repo.js';
 import taskRepo from './repos/task.repo.js';
 
-const db = new MongoDB();
+const repos = { userRepo, taskRepo };
 
-export { userRepo, taskRepo };
+export default async () => {
+  const db = new MongoDB();
+  await db.connect();
 
-export default db;
+  const c = new Map();
+  _.forEach(repos, (name, repo) => c.set(name, repo));
+  return c;
+};

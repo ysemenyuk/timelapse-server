@@ -1,9 +1,9 @@
-import fileService from '../../services/file.service.js';
-import { makeNumber, makePosterFileName, makeUniformSample, makeVideoFileName } from '../../utils/utils.js';
-import { fileType, type } from '../../utils/constants.js';
-import diskService from '../../services/disk.service.js';
-import storage from '../../storage/index.js';
-import ffmpegService from '../../services/ffmpeg.service.js';
+import fileService from '../services/file.service.js';
+import { makeNumber, makePosterFileName, makeUniformSample, makeVideoFileName } from '../utils/utils.js';
+import { fileType, type } from '../utils/constants.js';
+import diskService from '../services/disk.service.js';
+import storage from '../storage/index.js';
+import ffmpegService from '../services/ffmpeg.service.js';
 
 const sleep = (time, message = 'Hello') =>
   new Promise((resolve) => {

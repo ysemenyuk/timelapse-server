@@ -36,13 +36,10 @@ const stream2buffer = (stream) => {
 
 class GridfsStorage {
   constructor() {
-    this.logger;
-    this.bucket;
+    this.logger = debug('storage');
   }
 
-  async start() {
-    this.logger = debug('storage');
-
+  async init() {
     const mongoClient = new MongoClient(dbUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,

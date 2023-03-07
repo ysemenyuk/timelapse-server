@@ -45,11 +45,10 @@ function isDirExist(dirPath) {
 
 class DiskStorage {
   constructor() {
-    this.logger;
+    this.logger = debug('storage');
   }
 
   start() {
-    this.logger = debug('storage');
     this.logger(`storageType - "disk", pathOnDisk - "${pathToDiskSpace}"`);
   }
 

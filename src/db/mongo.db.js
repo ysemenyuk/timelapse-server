@@ -2,7 +2,6 @@ import mongoose from 'mongoose';
 import debug from 'debug';
 
 const dbUri = process.env.MONGO_URI;
-const logger = debug('mongo');
 
 class MongoDB {
   constructor() {
@@ -10,6 +9,8 @@ class MongoDB {
   }
 
   async connect() {
+    const logger = debug('mongo');
+
     await mongoose.connect(dbUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,

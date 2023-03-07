@@ -1,24 +1,30 @@
 import express from 'express';
-import authMiddleware from '../middleware/authMiddleware.js';
-import cameraMiddleware from '../middleware/cameraMiddleware.js';
-import { asyncHandler } from '../middleware/errorHandlerMiddleware.js';
-import taskController from '../controllers/task.controller.js';
-import taskValidator from '../validators/task.validator.yup.js';
+// import authMiddleware from '../middleware/authMiddleware.js';
+// import cameraMiddleware from '../middleware/cameraMiddleware.js';
+// import taskController from '../controllers/task.controller.js';
+// import taskValidator from '../validators/task.validator.yup.js';
+import { asyncHandler } from '../utils/utils.js';
 
-const router = express.Router({ mergeParams: true });
+export default (controllers, middlewares, validators) => {
+  const router = express.Router({ mergeParams: true });
 
-router.use(authMiddleware);
-router.use(cameraMiddleware);
+  const { authMiddleware, cameraMiddleware } = middlewares;
+  const { taskValidator } = validators;
+  const { taskController } = controllers;
 
-// /api/cameras/:cameraId/tasks
+  router.use(authMiddleware);
+  router.use(cameraMiddleware);
 
-router.get('/', asyncHandler(taskController.getAll));
-router.get('/:taskId', asyncHandler(taskController.getOne));
+  // /api/cameras/:cameraId/tasks
 
-router.post('/', taskValidator.validateTask, asyncHandler(taskController.createOne));
+  router.get('/', asyncHandler(taskController.getAll));
+  router.get('/:taskId', asyncHandler(taskController.getOne));
 
-router.put('/:taskId', taskValidator.validateTask, asyncHandler(taskController.updateOne));
+  router.post('/', taskValidator.validateTask, asyncHandler(taskController.createOne));
 
-router.delete('/:taskId', asyncHandler(taskController.deleteOne));
+  router.put('/:taskId', taskValidator.validateTask, asyncHandler(taskController.updateOne));
 
-export default router;
+  router.delete('/:taskId', asyncHandler(taskController.deleteOne));
+
+  return router;
+};

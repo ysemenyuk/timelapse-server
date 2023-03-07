@@ -1,5 +1,5 @@
-import taskService from '../../services/task.service.js';
-import { fileCreateType, taskName, taskStatus } from '../../utils/constants.js';
+import taskService from '../services/task.service.js';
+import { fileCreateType, taskName, taskStatus } from '../utils/constants.js';
 import createAndSaveVideo from './createAndSaveVideo.js';
 
 //
