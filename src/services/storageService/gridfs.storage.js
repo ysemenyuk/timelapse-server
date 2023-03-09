@@ -39,7 +39,7 @@ export default class GridfsStorage {
     this.logger = debug('storage');
   }
 
-  async start() {
+  async init() {
     const mongoClient = new MongoClient(dbUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,

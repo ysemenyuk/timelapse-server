@@ -1,94 +1,98 @@
-import cameraService from '../services/camera.service.js';
+// import cameraService from '../services/camera.service.js';
 
-// get
+export default class CameraController {
+  constructor(cameraService) {
+    this.cameraService = cameraService;
+  }
 
-const getAll = async (req, res) => {
-  req.reqLogger('cameraController.getAll');
+  // get
 
-  const cameras = await cameraService.getAll({
-    logger: req.reqLogger,
-    userId: req.userId,
-    query: req.query,
-  });
+  async getAll(req, res) {
+    req.reqLogger('cameraController.getAll');
 
-  res.status(200).send(cameras);
-  req.resLogger(req);
-};
+    const cameras = await this.cameraService.getAll({
+      logger: req.reqLogger,
+      userId: req.userId,
+      query: req.query,
+    });
 
-const getOne = async (req, res) => {
-  req.reqLogger(`cameraController.getOne`);
+    res.status(200).send(cameras);
+    req.resLogger(req);
+  }
 
-  const camera = await cameraService.getOne({
-    logger: req.reqLogger,
-    cameraId: req.cameraId,
-    query: req.query,
-  });
+  async getOne(req, res) {
+    req.reqLogger(`cameraController.getOne`);
 
-  res.status(200).send(camera);
-  req.resLogger(req);
-};
+    const camera = await this.cameraService.getOne({
+      logger: req.reqLogger,
+      cameraId: req.cameraId,
+      query: req.query,
+    });
 
-const getCameraStats = async (req, res) => {
-  req.reqLogger(`cameraController.getCameraStats`);
+    res.status(200).send(camera);
+    req.resLogger(req);
+  }
 
-  const camera = await cameraService.getCameraStats({
-    logger: req.reqLogger,
-    cameraId: req.cameraId,
-    query: req.query,
-  });
+  async getCameraStats(req, res) {
+    req.reqLogger(`cameraController.getCameraStats`);
 
-  res.status(200).send(camera);
-  req.resLogger(req);
-};
+    const camera = await this.cameraService.getCameraStats({
+      logger: req.reqLogger,
+      cameraId: req.cameraId,
+      query: req.query,
+    });
 
-// create
+    res.status(200).send(camera);
+    req.resLogger(req);
+  }
 
-const createOne = async (req, res) => {
-  req.reqLogger('cameraController.createOne');
+  // create
 
-  // TODO: check req.body take fields by schema!
-  const payload = req.body;
+  async createOne(req, res) {
+    req.reqLogger('cameraController.createOne');
 
-  const camera = await cameraService.createOne({
-    logger: req.reqLogger,
-    userId: req.userId,
-    payload,
-  });
+    // TODO: check req.body take fields by schema!
+    const payload = req.body;
 
-  res.status(201).send(camera);
-  req.resLogger(req);
-};
+    const camera = await this.cameraService.createOne({
+      logger: req.reqLogger,
+      userId: req.userId,
+      payload,
+    });
 
-// update
+    res.status(201).send(camera);
+    req.resLogger(req);
+  }
 
-const updateOne = async (req, res) => {
-  req.reqLogger(`cameraController.updateOne`);
+  // update
 
-  // TODO: check req.body take fields by schema!
-  const payload = req.body;
+  async updateOne(req, res) {
+    req.reqLogger(`cameraController.updateOne`);
 
-  const updated = await cameraService.updateOneById({
-    logger: req.reqLogger,
-    cameraId: req.cameraId,
-    userId: req.userId,
-    payload,
-  });
+    // TODO: check req.body take fields by schema!
+    const payload = req.body;
 
-  res.status(201).send(updated);
-  req.resLogger(req);
-};
+    const updated = await this.cameraService.updateOneById({
+      logger: req.reqLogger,
+      cameraId: req.cameraId,
+      userId: req.userId,
+      payload,
+    });
 
-const deleteOne = async (req, res) => {
-  req.reqLogger(`cameraController.deleteOne`);
+    res.status(201).send(updated);
+    req.resLogger(req);
+  }
 
-  const deleted = await cameraService.deleteOneById({
-    logger: req.reqLogger,
-    cameraId: req.cameraId,
-    userId: req.userId,
-  });
+  async deleteOne(req, res) {
+    req.reqLogger(`cameraController.deleteOne`);
 
-  res.status(204).send(deleted);
-  req.resLogger(req);
-};
+    const deleted = await this.cameraService.deleteOneById({
+      logger: req.reqLogger,
+      cameraId: req.cameraId,
+      userId: req.userId,
+    });
 
-export default { getAll, getOne, getCameraStats, createOne, updateOne, deleteOne };
+    res.status(204).send(deleted);
+    req.resLogger(req);
+  }
+}

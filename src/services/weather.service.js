@@ -1,10 +1,9 @@
 import axios from 'axios';
-
-const apiKey = process.env.WEATHER_API_KEY;
+import config from '../config.js';
 
 const getCurrentDateWeather = async (location) => {
   const [lat, lon] = location;
-  const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+  const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${config.weatherApiKey}&units=metric`;
   try {
     const resp = await axios.get(url);
     // console.log('resp.status', resp.status);

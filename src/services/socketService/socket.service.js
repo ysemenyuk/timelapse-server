@@ -1,15 +1,13 @@
 import { Server } from 'socket.io';
-import http from 'http';
 import debug from 'debug';
 
-export default class Socket {
+export default class SocketService {
   constructor() {
     this.logger = debug('socket');
     this.sessions = new Map();
   }
 
-  init() {
-    const httpServer = http.createServer();
+  init(httpServer) {
     this.socket = new Server(httpServer, {
       cors: { origin: '*' },
     });
@@ -44,7 +42,7 @@ export default class Socket {
       });
     });
 
-    return httpServer;
+    return { httpServer, socketService: this };
   }
 
   send(userId, name, data) {

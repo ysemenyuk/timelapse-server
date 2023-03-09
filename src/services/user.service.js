@@ -2,8 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import _ from 'lodash';
 import { BadRequestError } from '../errors.js';
-
-const secretkey = process.env.SECRET_KEY;
+import config from '../config.js';
 
 const fields = ['_id', 'name', 'email', 'avatar'];
 const filterProps = (user) => _.pick(user, fields);
@@ -22,11 +21,11 @@ export default class UserService {
   //
 
   sign(userId) {
-    return jwt.sign({ userId }, secretkey, { expiresIn: '1h' });
+    return jwt.sign({ userId }, config.secretkey, { expiresIn: '1h' });
   }
 
   verify(token) {
-    return jwt.verify(token, secretkey);
+    return jwt.verify(token, config.secretkey);
   }
 
   async getHashPassword(pass) {
@@ -57,7 +56,7 @@ export default class UserService {
     }
 
     const hashPassword = await this.getHashPassword(password);
-    const newUser = this.userRepo.create({ email, password: hashPassword });
+    const newUser = await this.userRepo.create({ email, password: hashPassword });
 
     // crete user folder
     await this.fileService.createUserFolder({
@@ -65,7 +64,6 @@ export default class UserService {
       userId: newUser._id,
     });
 
-    await newUser.save();
     const token = this.sign(newUser._id);
 
     return { token, user: filterProps(newUser) };
@@ -76,7 +74,7 @@ export default class UserService {
   async logIn({ email, password, logger }) {
     logger(`userService.logIn email: ${email}`);
 
-    const user = await this.userRepo.findOne({ email }, fields);
+    const user = await this.userRepo.findOne({ email });
 
     if (!user) {
       logger(`userService.logIn email ${email} - User not found`);
@@ -92,7 +90,7 @@ export default class UserService {
 
     const token = this.sign(user._id);
 
-    return { token, user };
+    return { token, user: filterProps(user) };
   }
 
   //

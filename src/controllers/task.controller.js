@@ -1,79 +1,85 @@
-import taskService from '../services/task.service.js';
+// import taskService from '../services/task.service.js';
 
-const getAll = async (req, res) => {
-  req.reqLogger('cameraTask.controller getAll');
+export default class TaskController {
+  constructor(taskService) {
+    this.taskService = taskService;
+  }
 
-  const tasks = await taskService.getAll({
-    cameraId: req.params.cameraId,
-    logger: req.reqLogger,
-  });
+  //
 
-  res.status(200).send(tasks);
-  req.resLogger(req);
-};
+  async getAll(req, res) {
+    req.reqLogger('cameraTask.controller getAll');
 
-const getOne = async (req, res) => {
-  req.reqLogger(`cameraTask.controller getOne`);
+    const tasks = await this.taskService.getAll({
+      cameraId: req.params.cameraId,
+      logger: req.reqLogger,
+    });
 
-  const task = await taskService.getOneById({
-    taskId: req.params.taskId,
-    logger: req.reqLogger,
-  });
+    res.status(200).send(tasks);
+    req.resLogger(req);
+  }
 
-  res.status(200).send(task);
-  req.resLogger(req);
-};
+  async getOne(req, res) {
+    req.reqLogger(`cameraTask.controller getOne`);
 
-const createOne = async (req, res) => {
-  req.reqLogger(`cameraTask.controller createOne`);
+    const task = await this.taskService.getOneById({
+      taskId: req.params.taskId,
+      logger: req.reqLogger,
+    });
 
-  // TODO: check req.body take fields by schema!
-  const payload = req.body;
+    res.status(200).send(task);
+    req.resLogger(req);
+  }
 
-  const task = await taskService.createOne({
-    userId: req.userId,
-    cameraId: req.params.cameraId,
-    payload,
-    // worker: req.app.worker,
-    logger: req.reqLogger,
-  });
+  //
 
-  res.status(201).send(task);
-  req.resLogger(req);
-};
+  async createOne(req, res) {
+    req.reqLogger(`cameraTask.controller createOne`);
 
-const updateOne = async (req, res) => {
-  req.reqLogger(`cameraTask.controller updateOne`);
+    // TODO: check req.body take fields by schema!
+    const payload = req.body;
 
-  // TODO: check req.body take fields by schema!
-  const payload = req.body;
+    const task = await this.taskService.createOne({
+      userId: req.userId,
+      cameraId: req.params.cameraId,
+      payload,
+      // worker: req.app.worker,
+      logger: req.reqLogger,
+    });
 
-  const updated = await taskService.updateOneById({
-    taskId: req.params.taskId,
-    payload,
-    logger: req.reqLogger,
-  });
+    res.status(201).send(task);
+    req.resLogger(req);
+  }
 
-  res.status(201).send(updated);
-  req.resLogger(req);
-};
+  //
 
-const deleteOne = async (req, res) => {
-  req.reqLogger(`cameraTask.controller deleteOne`);
+  async updateOne(req, res) {
+    req.reqLogger(`cameraTask.controller updateOne`);
 
-  const deleted = await taskService.deleteOneById({
-    taskId: req.params.taskId,
-    logger: req.reqLogger,
-  });
+    // TODO: check req.body take fields by schema!
+    const payload = req.body;
 
-  res.status(204).send(deleted);
-  req.resLogger(req);
-};
+    const updated = await this.taskService.updateOneById({
+      taskId: req.params.taskId,
+      payload,
+      logger: req.reqLogger,
+    });
 
-export default {
-  getAll,
-  getOne,
-  createOne,
-  updateOne,
-  deleteOne,
-};
+    res.status(201).send(updated);
+    req.resLogger(req);
+  }
+
+  //
+
+  async deleteOne(req, res) {
+    req.reqLogger(`cameraTask.controller deleteOne`);
+
+    const deleted = await this.taskService.deleteOneById({
+      taskId: req.params.taskId,
+      logger: req.reqLogger,
+    });
+
+    res.status(204).send(deleted);
+    req.resLogger(req);
+  }
+}

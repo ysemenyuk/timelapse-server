@@ -1,35 +1,36 @@
-import dateInfoService from '../services/dateInfo.service.js';
+// import dateInfoService from '../services/dateInfo.service.js';
 
-const getAll = async (req, res) => {
-  req.reqLogger('dateInfo.controller getAll');
+export default class DateInfoController {
+  constructor(dateInfoService) {
+    this.dateInfoService = dateInfoService;
+  }
 
-  const datesInfo = await dateInfoService.getAll({
-    userId: req.userId,
-    cameraId: req.params.cameraId,
-    logger: req.reqLogger,
-  });
+  async getAll(req, res) {
+    req.reqLogger('dateInfo.controller getAll');
 
-  res.status(200).send(datesInfo);
-  req.resLogger(req);
-};
+    const datesInfo = await this.dateInfoService.getAll({
+      userId: req.userId,
+      cameraId: req.params.cameraId,
+      logger: req.reqLogger,
+    });
 
-const getOne = async (req, res) => {
-  req.reqLogger(`dateInfo.controller getOne`);
+    res.status(200).send(datesInfo);
+    req.resLogger(req);
+  }
 
-  const dateInfo = await dateInfoService.getOne({
-    name: req.params.date,
-    userId: req.userId,
-    cameraId: req.params.cameraId,
-    logger: req.reqLogger,
-  });
+  async getOne(req, res) {
+    req.reqLogger(`dateInfo.controller getOne`);
 
-  // console.log('dateInfo', dateInfo);
+    const dateInfo = await this.dateInfoService.getOne({
+      name: req.params.date,
+      userId: req.userId,
+      cameraId: req.params.cameraId,
+      logger: req.reqLogger,
+    });
 
-  res.status(200).send(dateInfo);
-  req.resLogger(req);
-};
+    // console.log('dateInfo', dateInfo);
 
-export default {
-  getAll,
-  getOne,
-};
+    res.status(200).send(dateInfo);
+    req.resLogger(req);
+  }
+}

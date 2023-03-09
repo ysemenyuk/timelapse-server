@@ -1,11 +1,6 @@
 import mongoose from 'mongoose';
 import debug from 'debug';
 
-import userRepo from './repos/user.repo.js';
-import taskRepo from './repos/task.repo.js';
-
-const repos = { userRepo, taskRepo };
-
 class MongoDB {
   constructor() {
     this.logger = debug('mongo');
@@ -19,8 +14,6 @@ class MongoDB {
     });
 
     this.logger(`Mongoose successfully connected`);
-
-    return repos;
   }
 }
 

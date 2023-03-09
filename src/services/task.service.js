@@ -87,9 +87,28 @@ export default class TaskService {
       },
     });
 
-    const actualVideoByTimeTask = {};
+    const videosByTimeTask = {
+      user: userId,
+      camera: cameraId,
+      name: taskName.CREATE_VIDEOS_BY_TIME,
+      type: taskType.REPEAT_EVERY,
+      removable: false,
+      videoSettings: {
+        // default settings
+        customName: 'videoByTime',
+        dateRangeType: 'allDates', // allDates, customDates, lastDay, lastWeek, lastMonth
+        startDate: '', // dateString
+        endDate: '', // dateString
+        timeRangeType: 'customTime', // allTime, customTime
+        customTimeStart: '08:00', // timeString
+        customTimeEnd: '18:00', // timeString
+        fps: 25, // fps
+        duration: 60, // seconds
+        interval: 'oneTimeInMonth', // string
+      },
+    };
 
-    return { photosByTimeTask, actualVideoByTimeTask };
+    return { photosByTimeTask, videosByTimeTask };
   }
 
   async deleteCameraTasks({ cameraId, logger }) {

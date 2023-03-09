@@ -6,4 +6,6 @@ export default {
   workerPort: process.env.WORKER_PORT,
   dbUri: process.env.MONGO_URI,
   dbName: process.env.MONGO_DB_NAME,
+  secretkey: process.env.SECRET_KEY,
+  weatherApiKey: process.env.WEATHER_API_KEY,
 };

@@ -8,6 +8,6 @@ const storageTypeMap = {
 
 export default async (config) => {
   const storage = new storageTypeMap[config.storageType]();
-  await storage.start();
-  return storageTypeMap[config.storageType];
+  await storage.init();
+  return storage;
 };

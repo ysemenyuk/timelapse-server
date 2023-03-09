@@ -26,7 +26,7 @@ const startServer = async () => {
   try {
     logger(`Starting server`);
 
-    const { repos } = await initDb(config);
+    const repos = await initDb(config);
     const services = await initServices(repos);
 
     const controllers = initControllers(services);
@@ -48,8 +48,8 @@ const startServer = async () => {
       res.status(404).send('Sorry cant find that!');
     });
 
-    httpServer.listen(config.port, () => {
-      logger(`httpServer running in ${config.mode} mode on port ${config.port}`);
+    httpServer.listen(config.serverPort, () => {
+      logger(`httpServer running in ${config.mode} mode on port ${config.serverPort}`);
     });
   } catch (e) {
     console.log('catch err', e);

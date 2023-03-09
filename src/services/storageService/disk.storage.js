@@ -48,7 +48,7 @@ class DiskStorage {
     this.logger = debug('storage');
   }
 
-  start() {
+  init() {
     this.logger(`storageType - "disk", pathOnDisk - "${pathToDiskSpace}"`);
   }
 

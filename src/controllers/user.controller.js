@@ -1,78 +1,90 @@
-import userService from '../services/user.service.js';
+// import userService from '../services/user.service.js';
 
-const singUp = async (req, res) => {
-  req.reqLogger(`userController.singUp /api/user/singup`);
+export default class UserController {
+  constructor(userService) {
+    this.userService = userService;
+  }
 
-  const { token, user } = await userService.singUp({
-    email: req.body.email,
-    password: req.body.password,
-    logger: req.reqLogger,
-  });
+  //
 
-  res.status(201).send({ token, user });
-  req.resLogger(req);
-};
+  async singUp(req, res) {
+    req.reqLogger(`userController.singUp /api/user/singup`);
 
-const logIn = async (req, res) => {
-  req.reqLogger('userController.logIn /api/user/login');
+    const { token, user } = await this.userService.singUp({
+      email: req.body.email,
+      password: req.body.password,
+      logger: req.reqLogger,
+    });
 
-  const { token, user } = await userService.logIn({
-    email: req.body.email,
-    password: req.body.password,
-    logger: req.reqLogger,
-  });
+    res.status(201).send({ token, user });
+    req.resLogger(req);
+  }
 
-  res.status(200).send({ token, user });
-  req.resLogger(req);
-};
+  async logIn(req, res) {
+    req.reqLogger('userController.logIn /api/user/login');
 
-const auth = async (req, res) => {
-  req.reqLogger('userRouter.get /api/user/auth');
+    const { token, user } = await this.userService.logIn({
+      email: req.body.email,
+      password: req.body.password,
+      logger: req.reqLogger,
+    });
 
-  const { token, user } = await userService.auth({
-    userId: req.userId,
-    logger: req.reqLogger,
-  });
+    res.status(200).send({ token, user });
+    req.resLogger(req);
+  }
 
-  res.status(200).send({ token, user });
-  req.resLogger(req);
-};
+  async auth(req, res) {
+    req.reqLogger('userRouter.get /api/user/auth');
 
-const getOne = async (req, res) => {
-  req.reqLogger(`userController.getOne`);
+    const { token, user } = await this.userService.auth({
+      userId: req.userId,
+      logger: req.reqLogger,
+    });
 
-  const user = await userService.getOneById({
-    userId: req.userId,
-    logger: req.reqLogger,
-  });
+    res.status(200).send({ token, user });
+    req.resLogger(req);
+  }
 
-  res.status(200).send({ user });
-  req.resLogger(req);
-};
+  //
 
-const updateOne = async (req, res) => {
-  req.reqLogger(`userController.updateOne`);
+  async getOne(req, res) {
+    req.reqLogger(`userController.getOne`);
 
-  const updated = await userService.updateOne({
-    userId: req.userId,
-    payload: req.body,
-    logger: req.reqLogger,
-  });
+    const user = await this.userService.getOneById({
+      userId: req.userId,
+      logger: req.reqLogger,
+    });
 
-  res.status(201).send({ user: updated });
-  req.resLogger(req);
-};
+    res.status(200).send({ user });
+    req.resLogger(req);
+  }
 
-const deleteOne = async (req, res) => {
-  req.reqLogger(`userController.deleteOne`);
+  //
 
-  const deleted = await userService.deleteOne({
-    userId: req.userId,
-    logger: req.reqLogger,
-  });
+  async updateOne(req, res) {
+    req.reqLogger(`userController.updateOne`);
 
-  res.status(204).send({ user: deleted });
-  req.resLogger(req);
-};
+    const updated = await this.userService.updateOne({
+      userId: req.userId,
+      payload: req.body,
+      logger: req.reqLogger,
+    });
 
-export default { singUp, logIn, auth, getOne, updateOne, deleteOne };
+    res.status(201).send({ user: updated });
+    req.resLogger(req);
+  }
+
+  //
+
+  async deleteOne(req, res) {
+    req.reqLogger(`userController.deleteOne`);
+
+    const deleted = await this.userService.deleteOne({
+      userId: req.userId,
+      logger: req.reqLogger,
+    });
+
+    res.status(204).send({ user: deleted });
+    req.resLogger(req);
+  }
+}

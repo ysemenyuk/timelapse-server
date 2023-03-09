@@ -1,4 +1,4 @@
-import User from '../mongodb/models/User.js';
+import User from '../models/User.js';
 
 // create
 
@@ -10,18 +10,18 @@ const create = async (payload) => {
 
 // find
 
-const find = async (filter, fields = null) => {
-  const users = await User.find(filter, fields);
+const find = async (filter, projection, options) => {
+  const users = await User.find(filter, projection, options);
   return users;
 };
 
-const findOne = async (filter, fields = null) => {
-  const user = await User.findOne(filter, fields);
+const findOne = async (filter, projection, options) => {
+  const user = await User.findOne(filter, projection, options);
   return user;
 };
 
-const findOneById = async (id, fields = null) => {
-  const user = await User.findOne({ _id: id }, fields);
+const findOneById = async (id, projection, options) => {
+  const user = await User.findOne({ _id: id }, projection, options);
   return user;
 };
 
