@@ -11,8 +11,17 @@ const createAndSaveVideo = async ({ logger, userId, cameraId, taskId, create, vi
   //
   console.log('videoSettings', videoSettings);
 
-  const { customName, duration, fps, startDate, endDate, timeRangeType, customTimeStart, customTimeEnd } =
-    videoSettings;
+  const {
+    customName,
+    // dateRangeType,
+    startDate,
+    endDate,
+    timeRangeType,
+    customTimeStart,
+    customTimeEnd,
+    duration,
+    fps,
+  } = videoSettings;
 
   const isCustomTime = timeRangeType === 'customTime';
 

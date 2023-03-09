@@ -9,32 +9,32 @@ const TaskSchema = mongoose.Schema({
   stoppedAt: { type: Date },
   finishedAt: { type: Date },
 
-  name: { type: String }, // CreatePhoto, CreateVideo, CreatePhotosByTime, ...
+  name: { type: String }, // CreatePhoto, CreateVideo, CreatePhotosByTime, CreateVideosByTime
   type: { type: String }, // OneTime, RepeatEvery
   status: { type: String, default: 'Created' }, // Created, Running, Stopped, Successed, Failed, Canceled
   removable: { type: Boolean, default: true },
   message: { type: String, default: '' },
 
   photoSettings: {
-    // CreatePhoto
+    photoUrlType: { type: String }, // cameraUrl, customUrl
     photoUrl: { type: String }, // url
-    // CreatePhotosByTime
+    timeRangeType: { type: String }, // allTime, customTime, sunTime
+    customTimeStart: { type: String }, // default 08:00
+    customTimeStop: { type: String }, // default 20:00
     interval: { type: Number }, // seconds
-    timeRangeType: { type: String }, // allTime, sunTime, customTime
-    customTimeStart: { type: String }, // 08:00
-    customTimeStop: { type: String }, // 20:00
   },
 
   videoSettings: {
-    // CreateVideo
     customName: { type: String },
+    dateRangeType: { type: String }, // allDates, customDates, lastDay, lastWeek, lastMonth
     startDate: { type: String }, // dateString
     endDate: { type: String }, // dateString
     timeRangeType: { type: String }, // allTime, customTime
     customTimeStart: { type: String }, // timeString
     customTimeEnd: { type: String }, // timeString
-    duration: { type: Number }, // seconds
     fps: { type: Number }, // fps
+    duration: { type: Number }, // seconds
+    interval: { type: String }, // cron format
   },
 });
 

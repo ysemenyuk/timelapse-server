@@ -48,12 +48,12 @@ export default class WorkerService {
 
   async createTaskJob(task) {
     await this.removeTaskJobs(task.id);
+
     if (task.type === 'OneTime') {
       await this.createOneTimeTaskJob(task);
     }
     if (task.type === 'RepeatEvery') {
-      const interval = `${task.photoSettings.interval} seconds`;
-      await this.createRepeatEveryTaskJob(task, interval);
+      await this.createRepeatEveryTaskJob(task);
     }
   }
 
@@ -62,8 +62,9 @@ export default class WorkerService {
     await job.save();
   }
 
-  async createRepeatEveryTaskJob(task, interval) {
+  async createRepeatEveryTaskJob(task) {
     const job = this.createJob(task);
+    const interval = this.getInterval(task);
     await job.repeatEvery(interval).save();
   }
 
@@ -73,6 +74,22 @@ export default class WorkerService {
       cameraId: task.camera,
       taskId: task._id,
     });
+  }
+
+  getInterval(task) {
+    if (task.name === 'CreatePhotosByTime') {
+      return `${task.photoSettings.interval} seconds`;
+    }
+
+    if (task.name === 'CreateVideosByTime') {
+      const intervalMap = {
+        oneTimeDay: '0 1 * * *', // At 01:00 AM, every day
+        oneTimeWeek: '0 1 * * MON', // At 01:00 AM, one time in week (Monday)
+        oneTimeMonth: '0 1 1 * *', // At 01:00 AM, one time in month (1st day)
+      };
+
+      return intervalMap[task.videoSettings.interval];
+    }
   }
 
   //
@@ -95,8 +112,7 @@ export default class WorkerService {
   async updateRepeatEveryTaskJob(task) {
     await this.removeTaskJobs(task._id);
     if (task.status === taskStatus.RUNNING) {
-      const interval = `${task.photoSettings.interval} seconds`;
-      await this.createRepeatEveryTaskJob(task, interval);
+      await this.createRepeatEveryTaskJob(task);
     }
   }
 
