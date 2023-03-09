@@ -7,7 +7,7 @@ export default class SocketService {
     this.sessions = new Map();
   }
 
-  async init(httpServer) {
+  init(httpServer) {
     this.socket = new Server(httpServer, {
       cors: { origin: '*' },
     });

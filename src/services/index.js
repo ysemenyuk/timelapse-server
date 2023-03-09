@@ -1,7 +1,7 @@
 import config from '../config.js';
 import getStorageService from './storageService/index.js';
 import WorkerService from './workerService/worker.service.js';
-import SocketService from './socketService/socket.service.js';
+// import SocketService from './socketService/socket.service.js';
 import UserService from './user.service.js';
 import TaskService from './task.service.js';
 import CameraService from './camera.service.js';
@@ -17,7 +17,7 @@ const StorageService = getStorageService(config.storageType);
 
 const storageService = new StorageService();
 const workerService = new WorkerService();
-const socketService = new SocketService();
+// const socketService = new SocketService();
 const taskService = new TaskService();
 const userService = new UserService();
 const cameraService = new CameraService();
@@ -27,7 +27,7 @@ const dateInfoService = new DateInfoService();
 export {
   storageService,
   workerService,
-  socketService,
+  // socketService,
   taskService,
   userService,
   cameraService,

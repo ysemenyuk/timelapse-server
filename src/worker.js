@@ -2,7 +2,8 @@ import 'dotenv/config';
 import http from 'http';
 import debug from 'debug';
 import MongoDB from './db/index.js';
-import { workerService, storageService, socketService } from './services/index.js';
+import { workerService, storageService } from './services/index.js';
+import SocketService from './services/socketService/socket.service.js';
 import { taskName } from './utils/constants.js';
 import config from './config.js';
 
@@ -14,6 +15,7 @@ const startWorker = async () => {
   const logger = debug('worker:server');
   const httpServer = http.createServer();
   const db = new MongoDB();
+  const socketService = new SocketService();
 
   socketService.init(httpServer);
 
@@ -21,9 +23,6 @@ const startWorker = async () => {
     logger(`Starting worker`);
 
     await db.connect(config);
-
-    logger(`Mongoose successfully connected`);
-
     await storageService.init(config);
     await workerService.init(config);
 
