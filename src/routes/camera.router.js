@@ -16,9 +16,9 @@ export default ({ cameraController }, { authMiddleware, cameraMiddleware }, { ca
   router.get('/:cameraId', cameraMiddleware, asyncHandler(cameraController.getOne));
   router.get('/:cameraId/stats', cameraMiddleware, asyncHandler(cameraController.getCameraStats));
 
-  router.post('/', cameraValidator, asyncHandler(cameraController.createOne));
+  router.post('/', cameraValidator.validateCamera, asyncHandler(cameraController.createOne));
 
-  router.put('/:cameraId', cameraMiddleware, cameraValidator, asyncHandler(cameraController.updateOne));
+  router.put('/:cameraId', cameraMiddleware, cameraValidator.validateCamera, asyncHandler(cameraController.updateOne));
 
   router.delete('/:cameraId', cameraMiddleware, asyncHandler(cameraController.deleteOne));
 

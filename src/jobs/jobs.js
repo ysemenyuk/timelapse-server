@@ -1,4 +1,4 @@
-import { taskName } from '../../utils/constants.js';
+import { taskName } from '../utils/constants.js';
 import { createPhotoJob, createPhotosByTimeJob } from './photos.jobs.js';
 import { createVideoJob } from './videos.jobs.js';
 

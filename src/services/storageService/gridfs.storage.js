@@ -3,8 +3,8 @@ import _ from 'lodash';
 import debug from 'debug';
 import { Readable } from 'stream';
 import { pipeline } from 'stream/promises';
-import { type } from '../utils/constants.js';
-import { makeVideoFileName, makePhotoFileName, makePosterFileName } from '../utils/utils.js';
+import { type } from '../../utils/constants.js';
+import { makeVideoFileName, makePhotoFileName, makePosterFileName } from '../../utils/utils.js';
 
 const dbUri = process.env.MONGO_URI;
 const { MongoClient, ObjectId } = mongodb;

@@ -1,9 +1,11 @@
-import cameraService from '../../services/camera.service.js';
-import dateInfoService from '../../services/dateInfo.service.js';
-import weatherService from '../../services/weather.service.js';
-import { makeDateName } from '../../utils/utils.js';
+// import cameraService from '../../services/camera.service.js';
+// import dateInfoService from '../../services/dateInfo.service.js';
+// import weatherService from '../../services/weather.service.js';
+import { makeDateName } from '../utils/utils.js';
 
-export const createDateInfo = async ({ logger, userId, cameraId }) => {
+export const createDateInfo = async ({ services, logger, userId, cameraId }) => {
+  const { cameraService, weatherService, dateInfoService } = services;
+
   const camera = await cameraService.getOneById({ cameraId });
   const { location } = camera;
   const { latitude, longitude } = location;
@@ -32,7 +34,9 @@ export const createDateInfo = async ({ logger, userId, cameraId }) => {
   return dateInfo;
 };
 
-export const getDateInfo = async ({ logger, userId, cameraId }) => {
+export const getDateInfo = async ({ services, logger, userId, cameraId }) => {
+  const { dateInfoService } = services;
+
   const currentDateName = makeDateName(new Date());
 
   const dateInfo = await dateInfoService.getOne({

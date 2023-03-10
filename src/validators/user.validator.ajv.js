@@ -14,7 +14,7 @@ const userSchema = {
   required: ['email', 'password'],
 };
 
-export default (req, res, next) => {
+const validateUser = (req, res, next) => {
   // console.log('- validator logIn req.body -', req.body);
 
   const validate = ajv.compile(userSchema);
@@ -28,3 +28,5 @@ export default (req, res, next) => {
 
   next();
 };
+
+export default { validateUser };

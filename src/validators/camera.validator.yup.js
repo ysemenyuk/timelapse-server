@@ -13,7 +13,7 @@ const createOneSchema = yup.object({
   }),
 });
 
-export default async (req, res, next) => {
+const validateCamera = async (req, res, next) => {
   // console.log('- validateCamera createOne req.body -', req.body);
 
   try {
@@ -26,3 +26,5 @@ export default async (req, res, next) => {
 
   next();
 };
+
+export default { validateCamera };

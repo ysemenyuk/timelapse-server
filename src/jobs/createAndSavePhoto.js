@@ -1,17 +1,19 @@
-import fileService from '../../services/file.service.js';
-import cameraService from '../../services/camera.service.js';
-import cameraApi from '../../services/cameraApi.service.js';
-import { makeDateName, makePhotoFileName, makeTimeName } from '../../utils/utils.js';
-import { fileType, type } from '../../utils/constants.js';
-import { validatePhotoUrl } from '../../validators/photoUrl.validator.yup.js';
+// import fileService from '../../services/file.service.js';
+// import cameraService from '../../services/camera.service.js';
+// import httpService from '../../services/cameraApi.service.js';
+import { makeDateName, makePhotoFileName, makeTimeName } from '../utils/utils.js';
+import { fileType, type } from '../utils/constants.js';
+import urlValidator from '../validators/index.js';
 
-const createAndSavePhoto = async ({ logger, userId, cameraId, taskId, settings, create }) => {
+const createAndSavePhoto = async ({ services, logger, userId, cameraId, taskId, settings, create }) => {
+  const { httpService, cameraService, fileService } = services;
+
   const camera = await cameraService.getOneById({ cameraId });
   const url = settings.photoUrl || camera.photoUrl;
 
-  await validatePhotoUrl(url);
+  await urlValidator.validateUrl(url);
 
-  const bufferData = await cameraApi.getPhotoByHttpRequest(url, 'arraybuffer');
+  const bufferData = await httpService.getData(url, 'arraybuffer');
 
   const date = new Date();
 

@@ -16,9 +16,9 @@ export default ({ taskController }, { authMiddleware, cameraMiddleware }, { task
   router.get('/', asyncHandler(taskController.getAll));
   router.get('/:taskId', asyncHandler(taskController.getOne));
 
-  router.post('/', taskValidator, asyncHandler(taskController.createOne));
+  router.post('/', taskValidator.validateTask, asyncHandler(taskController.createOne));
 
-  router.put('/:taskId', taskValidator, asyncHandler(taskController.updateOne));
+  router.put('/:taskId', taskValidator.validateTask, asyncHandler(taskController.updateOne));
 
   router.delete('/:taskId', asyncHandler(taskController.deleteOne));
 

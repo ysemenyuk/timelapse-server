@@ -7,8 +7,8 @@ import { asyncHandler } from '../utils/utils.js';
 export default ({ userController }, { authMiddleware }, { userValidator }) => {
   const router = express.Router();
 
-  router.post('/singup', userValidator, asyncHandler(userController.singUp));
-  router.post('/login', userValidator, asyncHandler(userController.logIn));
+  router.post('/singup', userValidator.validateUser, asyncHandler(userController.singUp));
+  router.post('/login', userValidator.validateUser, asyncHandler(userController.logIn));
 
   router.get('/auth', authMiddleware, asyncHandler(userController.auth));
   router.get('/:userId', authMiddleware, asyncHandler(userController.getOne));

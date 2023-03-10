@@ -1,6 +1,6 @@
-import taskService from '../../services/task.service.js';
-import { makeTimeName } from '../../utils/utils.js';
-import { fileCreateType, taskName, taskStatus } from '../../utils/constants.js';
+// import taskService from '../../services/task.service.js';
+import { makeTimeName } from '../utils/utils.js';
+import { fileCreateType, taskName, taskStatus } from '../utils/constants.js';
 import createAndSavePhoto from './createAndSavePhoto.js';
 import createDateInfoIfNotExist from './createDateInfoIfNotExist.js';
 import { fromUnixTime } from 'date-fns';
@@ -9,10 +9,11 @@ import { fromUnixTime } from 'date-fns';
 //
 //
 
-export const createPhotoJob = async (data, socket, wLogger) => {
+export const createPhotoJob = async (data, services, wLogger) => {
   const logger = wLogger.extend(taskName.CREATE_PHOTO);
   logger(`start ${taskName.CREATE_PHOTO} job`);
 
+  const { taskService, socketService } = services;
   const { cameraId, userId, taskId } = data;
 
   try {
@@ -26,11 +27,12 @@ export const createPhotoJob = async (data, socket, wLogger) => {
       },
     });
 
-    socket.send(userId, 'update-task', { cameraId, userId, task: rtask });
+    socketService.send(userId, 'update-task', { cameraId, userId, task: rtask });
 
     await createDateInfoIfNotExist({ logger, userId, cameraId });
 
     const photo = await createAndSavePhoto({
+      services,
       logger,
       userId,
       cameraId,
@@ -48,8 +50,8 @@ export const createPhotoJob = async (data, socket, wLogger) => {
       },
     });
 
-    socket.send(userId, 'update-task', { cameraId, userId, task: stask });
-    socket.send(userId, 'create-file', { cameraId, userId, file: photo });
+    socketService.send(userId, 'update-task', { cameraId, userId, task: stask });
+    socketService.send(userId, 'create-file', { cameraId, userId, file: photo });
 
     logger(`successed ${taskName.CREATE_PHOTO} job`);
   } catch (error) {
@@ -64,7 +66,7 @@ export const createPhotoJob = async (data, socket, wLogger) => {
       },
     });
 
-    socket.send(userId, 'update-task', { cameraId, userId, task: etask });
+    socketService.send(userId, 'update-task', { cameraId, userId, task: etask });
     logger(`error ${taskName.CREATE_PHOTO} job`);
   }
 
@@ -106,10 +108,12 @@ const getTimeRange = (photoSettings, dateInfo) => {
 
 //
 
-export const createPhotosByTimeJob = async (data, socket, wLogger) => {
+export const createPhotosByTimeJob = async (data, services, wLogger) => {
   const logger = wLogger.extend(taskName.CREATE_PHOTOS_BY_TIME);
 
   logger(`start ${taskName.CREATE_PHOTOS_BY_TIME} job`);
+
+  const { taskService, socketService } = services;
 
   const { cameraId, userId, taskId } = data;
 
@@ -138,12 +142,12 @@ export const createPhotosByTimeJob = async (data, socket, wLogger) => {
     });
 
     logger(`successed ${taskName.CREATE_PHOTOS_BY_TIME} job`);
-    socket.send(userId, 'create-file', { cameraId, userId, file: photo });
+    socketService.send(userId, 'create-file', { cameraId, userId, file: photo });
   } catch (error) {
     console.log('--- error CreatePhotosByTime ---', error);
 
     logger(`error ${taskName.CREATE_PHOTOS_BY_TIME} job`);
-    socket.send(userId, 'task-error', { cameraId, userId, taskId, error });
+    socketService.send(userId, 'task-error', { cameraId, userId, taskId, error });
   }
 
   logger(`finish ${taskName.CREATE_PHOTOS_BY_TIME} job`);

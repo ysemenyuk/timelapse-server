@@ -4,7 +4,7 @@ import { pipeline } from 'stream/promises';
 import path from 'path';
 import _ from 'lodash';
 import debug from 'debug';
-import { isPhotoFile } from '../utils/utils.js';
+import { isPhotoFile } from '../../utils/utils.js';
 import diskpaths from './disk.paths.js';
 
 const pathToDiskSpace = process.env.DISK_PATH;
