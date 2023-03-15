@@ -1,5 +1,6 @@
-export default (userService) => (req, res, next) => {
-  // console.log(req.headers.authorization);
+export default (container) => (req, res, next) => {
+  const userService = container.userService;
+
   try {
     if (!req.headers.authorization) {
       req.reqLogger('authMiddleware no token');

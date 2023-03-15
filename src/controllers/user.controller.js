@@ -1,8 +1,8 @@
 // import userService from '../services/user.service.js';
 
 export default class UserController {
-  constructor(userService) {
-    this.userService = userService;
+  constructor(container) {
+    this.userService = container.userService;
   }
 
   //
@@ -11,9 +11,9 @@ export default class UserController {
     req.reqLogger(`userController.singUp /api/user/singup`);
 
     const { token, user } = await this.userService.singUp({
+      logger: req.reqLogger,
       email: req.body.email,
       password: req.body.password,
-      logger: req.reqLogger,
     });
 
     res.status(201).send({ token, user });
@@ -24,9 +24,9 @@ export default class UserController {
     req.reqLogger('userController.logIn /api/user/login');
 
     const { token, user } = await this.userService.logIn({
+      logger: req.reqLogger,
       email: req.body.email,
       password: req.body.password,
-      logger: req.reqLogger,
     });
 
     res.status(200).send({ token, user });
@@ -37,8 +37,8 @@ export default class UserController {
     req.reqLogger('userRouter.get /api/user/auth');
 
     const { token, user } = await this.userService.auth({
-      userId: req.userId,
       logger: req.reqLogger,
+      userId: req.userId,
     });
 
     res.status(200).send({ token, user });
@@ -51,8 +51,8 @@ export default class UserController {
     req.reqLogger(`userController.getOne`);
 
     const user = await this.userService.getOneById({
-      userId: req.userId,
       logger: req.reqLogger,
+      userId: req.userId,
     });
 
     res.status(200).send({ user });
@@ -65,9 +65,9 @@ export default class UserController {
     req.reqLogger(`userController.updateOne`);
 
     const updated = await this.userService.updateOne({
+      logger: req.reqLogger,
       userId: req.userId,
       payload: req.body,
-      logger: req.reqLogger,
     });
 
     res.status(201).send({ user: updated });
@@ -80,8 +80,8 @@ export default class UserController {
     req.reqLogger(`userController.deleteOne`);
 
     const deleted = await this.userService.deleteOne({
-      userId: req.userId,
       logger: req.reqLogger,
+      userId: req.userId,
     });
 
     res.status(204).send({ user: deleted });

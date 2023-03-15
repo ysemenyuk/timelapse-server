@@ -1,8 +1,7 @@
+import _ from 'lodash';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import _ from 'lodash';
 import { BadRequestError } from '../errors.js';
-import config from '../config.js';
 
 const fields = ['_id', 'name', 'email', 'avatar'];
 const filterProps = (user) => _.pick(user, fields);
@@ -10,22 +9,19 @@ const filterProps = (user) => _.pick(user, fields);
 //
 
 export default class UserService {
-  constructor(userRepo) {
-    this.userRepo = userRepo;
-  }
-
-  inject(fileService) {
-    this.fileService = fileService;
+  constructor(container) {
+    this.userRepo = container.userRepo;
+    this.config = container.config;
   }
 
   //
 
   sign(userId) {
-    return jwt.sign({ userId }, config.secretkey, { expiresIn: '1h' });
+    return jwt.sign({ userId }, this.config.secretkey, { expiresIn: '1h' });
   }
 
   verify(token) {
-    return jwt.verify(token, config.secretkey);
+    return jwt.verify(token, this.config.secretkey);
   }
 
   async getHashPassword(pass) {

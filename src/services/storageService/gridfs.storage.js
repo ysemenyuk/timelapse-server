@@ -1,15 +1,14 @@
 import mongodb from 'mongodb';
 import _ from 'lodash';
-import debug from 'debug';
 import { Readable } from 'stream';
 import { pipeline } from 'stream/promises';
 import { type } from '../../utils/constants.js';
 import { makeVideoFileName, makePhotoFileName, makePosterFileName } from '../../utils/utils.js';
 
-const dbUri = process.env.MONGO_URI;
+// const dbUri = process.env.MONGO_URI;
 const { MongoClient, ObjectId } = mongodb;
 
-const map = {
+const namesMap = {
   [type.VIDEO]: makeVideoFileName,
   [type.PHOTO]: makePhotoFileName,
   [type.POSTER]: makePosterFileName,
@@ -17,7 +16,7 @@ const map = {
 
 const createFileName = (file) => {
   const startPart = `u_${file.user.toString()}/c_${file.camera.toString()}`;
-  const fileName = map[file.type](file.date);
+  const fileName = namesMap[file.type](file.date);
   return [startPart, fileName].join('/');
 };
 
@@ -35,12 +34,13 @@ const stream2buffer = (stream) => {
 //
 
 export default class GridfsStorage {
-  constructor() {
-    this.logger = debug('storage');
+  constructor(container) {
+    this.logger = container.loggerService.create('storage');
+    this.config = container.config;
   }
 
   async init() {
-    const mongoClient = new MongoClient(dbUri, {
+    const mongoClient = new MongoClient(this.config.dbUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });

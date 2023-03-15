@@ -1,8 +1,8 @@
 // import fileService from '../services/file.service.js';
 
 export default class FileController {
-  constructor(fileService) {
-    this.fileService = fileService;
+  constructor(container) {
+    this.fileService = container.fileService;
   }
 
   // get
@@ -60,20 +60,17 @@ export default class FileController {
 
   //
 
-  async createOne(req, res) {
-    req.reqLogger('fileController.createOne');
+  async upload(req, res) {
+    req.reqLogger('fileController.upload');
 
-    // TODO: check req.body take fields by schema!
-    const payload = req.body;
+    res.status(201).send('upload');
+    req.resLogger(req);
+  }
 
-    const file = await this.fileService.createFile({
-      logger: req.reqLogger,
-      user: req.userId,
-      camera: req.cameraId,
-      ...payload,
-    });
+  async download(req, res) {
+    req.reqLogger('fileController.download');
 
-    res.status(201).send(file);
+    res.status(201).send('download');
     req.resLogger(req);
   }
 

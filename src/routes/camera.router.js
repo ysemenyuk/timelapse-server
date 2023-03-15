@@ -1,26 +1,53 @@
 import express from 'express';
-// import authMiddleware from '../middleware/authMiddleware.js';
-// import cameraMiddleware from '../middleware/cameraMiddleware.js';
-// import cameraValidator from '../validators/camera.validator.yup.js';
-// import cameraController from '../controllers/camera.controller.js';
 import { asyncHandler } from '../utils/utils.js';
 
-export default ({ cameraController }, { authMiddleware, cameraMiddleware }, { cameraValidator }) => {
+export default (container) => {
   const router = express.Router({ mergeParams: true });
+
+  const authMiddleware = container.authMiddleware;
+  const cameraMiddleware = container.cameraMiddleware;
+  const cameraValidator = container.cameraValidator;
+  const cameraController = container.cameraController;
 
   router.use(authMiddleware);
 
   // /api/cameras
 
-  router.get('/', asyncHandler(cameraController.getAll));
-  router.get('/:cameraId', cameraMiddleware, asyncHandler(cameraController.getOne));
-  router.get('/:cameraId/stats', cameraMiddleware, asyncHandler(cameraController.getCameraStats));
+  router.get(
+    '/',
+    asyncHandler(cameraController.getAll.bind(cameraController)) //
+  );
 
-  router.post('/', cameraValidator.validateCamera, asyncHandler(cameraController.createOne));
+  router.get(
+    '/:cameraId',
+    cameraMiddleware,
+    asyncHandler(cameraController.getOne.bind(cameraController)) //
+  );
 
-  router.put('/:cameraId', cameraMiddleware, cameraValidator.validateCamera, asyncHandler(cameraController.updateOne));
+  router.post(
+    '/',
+    cameraValidator.validateCamera,
+    asyncHandler(cameraController.createOne.bind(cameraController)) //
+  );
 
-  router.delete('/:cameraId', cameraMiddleware, asyncHandler(cameraController.deleteOne));
+  router.put(
+    '/:cameraId',
+    cameraMiddleware,
+    cameraValidator.validateCamera,
+    asyncHandler(cameraController.updateOne.bind(cameraController)) //
+  );
+
+  router.delete(
+    '/:cameraId',
+    cameraMiddleware,
+    asyncHandler(cameraController.deleteOne.bind(cameraController)) //
+  );
+
+  router.get(
+    '/:cameraId/stats',
+    cameraMiddleware,
+    asyncHandler(cameraController.getCameraStats.bind(cameraController)) //
+  );
 
   return router;
 };

@@ -1,36 +1,37 @@
 import 'dotenv/config';
-import debug from 'debug';
-import http from 'http';
-import config from './config.js';
-import { taskName } from './utils/constants.js';
-import initDb from './db/index.js';
-import initServices from './services/index.js';
-import initSocketService from './services/socketService/index.js';
-
-const jobTypes = [taskName.CREATE_PHOTO, taskName.CREATE_VIDEO, taskName.CREATE_PHOTOS_BY_TIME];
+import registerConfig from './config.js';
+import registerDb from './db/index.js';
+import registerServices from './services/index.js';
+import Container from './container.js';
 
 //
 
 const startWorker = async () => {
-  const logger = debug('worker:server');
-  const httpServer = http.createServer();
+  const container = new Container();
+
+  registerConfig(container);
+
+  registerDb(container);
+  registerServices(container);
+
+  const db = container.db;
+
+  const storage = container.storageService;
+  const worker = container.workerService;
+
+  const logger = container.loggerService.create('worker:server');
 
   try {
     logger(`Starting worker`);
 
-    const repos = await initDb(config);
+    await db.connect();
 
-    const services = await initServices(repos);
+    await storage.init();
+    await worker.init();
 
-    services.socketService = initSocketService(httpServer);
-
-    await services.workerService.startJobs(jobTypes, services);
-
-    httpServer.listen(config.workerPort, () => {
-      logger(`workerServer running in ${config.mode} mode on port ${config.workerPort}`);
-    });
+    await worker.startJobs(container);
   } catch (e) {
-    console.log('catch err', e);
+    console.log('catch worker err', e);
   }
 };
 

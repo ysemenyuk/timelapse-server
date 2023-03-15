@@ -1,19 +1,20 @@
 import express from 'express';
-// import dateInfoController from '../controllers/dateInfo.controller.js';
-// import authMiddleware from '../middleware/authMiddleware.js';
-// import cameraMiddleware from '../middleware/cameraMiddleware.js';
 import { asyncHandler } from '../utils/utils.js';
 
-export default ({ dateInfoController }, { authMiddleware, cameraMiddleware }) => {
+export default (container) => {
   const router = express.Router({ mergeParams: true });
+
+  const authMiddleware = container.authMiddleware;
+  const cameraMiddleware = container.cameraMiddleware;
+  const dateInfoController = container.dateInfoController;
 
   router.use(authMiddleware);
   router.use(cameraMiddleware);
 
   // /api/cameras/:cameraId/dateInfo/
 
-  router.get('/', asyncHandler(dateInfoController.getAll));
-  router.get('/:date', asyncHandler(dateInfoController.getOne));
+  router.get('/', asyncHandler(dateInfoController.getAll.bind(dateInfoController)));
+  router.get('/:date', asyncHandler(dateInfoController.getOne.bind(dateInfoController)));
 
   return router;
 };

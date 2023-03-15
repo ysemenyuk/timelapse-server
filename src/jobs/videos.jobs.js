@@ -66,3 +66,15 @@ export const createVideoJob = async (data, services, wLogger) => {
 
   logger(`finish ${taskName.CREATE_VIDEO} job`);
 };
+
+//
+//
+//
+
+export const createVideosByTimeJob = async (data, socket, wLogger) => {
+  const logger = wLogger.extend(taskName.CREATE_VIDEOS_BY_TIME);
+
+  logger(`start ${taskName.CREATE_VIDEOS_BY_TIME} job`);
+
+  logger(`finish ${taskName.CREATE_VIDEOS_BY_TIME} job`);
+};

@@ -1,49 +1,34 @@
 import DateInfo from '../models/DateInfo.js';
 
-// create
+export default class DateInfoRepository {
+  async create(payload) {
+    const dateInfo = new DateInfo(payload);
+    await dateInfo.save();
+    return dateInfo;
+  }
 
-const create = async (payload) => {
-  const dateInfo = new DateInfo(payload);
-  await dateInfo.save();
-  return dateInfo;
-};
+  async find(filter) {
+    const datesInfo = await DateInfo.find(filter);
+    return datesInfo;
+  }
 
-// find
+  async findOne(filter) {
+    const dateInfo = await DateInfo.findOne(filter);
+    return dateInfo;
+  }
 
-const find = async (filter) => {
-  const datesInfo = await DateInfo.find(filter);
-  return datesInfo;
-};
+  async findOneById(id) {
+    const dateInfo = await DateInfo.findOne({ _id: id });
+    return dateInfo;
+  }
 
-const findOne = async (filter) => {
-  const dateInfo = await DateInfo.findOne(filter);
-  return dateInfo;
-};
+  async updateOneById(id, payload) {
+    const dateInfo = await DateInfo.findOneAndUpdate({ _id: id }, payload, { new: true });
+    return dateInfo;
+  }
 
-const findOneById = async (id) => {
-  const dateInfo = await DateInfo.findOne({ _id: id });
-  return dateInfo;
-};
-
-// update
-
-const updateOneById = async (id, payload) => {
-  const dateInfo = await DateInfo.findOneAndUpdate({ _id: id }, payload, { new: true });
-  return dateInfo;
-};
-
-// delete
-
-const deleteOneById = async (id) => {
-  const deleted = await DateInfo.findOneAndRemove({ _id: id });
-  return deleted;
-};
-
-export default {
-  create,
-  find,
-  findOne,
-  findOneById,
-  updateOneById,
-  deleteOneById,
-};
+  async deleteOneById(id) {
+    const deleted = await DateInfo.findOneAndRemove({ _id: id });
+    return deleted;
+  }
+}

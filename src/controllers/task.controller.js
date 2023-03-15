@@ -1,8 +1,8 @@
 // import taskService from '../services/task.service.js';
 
 export default class TaskController {
-  constructor(taskService) {
-    this.taskService = taskService;
+  constructor(container) {
+    this.taskService = container.taskService;
   }
 
   //
@@ -11,8 +11,8 @@ export default class TaskController {
     req.reqLogger('cameraTask.controller getAll');
 
     const tasks = await this.taskService.getAll({
-      cameraId: req.params.cameraId,
       logger: req.reqLogger,
+      cameraId: req.cameraId,
     });
 
     res.status(200).send(tasks);
@@ -23,8 +23,8 @@ export default class TaskController {
     req.reqLogger(`cameraTask.controller getOne`);
 
     const task = await this.taskService.getOneById({
-      taskId: req.params.taskId,
       logger: req.reqLogger,
+      taskId: req.params.taskId,
     });
 
     res.status(200).send(task);
@@ -40,11 +40,10 @@ export default class TaskController {
     const payload = req.body;
 
     const task = await this.taskService.createOne({
-      userId: req.userId,
-      cameraId: req.params.cameraId,
-      payload,
-      // worker: req.app.worker,
       logger: req.reqLogger,
+      userId: req.userId,
+      cameraId: req.cameraId,
+      payload,
     });
 
     res.status(201).send(task);
@@ -60,9 +59,9 @@ export default class TaskController {
     const payload = req.body;
 
     const updated = await this.taskService.updateOneById({
+      logger: req.reqLogger,
       taskId: req.params.taskId,
       payload,
-      logger: req.reqLogger,
     });
 
     res.status(201).send(updated);
@@ -75,8 +74,8 @@ export default class TaskController {
     req.reqLogger(`cameraTask.controller deleteOne`);
 
     const deleted = await this.taskService.deleteOneById({
-      taskId: req.params.taskId,
       logger: req.reqLogger,
+      taskId: req.params.taskId,
     });
 
     res.status(204).send(deleted);

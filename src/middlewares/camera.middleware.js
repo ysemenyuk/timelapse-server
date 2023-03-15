@@ -1,5 +1,5 @@
-export default (cameraService) => async (req, res, next) => {
-  req.reqLogger(`cameraMiddleware cameraId: ${req.params.cameraId}`);
+export default (container) => async (req, res, next) => {
+  const cameraService = container.cameraService;
 
   try {
     const camera = await cameraService.getOneById({

@@ -2,12 +2,13 @@ import mongoose from 'mongoose';
 import debug from 'debug';
 
 class MongoDB {
-  constructor() {
+  constructor(container) {
     this.logger = debug('mongo');
+    this.config = container.config;
   }
 
-  async connect(config) {
-    await mongoose.connect(config.dbUri, {
+  async connect() {
+    await mongoose.connect(this.config.dbUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       useFindAndModify: false,

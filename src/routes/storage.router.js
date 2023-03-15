@@ -1,18 +1,19 @@
 import express from 'express';
 import path from 'path';
-import { asyncHandler } from '../utils/utils.js';
 import * as consts from '../utils/constants.js';
-import config from '../config.js';
-// import fileService from '../services/file.service.js';
-// import imageService from '../services/image.service.js';
-// import storageService from '../services/storageService/index.js';
+import { asyncHandler } from '../utils/utils.js';
 
-function createFullPath(filePath) {
-  return path.join(config.pathToDiskSpace, filePath);
-}
-
-export default ({ storageService, imageService }) => {
+export default (container) => {
   const router = express.Router({ mergeParams: true });
+
+  const storageService = container.storageService;
+  const imageService = container.imageService;
+
+  const config = container.config;
+
+  function createFullPath(filePath) {
+    return path.join(config.pathToDiskSpace, filePath);
+  }
 
   //
   // gridfs

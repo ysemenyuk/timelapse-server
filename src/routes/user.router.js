@@ -1,21 +1,22 @@
 import express from 'express';
-// import userController from '../controllers/user.controller.js';
-// import authMiddleware from '../middleware/authMiddleware.js';
-// import userValidator from '../validators/user.validator.ajv.js';
 import { asyncHandler } from '../utils/utils.js';
 
-export default ({ userController }, { authMiddleware }, { userValidator }) => {
+export default (container) => {
   const router = express.Router();
 
-  router.post('/singup', userValidator.validateUser, asyncHandler(userController.singUp));
-  router.post('/login', userValidator.validateUser, asyncHandler(userController.logIn));
+  const authMiddleware = container.authMiddleware;
+  const userValidator = container.userValidator;
+  const userController = container.userController;
 
-  router.get('/auth', authMiddleware, asyncHandler(userController.auth));
-  router.get('/:userId', authMiddleware, asyncHandler(userController.getOne));
+  router.post('/singup', userValidator.validateUser, asyncHandler(userController.singUp.bind(userController)));
+  router.post('/login', userValidator.validateUser, asyncHandler(userController.logIn.bind(userController)));
 
-  router.put('/:userId', authMiddleware, asyncHandler(userController.updateOne));
+  router.get('/auth', authMiddleware, asyncHandler(userController.auth.bind(userController)));
+  router.get('/:userId', authMiddleware, asyncHandler(userController.getOne.bind(userController)));
 
-  router.delete('/:userId', authMiddleware, asyncHandler(userController.deleteOne));
+  router.put('/:userId', authMiddleware, asyncHandler(userController.updateOne.bind(userController)));
+
+  router.delete('/:userId', authMiddleware, asyncHandler(userController.deleteOne.bind(userController)));
 
   return router;
 };

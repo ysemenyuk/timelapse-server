@@ -1,25 +1,25 @@
 import { Agenda } from 'agenda/es.js';
 import mongodb from 'mongodb';
-import jobs from '../../jobs/jobs.js';
-import debug from 'debug';
 import { taskStatus } from '../../utils/constants.js';
+import jobs from '../../jobs/jobs.js';
 
 const { MongoClient, ObjectID } = mongodb;
 
 export default class WorkerService {
-  constructor() {
-    this.logger = debug('worker');
+  constructor(container) {
+    this.logger = container.loggerService.create('worker');
+    this.config = container.config;
   }
 
-  async init(config) {
-    const mongoClient = new MongoClient(config.dbUri, {
+  async init() {
+    const mongoClient = new MongoClient(this.config.dbUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
 
     await mongoClient.connect();
 
-    this.agenda = new Agenda({ mongo: mongoClient.db(config.dbName) });
+    this.agenda = new Agenda({ mongo: mongoClient.db(this.config.dbName) });
 
     await this.agenda.start();
     this.logger(`agenda successfully started`);
@@ -35,11 +35,15 @@ export default class WorkerService {
     // }
   }
 
-  async startJobs(jobTypes, services) {
-    jobTypes.forEach((type) => {
+  async startJobs(container) {
+    if (container.config.jobTypes.length === 0) {
+      return;
+    }
+
+    container.config.jobTypes.forEach((type) => {
       this.agenda.define(type, async (job) => {
         const data = job.attrs.data;
-        await jobs[type](data, services, this.logger);
+        await jobs[type](data, container);
       });
     });
   }

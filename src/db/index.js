@@ -1,13 +1,16 @@
 import MongoDB from './mongo.db.js';
+import UserRepo from './repos/user.repo.js';
+import CameraRepo from './repos/camera.repo.js';
+import TaskRepo from './repos/task.repo.js';
+import FileRepo from './repos/file.repo.js';
+import DateInfoRepo from './repos/dateInfo.repo.js';
 
-import cameraRepo from './repos/camera.repo.js';
-import dateInfoRepo from './repos/dateInfo.repo.js';
-import fileRepo from './repos/file.repo.js';
-import taskRepo from './repos/task.repo.js';
-import userRepo from './repos/user.repo.js';
+export default (container) => {
+  container.register('db', (container) => new MongoDB(container));
 
-export default async (config) => {
-  const db = new MongoDB();
-  await db.connect(config);
-  return { cameraRepo, dateInfoRepo, fileRepo, taskRepo, userRepo };
+  container.register('userRepo', (container) => new UserRepo(container));
+  container.register('cameraRepo', (container) => new CameraRepo(container));
+  container.register('taskRepo', (container) => new TaskRepo(container));
+  container.register('fileRepo', (container) => new FileRepo(container));
+  container.register('dateInfoRepo', (container) => new DateInfoRepo(container));
 };

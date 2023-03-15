@@ -1,29 +1,28 @@
 import express from 'express';
-// import authMiddleware from '../middleware/authMiddleware.js';
-// import cameraMiddleware from '../middleware/cameraMiddleware.js';
-// import fileController from '../controllers/file.controller.js';
 import { asyncHandler } from '../utils/utils.js';
 
-export default ({ fileController }, { authMiddleware, cameraMiddleware }) => {
+export default (container) => {
   const router = express.Router({ mergeParams: true });
+
+  const authMiddleware = container.authMiddleware;
+  const cameraMiddleware = container.cameraMiddleware;
+  const fileController = container.fileController;
 
   router.use(authMiddleware);
   router.use(cameraMiddleware);
 
   // /api/cameras/:cameraId/files
 
-  router.get('/', asyncHandler(fileController.getAll));
+  router.get('/', asyncHandler(fileController.getAll.bind(fileController)));
+  router.get('/:fileId', asyncHandler(fileController.getOne.bind(fileController)));
+  router.put('/:fileId', asyncHandler(fileController.updateOne.bind(fileController)));
+  router.delete('/:fileId', asyncHandler(fileController.deleteOne.bind(fileController)));
 
-  router.get('/count', asyncHandler(fileController.getCount));
-  router.get('/countsByDates', asyncHandler(fileController.getCountsByDates));
+  router.post('/upload', asyncHandler(fileController.upload.bind(fileController)));
+  router.get('/download', asyncHandler(fileController.download.bind(fileController)));
 
-  router.get('/:fileId', asyncHandler(fileController.getOne));
-
-  router.post('/', asyncHandler(fileController.createOne));
-
-  router.put('/:fileId', asyncHandler(fileController.updateOne));
-
-  router.delete('/:fileId', asyncHandler(fileController.deleteOne));
+  router.get('/count', asyncHandler(fileController.getCount.bind(fileController)));
+  router.get('/countsByDates', asyncHandler(fileController.getCountsByDates.bind(fileController)));
 
   return router;
 };

@@ -2,13 +2,10 @@
 // import { fileService, taskService } from './index.js';
 
 export default class CameraService {
-  constructor(cameraRepo) {
-    this.cameraRepo = cameraRepo;
-  }
-
-  inject(fileService, taskService) {
-    this.fileService = fileService;
-    this.taskService = taskService;
+  constructor(container) {
+    this.cameraRepo = container.cameraRepo;
+    this.fileService = container.fileService;
+    this.taskService = container.taskService;
   }
 
   //

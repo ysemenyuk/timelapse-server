@@ -1,14 +1,10 @@
 import { taskName, taskType } from '../utils/constants.js';
 
 export default class TaskService {
-  constructor(taskRepo) {
-    this.taskRepo = taskRepo;
+  constructor(container) {
+    this.taskRepo = container.taskRepo;
+    this.workerService = container.workerService;
   }
-
-  inject(workerService) {
-    this.workerService = workerService;
-  }
-
   // create
 
   async createOne({ logger, userId, cameraId, payload }) {

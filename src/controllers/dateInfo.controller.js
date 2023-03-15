@@ -1,8 +1,8 @@
 // import dateInfoService from '../services/dateInfo.service.js';
 
 export default class DateInfoController {
-  constructor(dateInfoService) {
-    this.dateInfoService = dateInfoService;
+  constructor(container) {
+    this.dateInfoService = container.dateInfoService;
   }
 
   async getAll(req, res) {

@@ -1,9 +1,8 @@
 import { Server } from 'socket.io';
-import debug from 'debug';
 
 export default class SocketService {
-  constructor() {
-    this.logger = debug('socket');
+  constructor(container) {
+    this.logger = container.loggerService.create('socket');
     this.sessions = new Map();
   }
 

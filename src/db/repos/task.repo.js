@@ -1,49 +1,34 @@
 import Task from '../models/Task.js';
 
-// create
+export default class TaskRepository {
+  async create(payload) {
+    const task = new Task(payload);
+    await task.save();
+    return task;
+  }
 
-const create = async (payload) => {
-  const task = new Task(payload);
-  await task.save();
-  return task;
-};
+  async find(filter) {
+    const tasks = await Task.find(filter);
+    return tasks;
+  }
 
-// find
+  async findOneById(id) {
+    const task = await Task.findOne({ _id: id });
+    return task;
+  }
 
-const find = async (filter) => {
-  const tasks = await Task.find(filter);
-  return tasks;
-};
+  async updateOneById(id, payload) {
+    const task = await Task.findOneAndUpdate({ _id: id }, payload, { new: true });
+    return task;
+  }
 
-const findOneById = async (id) => {
-  const task = await Task.findOne({ _id: id });
-  return task;
-};
+  async deleteOneById(id) {
+    const deleted = await Task.findOneAndRemove({ _id: id });
+    return deleted;
+  }
 
-// update
-
-const updateOneById = async (id, payload) => {
-  const task = await Task.findOneAndUpdate({ _id: id }, payload, { new: true });
-  return task;
-};
-
-// delete
-
-const deleteOneById = async (id) => {
-  const deleted = await Task.findOneAndRemove({ _id: id });
-  return deleted;
-};
-
-const deleteMany = async (conditions) => {
-  const deleted = await Task.deleteMany(conditions);
-  return deleted;
-};
-
-export default {
-  create,
-  find,
-  findOneById,
-  updateOneById,
-  deleteOneById,
-  deleteMany,
-};
+  async deleteMany(conditions) {
+    const deleted = await Task.deleteMany(conditions);
+    return deleted;
+  }
+}
