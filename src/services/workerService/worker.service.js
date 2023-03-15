@@ -48,6 +48,10 @@ export default class WorkerService {
     });
   }
 
+  get workerLogger() {
+    return this.logger;
+  }
+
   //
 
   async createTaskJob(task) {

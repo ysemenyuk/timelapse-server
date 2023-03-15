@@ -14,7 +14,7 @@ import fsService from './fs.service.js';
 import httpService from './http.service.js';
 import imageService from './image.service.js';
 import videoService from './video.service.js';
-import weatherService from './weather.service.js';
+import WeatherService from './weather.service.js';
 
 export default async (container) => {
   container.register('storageService', (container) => initStorageService(container));
@@ -28,9 +28,9 @@ export default async (container) => {
   container.register('fileService', (container) => new FileService(container));
   container.register('dateInfoService', (container) => new DateInfoService(container));
 
+  container.register('weatherService', (container) => new WeatherService(container));
   container.register('fsService', () => fsService);
   container.register('httpService', () => httpService);
   container.register('imageService', () => imageService);
   container.register('videoService', () => videoService);
-  container.register('weatherService', () => weatherService);
 };

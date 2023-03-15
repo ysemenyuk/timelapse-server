@@ -39,6 +39,7 @@ const makeFilter = (camera, query) => {
 export default class FileService {
   constructor(container) {
     this.fileRepo = container.fileRepo;
+    this.storageService = container.storageService;
   }
 
   //

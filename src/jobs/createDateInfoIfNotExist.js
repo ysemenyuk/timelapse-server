@@ -1,10 +1,11 @@
-// import cameraService from '../../services/camera.service.js';
-// import dateInfoService from '../../services/dateInfo.service.js';
-// import weatherService from '../../services/weather.service.js';
 import { makeDateName } from '../utils/utils.js';
 
-export const createDateInfo = async ({ services, logger, userId, cameraId }) => {
-  const { cameraService, weatherService, dateInfoService } = services;
+export const createDateInfo = async (container, { logger, userId, cameraId }) => {
+  // const { cameraService, weatherService, dateInfoService } = services;
+
+  const weatherService = container.weatherService;
+  const cameraService = container.cameraService;
+  const dateInfoService = container.dateInfoService;
 
   const camera = await cameraService.getOneById({ cameraId });
   const { location } = camera;
@@ -34,8 +35,10 @@ export const createDateInfo = async ({ services, logger, userId, cameraId }) => 
   return dateInfo;
 };
 
-export const getDateInfo = async ({ services, logger, userId, cameraId }) => {
-  const { dateInfoService } = services;
+export const getDateInfo = async (container, { logger, userId, cameraId }) => {
+  // const { dateInfoService } = services;
+
+  const dateInfoService = container.dateInfoService;
 
   const currentDateName = makeDateName(new Date());
 
@@ -49,10 +52,13 @@ export const getDateInfo = async ({ services, logger, userId, cameraId }) => {
   return dateInfo;
 };
 
-export default async ({ logger, userId, cameraId }) => {
-  let dateInfo = await getDateInfo({ logger, userId, cameraId });
-  if (!dateInfo) {
-    dateInfo = await createDateInfo({ logger, userId, cameraId });
+export default async (container, { logger, userId, cameraId }) => {
+  const dateInfo = await getDateInfo(container, { logger, userId, cameraId });
+
+  if (dateInfo) {
+    return dateInfo;
   }
-  return dateInfo;
+
+  const newDateInfo = await createDateInfo(container, { logger, userId, cameraId });
+  return newDateInfo;
 };

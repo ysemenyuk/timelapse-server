@@ -1,19 +1,18 @@
-// import fileService from '../../services/file.service.js';
-// import cameraService from '../../services/camera.service.js';
-// import httpService from '../../services/cameraApi.service.js';
 import { makeDateName, makePhotoFileName, makeTimeName } from '../utils/utils.js';
 import { fileType, type } from '../utils/constants.js';
-import urlValidator from '../validators/index.js';
 
-const createAndSavePhoto = async ({ services, logger, userId, cameraId, taskId, settings, create }) => {
-  const { httpService, cameraService, fileService } = services;
+const createAndSavePhoto = async (container, { logger, userId, cameraId, taskId, settings, createType }) => {
+  const httpService = container.httpService;
+  const cameraService = container.cameraService;
+  const fileService = container.fileService;
+  // const urlValidator = container.urlValidator;
 
   const camera = await cameraService.getOneById({ cameraId });
   const url = settings.photoUrl || camera.photoUrl;
 
-  await urlValidator.validateUrl(url);
+  // await urlValidator.validateUrl(url);
 
-  const bufferData = await httpService.getData(url, 'arraybuffer');
+  const bufferData = await httpService.getData(url, { responseType: 'arraybuffer' });
 
   const date = new Date();
 
@@ -30,7 +29,7 @@ const createAndSavePhoto = async ({ services, logger, userId, cameraId, taskId, 
 
     type: type.PHOTO,
     fileType: fileType.IMAGE_JPG,
-    createType: create,
+    createType: createType,
 
     photoFileData: {
       photoUrl: url,

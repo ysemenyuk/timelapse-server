@@ -10,8 +10,8 @@ const sleep = (time, message = 'Hello') =>
     setTimeout(() => resolve(message), time);
   });
 
-const createAndSaveVideo = async ({ services, logger, userId, cameraId, taskId, create, videoSettings }) => {
-  const { videoService, storageService, fsService, fileService } = services;
+const createAndSaveVideo = async (container, { logger, userId, cameraId, taskId, create, videoSettings }) => {
+  // const { videoService, storageService, fsService, fileService } = services;
   //
   console.log('videoSettings', videoSettings);
 
