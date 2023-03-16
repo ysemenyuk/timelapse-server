@@ -1,11 +1,8 @@
-// import { cameraRepo } from '../db/index.js';
-// import { fileService, taskService } from './index.js';
-
 export default class CameraService {
-  constructor(container) {
-    this.cameraRepo = container.cameraRepo;
-    this.fileService = container.fileService;
-    this.taskService = container.taskService;
+  constructor(cameraRepo, taskService, fileService) {
+    this.cameraRepo = cameraRepo;
+    this.fileService = fileService;
+    this.taskService = taskService;
   }
 
   //

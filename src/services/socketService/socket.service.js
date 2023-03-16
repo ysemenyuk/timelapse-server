@@ -1,12 +1,14 @@
 import { Server } from 'socket.io';
 
 export default class SocketService {
-  constructor(container) {
-    this.logger = container.loggerService.create('socket');
+  constructor(loggerService) {
+    this.loggerService = loggerService;
     this.sessions = new Map();
   }
 
-  init(httpServer) {
+  init(httpServer, sLogger) {
+    this.logger = this.loggerService.extend(sLogger, 'socket');
+
     this.socket = new Server(httpServer, {
       cors: { origin: '*' },
     });
@@ -41,7 +43,8 @@ export default class SocketService {
       });
     });
 
-    return { httpServer, socketService: this };
+    sLogger('socketService successfully started!');
+    return 'socketService successfully started!';
   }
 
   send(userId, name, data) {

@@ -89,3 +89,10 @@ export const makeUniformSample = (photos, duration, fps = 25) => {
 
   return result;
 };
+
+//
+
+export const sleep = (time, message = 'Hello') =>
+  new Promise((resolve) => {
+    setTimeout(() => resolve(message), time);
+  });

@@ -5,10 +5,10 @@ import TaskController from './task.controller.js';
 import FileController from './file.controller.js';
 import DateInfoController from './dateInfo.controller.js';
 
-export default (container) => {
-  container.register('userController', (container) => new UserController(container));
-  container.register('cameraController', (container) => new CameraController(container));
-  container.register('taskController', (container) => new TaskController(container));
-  container.register('fileController', (container) => new FileController(container));
-  container.register('dateInfoController', (container) => new DateInfoController(container));
+export default (c) => {
+  c.register('userController', (c) => new UserController(c.userService));
+  c.register('cameraController', (c) => new CameraController(c.cameraService));
+  c.register('taskController', (c) => new TaskController(c.taskService));
+  c.register('fileController', (c) => new FileController(c.fileService));
+  c.register('dateInfoController', (c) => new DateInfoController(c.dateInfoService));
 };

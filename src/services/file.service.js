@@ -1,8 +1,6 @@
 import _ from 'lodash';
 import { addHours } from 'date-fns';
 import { type } from '../utils/constants.js';
-// import { fileRepo } from '../db/index.js';
-// import { storageService } from './index.js';
 
 const getGteDateTime = (date) => new Date(`${date} 00:00:00`);
 const getLteDateTime = (date) => addHours(new Date(`${date} 00:00:00`), 24);
@@ -37,19 +35,19 @@ const makeFilter = (camera, query) => {
 //
 
 export default class FileService {
-  constructor(container) {
-    this.fileRepo = container.fileRepo;
-    this.storageService = container.storageService;
+  constructor(fileRepo, storageService) {
+    this.fileRepo = fileRepo;
+    this.storageService = storageService;
   }
 
   //
   // create
   //
 
-  async createFile({ logger, data, stream, ...payload }) {
+  async createFile({ logger, data, stream, payload }) {
     logger && logger(`fileService.createFile`);
 
-    const file = await this.fileRepo.create({ ...payload });
+    const file = await this.fileRepo.create(payload);
 
     // save on storage
     const fileInfo = await this.storageService.saveFile({
@@ -110,7 +108,7 @@ export default class FileService {
     logger && logger(`fileService.getCountByQuery`);
 
     const counts = await this.fileRepo.countsByDates(cameraId, query);
-    // console.log(222, counts);
+    console.log(222333, counts);
 
     return counts;
   }

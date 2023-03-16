@@ -1,17 +1,8 @@
-// import fileService from '../services/file.service.js';
-// import diskService from '../services/disk.service.js';
-// import storage from '../storage/index.js';
-// import ffmpegService from '../services/ffmpeg.service.js';
 import { makeNumber, makePosterFileName, makeUniformSample, makeVideoFileName } from '../utils/utils.js';
 import { fileType, type } from '../utils/constants.js';
 
-const sleep = (time, message = 'Hello') =>
-  new Promise((resolve) => {
-    setTimeout(() => resolve(message), time);
-  });
-
-const createAndSaveVideo = async (container, { logger, userId, cameraId, taskId, create, videoSettings }) => {
-  // const { videoService, storageService, fsService, fileService } = services;
+const createAndSaveVideo = async ({ services, logger, userId, cameraId, taskId, createType, videoSettings }) => {
+  const { videoService, storageService, fsService, fileService } = services;
   //
   console.log('videoSettings', videoSettings);
 
@@ -97,42 +88,46 @@ const createAndSaveVideo = async (container, { logger, userId, cameraId, taskId,
 
   const poster = await fileService.createFile({
     logger,
-    date,
-    user: userId,
-    camera: cameraId,
-    task: taskId,
-    name: posterFileName,
-    type: type.POSTER,
-    fileType: fileType.IMAGE_JPG,
-    createType: null,
-    photoFileData: {},
     stream: posterFileStream,
+    payload: {
+      date,
+      user: userId,
+      camera: cameraId,
+      task: taskId,
+      name: posterFileName,
+      type: type.POSTER,
+      fileType: fileType.IMAGE_JPG,
+      createType: null,
+      photoFileData: {},
+    },
   });
 
   // console.log('poster', poster);
 
   const video = await fileService.createFile({
     logger,
-    date,
-    user: userId,
-    camera: cameraId,
-    task: taskId,
-    name: videoFileName,
-    type: type.VIDEO,
-    fileType: fileType.VIDEO_MP4,
-    createType: create,
-    poster: poster._id,
-    videoFileData: {
-      customName: customName,
-      startDate: startDate,
-      endDate: endDate,
-      timeRangeType: timeRangeType,
-      customTimeStart: customTimeStart,
-      customTimeEnd: customTimeEnd,
-      duration: videoinfo.format.duration,
-      fps: fps,
-    },
     stream: videoFileStream,
+    payload: {
+      date,
+      user: userId,
+      camera: cameraId,
+      task: taskId,
+      name: videoFileName,
+      type: type.VIDEO,
+      fileType: fileType.VIDEO_MP4,
+      createType: createType,
+      poster: poster._id,
+      videoFileData: {
+        customName: customName,
+        startDate: startDate,
+        endDate: endDate,
+        timeRangeType: timeRangeType,
+        customTimeStart: customTimeStart,
+        customTimeEnd: customTimeEnd,
+        duration: videoinfo.format.duration,
+        fps: fps,
+      },
+    },
   });
 
   // console.log('video', video);
@@ -140,8 +135,6 @@ const createAndSaveVideo = async (container, { logger, userId, cameraId, taskId,
   // remove tmp-dir from disk
   await fsService.removeDir({ dir: tmpdir });
   console.log('removeTmpDir', tmpdir);
-
-  await sleep(3 * 1000); // doing job
 
   return video;
 };

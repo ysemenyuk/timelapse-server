@@ -9,9 +9,9 @@ const filterProps = (user) => _.pick(user, fields);
 //
 
 export default class UserService {
-  constructor(container) {
-    this.userRepo = container.userRepo;
-    this.config = container.config;
+  constructor(userRepo, config) {
+    this.userRepo = userRepo;
+    this.config = config;
   }
 
   //

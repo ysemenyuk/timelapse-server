@@ -1,10 +1,9 @@
 // import axios from 'axios';
-// import config from '../config.js';
 
 export default class WeatherService {
-  constructor(container) {
-    this.config = container.config;
-    this.httpService = container.httpService;
+  constructor(config, httpService) {
+    this.config = config;
+    this.httpService = httpService;
   }
 
   async getCurrentDateWeather(location) {

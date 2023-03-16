@@ -3,13 +3,8 @@ import path from 'path';
 import * as consts from '../utils/constants.js';
 import { asyncHandler } from '../utils/utils.js';
 
-export default (container) => {
+export default (config, storageService, imageService) => {
   const router = express.Router({ mergeParams: true });
-
-  const storageService = container.storageService;
-  const imageService = container.imageService;
-
-  const config = container.config;
 
   function createFullPath(filePath) {
     return path.join(config.pathToDiskSpace, filePath);
@@ -24,7 +19,7 @@ export default (container) => {
   router.get(
     /g+\/u_[a-z0-9]+\/c_[a-z0-9]+\/.*\.jpg/,
     asyncHandler(async (req, res, next) => {
-      req.reqLogger(`gridfs.storage.router.get jpg ${req.url}`);
+      // req.reqLogger(`gridfs.storage.router.get jpg ${req.url}`);
 
       const fileLink = req._parsedUrl.pathname;
       const stream = storageService.openDownloadStreamByLink({
@@ -56,7 +51,7 @@ export default (container) => {
   router.get(
     /g+\/u_[a-z0-9]+\/c_[a-z0-9]+\/.*\.mp4/,
     asyncHandler(async (req, res, next) => {
-      req.reqLogger(`gridfs.storage.router.get mp4 ${req.url}`);
+      // req.reqLogger(`gridfs.storage.router.get mp4 ${req.url}`);
 
       const fileLink = req._parsedUrl.pathname;
       const stream = storageService.openDownloadStreamByLink({

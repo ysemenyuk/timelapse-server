@@ -6,8 +6,7 @@ const storageTypeMap = {
   gridfs: GridfsStorage,
 };
 
-export default (container) => {
-  const config = container.config;
-  const storage = new storageTypeMap[config.storageType](container);
-  return storage;
+export default (loggerService, config) => {
+  const storageService = new storageTypeMap[config.storageType](loggerService);
+  return storageService;
 };

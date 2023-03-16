@@ -1,12 +1,10 @@
 import express from 'express';
 import { asyncHandler } from '../utils/utils.js';
 
-export default (container) => {
+export default (middlewares, fileController) => {
   const router = express.Router({ mergeParams: true });
 
-  const authMiddleware = container.authMiddleware;
-  const cameraMiddleware = container.cameraMiddleware;
-  const fileController = container.fileController;
+  const { authMiddleware, cameraMiddleware } = middlewares;
 
   router.use(authMiddleware);
   router.use(cameraMiddleware);

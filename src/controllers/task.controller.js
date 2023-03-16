@@ -1,8 +1,8 @@
 // import taskService from '../services/task.service.js';
 
 export default class TaskController {
-  constructor(container) {
-    this.taskService = container.taskService;
+  constructor(taskService) {
+    this.taskService = taskService;
   }
 
   //

@@ -1,16 +1,13 @@
 import { makeDateName, makePhotoFileName, makeTimeName } from '../utils/utils.js';
 import { fileType, type } from '../utils/constants.js';
 
-const createAndSavePhoto = async (container, { logger, userId, cameraId, taskId, settings, createType }) => {
-  const httpService = container.httpService;
-  const cameraService = container.cameraService;
-  const fileService = container.fileService;
-  // const urlValidator = container.urlValidator;
+const createAndSavePhoto = async ({ services, logger, userId, cameraId, taskId, photoSettings, createType }) => {
+  const { cameraService, httpService, fileService } = services;
 
   const camera = await cameraService.getOneById({ cameraId });
-  const url = settings.photoUrl || camera.photoUrl;
+  const url = photoSettings.photoUrl || camera.photoUrl;
 
-  // await urlValidator.validateUrl(url);
+  // await validatorService.validateUrl(url);
 
   const bufferData = await httpService.getData(url, { responseType: 'arraybuffer' });
 
@@ -18,24 +15,25 @@ const createAndSavePhoto = async (container, { logger, userId, cameraId, taskId,
 
   const photo = await fileService.createFile({
     logger,
-    date,
-    user: userId,
-    camera: cameraId,
-    task: taskId,
-
-    name: makePhotoFileName(date),
-    dateString: makeDateName(date),
-    timeString: makeTimeName(date),
-
-    type: type.PHOTO,
-    fileType: fileType.IMAGE_JPG,
-    createType: createType,
-
-    photoFileData: {
-      photoUrl: url,
-    },
-
     data: bufferData,
+    payload: {
+      date,
+      user: userId,
+      camera: cameraId,
+      task: taskId,
+
+      name: makePhotoFileName(date),
+      dateString: makeDateName(date),
+      timeString: makeTimeName(date),
+
+      type: type.PHOTO,
+      fileType: fileType.IMAGE_JPG,
+      createType: createType,
+
+      photoFileData: {
+        photoUrl: url,
+      },
+    },
   });
 
   return photo;

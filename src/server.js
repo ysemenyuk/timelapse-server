@@ -3,7 +3,7 @@ import express from 'express';
 import http from 'http';
 import cors from 'cors';
 import fileUpload from 'express-fileupload';
-import registerConfig from './config.js';
+import registerConfig, { config } from './config.js';
 import registerDb from './db/index.js';
 import registerServices from './services/index.js';
 import registerMiddlewares from './middlewares/index.js';
@@ -25,7 +25,6 @@ const startServer = async () => {
   const container = new Container();
 
   registerConfig(container);
-
   registerDb(container);
   registerServices(container);
 
@@ -55,24 +54,24 @@ const startServer = async () => {
 
   //
 
-  const logger = container.loggerService.create('http:server');
+  const loggerService = container.loggerService;
+  const logger = loggerService.create('http:server');
 
   const db = container.db;
 
-  const socket = container.socketService;
-  const storage = container.storageService;
-  const worker = container.workerService;
-
-  const config = container.config;
+  const socketService = container.socketService;
+  const storageService = container.storageService;
+  const workerService = container.workerService;
 
   try {
     logger(`Starting server`);
 
-    await db.connect();
+    await db.connect(config);
+    logger(`db successfully connected!`);
 
-    await socket.init(httpServer);
-    await storage.init();
-    await worker.init();
+    await socketService.init(httpServer, logger);
+    await storageService.init(config, logger);
+    await workerService.init(config, logger);
 
     httpServer.listen(config.serverPort, () => {
       logger(`httpServer running in ${config.mode} mode on port ${config.serverPort}`);

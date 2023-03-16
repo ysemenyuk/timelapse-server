@@ -1,6 +1,4 @@
-export default (container) => async (req, res, next) => {
-  const cameraService = container.cameraService;
-
+export default (cameraService) => async (req, res, next) => {
   try {
     const camera = await cameraService.getOneById({
       cameraId: req.params.cameraId,

@@ -1,5 +1,5 @@
 // import _ from 'lodash';
-import initStorageService from './storageService/index.js';
+import getStorageService from './storageService/index.js';
 import WorkerService from './workerService/worker.service.js';
 import SocketService from './socketService/socket.service.js';
 import LoggerService from './logger.service.js';
@@ -16,21 +16,22 @@ import imageService from './image.service.js';
 import videoService from './video.service.js';
 import WeatherService from './weather.service.js';
 
-export default async (container) => {
-  container.register('storageService', (container) => initStorageService(container));
-  container.register('workerService', (container) => new WorkerService(container));
-  container.register('socketService', (container) => new SocketService(container));
-  container.register('loggerService', (container) => new LoggerService(container));
+export default async (c) => {
+  c.register('storageService', (c) => getStorageService(c.loggerService, c.config));
+  c.register('workerService', (c) => new WorkerService(c.loggerService));
+  c.register('socketService', (c) => new SocketService(c.loggerService));
 
-  container.register('taskService', (container) => new TaskService(container));
-  container.register('userService', (container) => new UserService(container));
-  container.register('cameraService', (container) => new CameraService(container));
-  container.register('fileService', (container) => new FileService(container));
-  container.register('dateInfoService', (container) => new DateInfoService(container));
+  c.register('userService', (c) => new UserService(c.userRepo, c.config));
+  c.register('cameraService', (c) => new CameraService(c.cameraRepo, c.taskService, c.fileService));
+  c.register('taskService', (c) => new TaskService(c.taskRepo, c.workerService));
+  c.register('fileService', (c) => new FileService(c.fileRepo, c.storageService));
+  c.register('dateInfoService', (c) => new DateInfoService(c.dateInfoRepo));
 
-  container.register('weatherService', (container) => new WeatherService(container));
-  container.register('fsService', () => fsService);
-  container.register('httpService', () => httpService);
-  container.register('imageService', () => imageService);
-  container.register('videoService', () => videoService);
+  c.register('loggerService', () => new LoggerService());
+  c.register('weatherService', (c) => new WeatherService(c.httpService, c.config));
+
+  c.register('fsService', () => fsService);
+  c.register('httpService', () => httpService);
+  c.register('imageService', () => imageService);
+  c.register('videoService', () => videoService);
 };

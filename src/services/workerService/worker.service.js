@@ -1,31 +1,29 @@
-import { Agenda } from 'agenda/es.js';
 import mongodb from 'mongodb';
+import { Agenda } from 'agenda/es.js';
 import { taskStatus } from '../../utils/constants.js';
-import jobs from '../../jobs/jobs.js';
 
 const { MongoClient, ObjectID } = mongodb;
 
 export default class WorkerService {
-  constructor(container) {
-    this.logger = container.loggerService.create('worker');
-    this.config = container.config;
+  constructor(loggerService) {
+    this.loggerService = loggerService;
   }
 
-  async init() {
-    const mongoClient = new MongoClient(this.config.dbUri, {
+  async init(config, sLogger) {
+    const mongoClient = new MongoClient(config.dbUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
 
     await mongoClient.connect();
 
-    this.agenda = new Agenda({ mongo: mongoClient.db(this.config.dbName) });
+    this.agenda = new Agenda({ mongo: mongoClient.db(config.dbName) });
 
     await this.agenda.start();
-    this.logger(`agenda successfully started`);
+    sLogger(`workerService successfully started!`);
 
     const currentjobs = await this.agenda.jobs();
-    this.logger(`agenda currentjobs: ${currentjobs.length}`);
+    sLogger(`workerService currentjobs: ${currentjobs.length}`);
 
     // if (currentjobs.length) {
     // await Promise.all(currentjobs.map(async (job) => await job.remove()));
@@ -33,23 +31,21 @@ export default class WorkerService {
     //   console.log(job.attrs);
     // });
     // }
+
+    return `workerService successfully started!`;
   }
 
-  async startJobs(container) {
-    if (container.config.jobTypes.length === 0) {
+  async startJobs(jobTypesToStart, jobs, services, logger) {
+    if (jobTypesToStart.length === 0) {
       return;
     }
 
-    container.config.jobTypes.forEach((type) => {
+    jobTypesToStart.forEach((type) => {
       this.agenda.define(type, async (job) => {
         const data = job.attrs.data;
-        await jobs[type](data, container);
+        await jobs[type](data, services, logger);
       });
     });
-  }
-
-  get workerLogger() {
-    return this.logger;
   }
 
   //

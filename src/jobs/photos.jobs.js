@@ -9,18 +9,16 @@ import { fromUnixTime } from 'date-fns';
 //
 //
 
-export const createPhotoJob = async (data, container) => {
-  const loggerService = container.loggerService;
-  const workerLogger = container.workerService.workerLogger;
-  const logger = loggerService.extend(workerLogger, taskName.CREATE_PHOTO);
-
-  logger(`start ${taskName.CREATE_PHOTO} job`);
-
+export const createPhotoJob = async (data, services, wLogger) => {
   const { cameraId, userId, taskId } = data;
-  const taskService = container.taskService;
+  const { loggerService, taskService, brokerService } = services;
+
+  const logger = loggerService.extend(wLogger, taskName.CREATE_PHOTO);
+  logger(`start ${taskName.CREATE_PHOTO} job`);
 
   try {
     const task = await taskService.getOneById({ taskId });
+    const { photoSettings } = task;
 
     const rtask = await taskService.updateOneById({
       taskId,
@@ -30,16 +28,17 @@ export const createPhotoJob = async (data, container) => {
       },
     });
 
-    // socketService.send(userId, 'update-task', { cameraId, userId, task: rtask });
+    brokerService.send(userId, 'update-task', { cameraId, userId, task: rtask });
 
-    await createDateInfoIfNotExist(container, { logger, userId, cameraId });
+    await createDateInfoIfNotExist({ services, logger, userId, cameraId });
 
-    const photo = await createAndSavePhoto(container, {
+    const photo = await createAndSavePhoto({
+      services,
       logger,
       userId,
       cameraId,
       taskId,
-      settings: task.photoSettings,
+      photoSettings,
       createType: fileCreateType.BY_HAND,
     });
 
@@ -52,8 +51,8 @@ export const createPhotoJob = async (data, container) => {
       },
     });
 
-    // socketService.send(userId, 'update-task', { cameraId, userId, task: stask });
-    // socketService.send(userId, 'create-file', { cameraId, userId, file: photo });
+    brokerService.send(userId, 'update-task', { cameraId, userId, task: stask });
+    brokerService.send(userId, 'create-file', { cameraId, userId, file: photo });
 
     logger(`successed ${taskName.CREATE_PHOTO} job`);
   } catch (error) {
@@ -68,7 +67,7 @@ export const createPhotoJob = async (data, container) => {
       },
     });
 
-    // socketService.send(userId, 'update-task', { cameraId, userId, task: etask });
+    brokerService.send(userId, 'update-task', { cameraId, userId, task: etask });
     logger(`error ${taskName.CREATE_PHOTO} job`);
   }
 
@@ -111,20 +110,20 @@ const getTimeRange = (photoSettings, dateInfo) => {
 //
 
 export const createPhotosByTimeJob = async (data, services, wLogger) => {
-  const logger = wLogger.extend(taskName.CREATE_PHOTOS_BY_TIME);
-
-  logger(`start ${taskName.CREATE_PHOTOS_BY_TIME} job`);
-
-  const { taskService, socketService } = services;
-
   const { cameraId, userId, taskId } = data;
+  const { loggerService, taskService, brokerService } = services;
+
+  const logger = loggerService.extend(wLogger, taskName.CREATE_PHOTOS_BY_TIME);
+  logger(`start ${taskName.CREATE_PHOTOS_BY_TIME} job`);
 
   try {
     const task = await taskService.getOneById({ logger, taskId });
-    logger(`timeRangeType: ${task.photoSettings.timeRangeType}`);
+    const { photoSettings } = task;
 
-    const dateInfo = await createDateInfoIfNotExist({ logger, userId, cameraId });
-    const { startTime, stopTime } = getTimeRange(task.photoSettings, dateInfo);
+    logger(`timeRangeType: ${photoSettings.timeRangeType}`);
+
+    const dateInfo = await createDateInfoIfNotExist({ services, logger, userId, cameraId });
+    const { startTime, stopTime } = getTimeRange(photoSettings, dateInfo);
 
     const currentTime = makeTimeName(new Date());
     logger(`currentTime: ${currentTime}, startTime: ${startTime} stopTime: ${stopTime}`);
@@ -135,21 +134,22 @@ export const createPhotosByTimeJob = async (data, services, wLogger) => {
     }
 
     const photo = await createAndSavePhoto({
+      services,
       logger,
       userId,
       cameraId,
       taskId,
-      settings: task.photoSettings,
+      photoSettings,
       create: fileCreateType.BY_TIME,
     });
 
     logger(`successed ${taskName.CREATE_PHOTOS_BY_TIME} job`);
-    socketService.send(userId, 'create-file', { cameraId, userId, file: photo });
+    brokerService.send(userId, 'create-file', { cameraId, userId, file: photo });
   } catch (error) {
     console.log('--- error CreatePhotosByTime ---', error);
 
     logger(`error ${taskName.CREATE_PHOTOS_BY_TIME} job`);
-    socketService.send(userId, 'task-error', { cameraId, userId, taskId, error });
+    brokerService.send(userId, 'task-error', { cameraId, userId, taskId, error });
   }
 
   logger(`finish ${taskName.CREATE_PHOTOS_BY_TIME} job`);

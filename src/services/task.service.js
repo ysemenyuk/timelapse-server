@@ -1,9 +1,9 @@
 import { taskName, taskType } from '../utils/constants.js';
 
 export default class TaskService {
-  constructor(container) {
-    this.taskRepo = container.taskRepo;
-    this.workerService = container.workerService;
+  constructor(taskRepo, workerService) {
+    this.taskRepo = taskRepo;
+    this.workerService = workerService;
   }
   // create
 

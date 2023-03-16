@@ -1,16 +1,14 @@
 // import cameraService from '../services/camera.service.js';
 
 export default class CameraController {
-  constructor(container) {
-    this.cameraService = container.cameraService;
+  constructor(cameraService) {
+    this.cameraService = cameraService;
   }
 
   // get
 
   async getAll(req, res) {
     req.reqLogger('cameraController.getAll');
-
-    console.log(222, this.cameraService);
 
     const cameras = await this.cameraService.getAll({
       logger: req.reqLogger,

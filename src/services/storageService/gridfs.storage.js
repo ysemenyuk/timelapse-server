@@ -5,7 +5,6 @@ import { pipeline } from 'stream/promises';
 import { type } from '../../utils/constants.js';
 import { makeVideoFileName, makePhotoFileName, makePosterFileName } from '../../utils/utils.js';
 
-// const dbUri = process.env.MONGO_URI;
 const { MongoClient, ObjectId } = mongodb;
 
 const namesMap = {
@@ -34,23 +33,25 @@ const stream2buffer = (stream) => {
 //
 
 export default class GridfsStorage {
-  constructor(container) {
-    this.logger = container.loggerService.create('storage');
-    this.config = container.config;
+  constructor(loggerService) {
+    this.loggerService = loggerService;
   }
 
-  async init() {
-    const mongoClient = new MongoClient(this.config.dbUri, {
+  async init(config, sLogger) {
+    const mongoClient = new MongoClient(config.dbUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
 
     await mongoClient.connect();
 
-    const database = mongoClient.db('myFirstDatabase');
+    const dbName = 'myFirstDatabase'; // TODO: from config
+
+    const database = mongoClient.db(dbName);
     this.bucket = new mongodb.GridFSBucket(database);
 
-    this.logger(`storageType - "gridfs", database - "myFirstDatabase"`);
+    sLogger(`storageService successfully starded! storageType: "gridfs", database: "${dbName}"`);
+    return `storageService successfully starded! storageType: "gridfs", database: "${dbName}"`;
   }
 
   // create

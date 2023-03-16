@@ -5,12 +5,12 @@ import TaskRepo from './repos/task.repo.js';
 import FileRepo from './repos/file.repo.js';
 import DateInfoRepo from './repos/dateInfo.repo.js';
 
-export default (container) => {
-  container.register('db', (container) => new MongoDB(container));
+export default (c) => {
+  c.register('db', () => new MongoDB());
 
-  container.register('userRepo', (container) => new UserRepo(container));
-  container.register('cameraRepo', (container) => new CameraRepo(container));
-  container.register('taskRepo', (container) => new TaskRepo(container));
-  container.register('fileRepo', (container) => new FileRepo(container));
-  container.register('dateInfoRepo', (container) => new DateInfoRepo(container));
+  c.register('userRepo', () => new UserRepo());
+  c.register('cameraRepo', () => new CameraRepo());
+  c.register('taskRepo', () => new TaskRepo());
+  c.register('fileRepo', () => new FileRepo());
+  c.register('dateInfoRepo', () => new DateInfoRepo());
 };

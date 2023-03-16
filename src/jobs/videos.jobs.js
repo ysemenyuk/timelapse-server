@@ -10,7 +10,7 @@ export const createVideoJob = async (data, services, wLogger) => {
   const logger = wLogger.extend(taskName.CREATE_VIDEO);
   logger(`start ${taskName.CREATE_VIDEO} job`);
 
-  const { taskService, socketService } = services;
+  const { taskService, brokerService } = services;
 
   const { cameraId, userId, taskId } = data;
 
@@ -26,14 +26,15 @@ export const createVideoJob = async (data, services, wLogger) => {
       },
     });
 
-    socketService.send(userId, 'update-task', { cameraId, userId, task: rtask });
+    brokerService.send(userId, 'update-task', { cameraId, userId, task: rtask });
 
     const video = await createAndSaveVideo({
+      services,
       logger,
       userId,
       cameraId,
       videoSettings,
-      create: fileCreateType.BY_HAND,
+      createType: fileCreateType.BY_HAND,
     });
 
     const stask = await taskService.updateOneById({
@@ -45,8 +46,8 @@ export const createVideoJob = async (data, services, wLogger) => {
       },
     });
 
-    socketService.send(userId, 'update-task', { cameraId, userId, task: stask });
-    socketService.send(userId, 'create-file', { cameraId, userId, file: video });
+    brokerService.send(userId, 'update-task', { cameraId, userId, task: stask });
+    brokerService.send(userId, 'create-file', { cameraId, userId, file: video });
     logger(`successed ${taskName.CREATE_VIDEO} job`);
   } catch (error) {
     console.log('-- error createVideo job --', error);
@@ -60,7 +61,7 @@ export const createVideoJob = async (data, services, wLogger) => {
       },
     });
 
-    socketService.send(userId, 'update-task', { cameraId, userId, task: etask });
+    brokerService.send(userId, 'update-task', { cameraId, userId, task: etask });
     logger(`error ${taskName.CREATE_VIDEO} job`);
   }
 

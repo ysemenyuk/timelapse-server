@@ -1,7 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 
-export default (container) => (req, res, next) => {
-  const loggerService = container.loggerService;
+export default (loggerService) => (req, res, next) => {
   const logger = loggerService.create('request');
 
   const requestId = uuidv4();

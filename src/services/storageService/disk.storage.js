@@ -3,11 +3,8 @@ import * as fsp from 'fs/promises';
 import { pipeline } from 'stream/promises';
 import path from 'path';
 import _ from 'lodash';
-import debug from 'debug';
 import { isPhotoFile } from '../../utils/utils.js';
 import diskpaths from './disk.paths.js';
-
-const pathToDiskSpace = process.env.DISK_PATH;
 
 const {
   createFilePath,
@@ -18,38 +15,43 @@ const {
   createDateDirPath,
 } = diskpaths;
 
-export function createFullPath(filePath) {
-  return path.join(pathToDiskSpace, filePath);
-}
-
-async function createDir(dirPath) {
-  const fullPath = createFullPath(dirPath);
-  const created = await fsp.mkdir(fullPath, { recursive: true });
-  return created;
-}
-
-async function removeDir(dirPath) {
-  const fullPath = createFullPath(dirPath);
-  const deleted = await fsp.rmdir(fullPath, { recursive: true });
-  return deleted;
-}
-
-function isDirExist(dirPath) {
-  const fullPath = createFullPath(dirPath);
-  return existsSync(fullPath);
-}
-
 //
 // main
 //
 
 class DiskStorage {
-  constructor() {
-    this.logger = debug('storage');
+  constructor(loggerService) {
+    this.loggerService = loggerService;
   }
 
-  init() {
-    this.logger(`storageType - "disk", pathOnDisk - "${pathToDiskSpace}"`);
+  init(config, sLogger) {
+    this.pathToDiskSpace = config.pathToDiskSpace;
+
+    sLogger(`storageService successfully starded! storageType: "disk", pathOnDisk: "${config.pathToDiskSpace}"`);
+    return `storageService successfully starded! storageType: "disk", pathOnDisk: "${config.pathToDiskSpace}"`;
+  }
+
+  //
+
+  createFullPath(filePath) {
+    return path.join(this.pathToDiskSpace, filePath);
+  }
+
+  async createDir(dirPath) {
+    const fullPath = this.createFullPath(dirPath);
+    const created = await fsp.mkdir(fullPath, { recursive: true });
+    return created;
+  }
+
+  async removeDir(dirPath) {
+    const fullPath = this.createFullPath(dirPath);
+    const deleted = await fsp.rmdir(fullPath, { recursive: true });
+    return deleted;
+  }
+
+  isDirExist(dirPath) {
+    const fullPath = this.createFullPath(dirPath);
+    return existsSync(fullPath);
   }
 
   // create
@@ -58,7 +60,7 @@ class DiskStorage {
     logger && logger(`disk.storage.createUserFolder userId: ${userId}`);
 
     const userDirPath = createUserDirPath(userId);
-    await createDir(userDirPath);
+    await this.createDir(userDirPath);
   }
 
   async createCameraFolder({ logger, userId, cameraId }) {
@@ -68,9 +70,9 @@ class DiskStorage {
     const cameraPhotosDirPath = createPhotosDirPath(userId, cameraId);
     const cameraVideosDirPath = createVideosDirPath(userId, cameraId);
 
-    await createDir(cameraDirPath);
-    await createDir(cameraPhotosDirPath);
-    await createDir(cameraVideosDirPath);
+    await this.createDir(cameraDirPath);
+    await this.createDir(cameraPhotosDirPath);
+    await this.createDir(cameraVideosDirPath);
   }
 
   // remove
@@ -79,7 +81,7 @@ class DiskStorage {
     logger && logger(`disk.storage.removeUserFiles userId: ${userId}`);
 
     const userDirPath = createUserDirPath(userId);
-    const deleted = await removeDir(userDirPath);
+    const deleted = await this.removeDir(userDirPath);
 
     return deleted;
   }
@@ -88,7 +90,7 @@ class DiskStorage {
     logger && logger(`disk.storage.removeCameraFiles userId cameraId: ${userId} ${cameraId}`);
 
     const cameraDirPath = createCameraDirPath(userId, cameraId);
-    const deleted = await removeDir(cameraDirPath);
+    const deleted = await this.removeDir(cameraDirPath);
 
     return deleted;
   }
@@ -100,13 +102,13 @@ class DiskStorage {
 
     const dateDir = createDateDirPath(file.user, file.camera, file.date);
 
-    if (isPhotoFile(file) && !isDirExist(dateDir)) {
+    if (isPhotoFile(file) && !this.isDirExist(dateDir)) {
       logger && logger(`disk.storage.makeDateDir dateDir: ${dateDir}`);
-      await createDir(dateDir);
+      await this.createDir(dateDir);
     }
 
     const filePath = createFilePath(file);
-    const fullPath = createFullPath(filePath);
+    const fullPath = this.createFullPath(filePath);
 
     try {
       if (stream) {
@@ -132,7 +134,7 @@ class DiskStorage {
     logger && logger(`disk.storage.readFile file.name: ${file.name}`);
 
     const filePath = createFilePath(file);
-    const fullPath = createFullPath(filePath);
+    const fullPath = this.createFullPath(filePath);
 
     try {
       if (type === 'stream') {
@@ -154,7 +156,7 @@ class DiskStorage {
     logger && logger(`disk.storage.removeFile file.name: ${file.name}`);
 
     const filePath = createFilePath(file);
-    const fullPath = createFullPath(filePath);
+    const fullPath = this.createFullPath(filePath);
 
     const deleted = await fsp.unlink(fullPath);
     return deleted;
@@ -166,7 +168,7 @@ class DiskStorage {
     logger && logger(`disk.storage.openDownloadStream file.name: ${file.name}`);
 
     const filePath = createFilePath(file);
-    const fullPath = createFullPath(filePath);
+    const fullPath = this.createFullPath(filePath);
 
     const stream = createReadStream(fullPath);
     return stream;
@@ -177,7 +179,7 @@ class DiskStorage {
 
     // const fileName = _.last(fileLink.split('/'));
     const filePath = _.trimStart(fileLink, '/');
-    const fullPath = createFullPath(filePath);
+    const fullPath = this.createFullPath(filePath);
 
     const stream = createReadStream(fullPath);
     return stream;
