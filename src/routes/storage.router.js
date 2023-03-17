@@ -1,75 +1,21 @@
 import express from 'express';
-import path from 'path';
-import * as consts from '../utils/constants.js';
-import { asyncHandler } from '../utils/utils.js';
+import { asyncHandler } from '../utils/index.js';
 
-export default (config, storageService, imageService) => {
+export default (middlewares, storageController) => {
   const router = express.Router({ mergeParams: true });
 
-  function createFullPath(filePath) {
-    return path.join(config.pathToDiskSpace, filePath);
-  }
-
-  //
-  // gridfs
-  //
-
-  // photo from gridfs
+  // photo
 
   router.get(
     /g+\/u_[a-z0-9]+\/c_[a-z0-9]+\/.*\.jpg/,
-    asyncHandler(async (req, res, next) => {
-      // req.reqLogger(`gridfs.storage.router.get jpg ${req.url}`);
-
-      const fileLink = req._parsedUrl.pathname;
-      const stream = storageService.openDownloadStreamByLink({
-        // logger: req.reqLogger,
-        fileLink,
-      });
-
-      const isThumbnail = req.query && req.query.size && req.query.size === 'thumbnail';
-
-      if (isThumbnail) {
-        stream.pipe(imageService.resize(consts.THUMBNAIL_SIZE)).pipe(res);
-      } else {
-        stream.pipe(res);
-      }
-
-      stream.on('error', (err) => {
-        next(err);
-        req.resLogger(req);
-      });
-
-      stream.on('end', () => {
-        req.resLogger(req);
-      });
-    })
+    asyncHandler(storageController.getPhotoByStream.bind(storageController))
   );
 
-  // video from gridfs
+  // video
 
   router.get(
     /g+\/u_[a-z0-9]+\/c_[a-z0-9]+\/.*\.mp4/,
-    asyncHandler(async (req, res, next) => {
-      // req.reqLogger(`gridfs.storage.router.get mp4 ${req.url}`);
-
-      const fileLink = req._parsedUrl.pathname;
-      const stream = storageService.openDownloadStreamByLink({
-        // logger: req.reqLogger,
-        fileLink,
-      });
-
-      stream.pipe(res);
-
-      stream.on('error', (err) => {
-        next(err);
-        req.resLogger(req);
-      });
-
-      stream.on('end', () => {
-        req.resLogger(req);
-      });
-    })
+    asyncHandler(storageController.getVideoByStream.bind(storageController))
   );
 
   //
@@ -78,45 +24,45 @@ export default (config, storageService, imageService) => {
 
   // file from disk
 
-  router.get(
-    /u_[a-z0-9]+\/c_[a-z0-9]+\/.*\.jpg/,
-    asyncHandler(async (req, res) => {
-      req.reqLogger(`disk.storage.router.get jpg ${req.url}`);
-      // console.log(1111, req._parsedUrl.path);
+  //   router.get(
+  //     /u_[a-z0-9]+\/c_[a-z0-9]+\/.*\.jpg/,
+  //     asyncHandler(async (req, res) => {
+  //       req.reqLogger(`disk.storage.router.get jpg ${req.url}`);
+  //       // console.log(1111, req._parsedUrl.path);
 
-      const filePath = req._parsedUrl.pathname;
-      const fileFullPath = createFullPath(filePath);
+  //       const filePath = req._parsedUrl.pathname;
+  //       const fileFullPath = createFullPath(filePath);
 
-      const isThumbnail = req.query && req.query.size && req.query.size === 'thumbnail';
+  //       const isThumbnail = req.query && req.query.size && req.query.size === 'thumbnail';
 
-      if (isThumbnail) {
-        res.set('Content-Type', 'image/jpg');
-        const buffer = await imageService.resizeToBuffer(fileFullPath, consts.THUMBNAIL_SIZE);
-        res.send(buffer);
-        req.resLogger(req);
-        return;
-      }
+  //       if (isThumbnail) {
+  //         res.set('Content-Type', 'image/jpg');
+  //         const buffer = await imageService.resizeToBuffer(fileFullPath, consts.THUMBNAIL_SIZE);
+  //         res.send(buffer);
+  //         req.resLogger(req);
+  //         return;
+  //       }
 
-      res.sendFile(fileFullPath);
-      req.resLogger(req);
-    })
-  );
+  //       res.sendFile(fileFullPath);
+  //       req.resLogger(req);
+  //     })
+  //   );
 
-  // video from disk
+  //   // video from disk
 
-  router.get(
-    /u_[a-z0-9]+\/c_[a-z0-9]+\/.*\.mp4/,
-    asyncHandler(async (req, res) => {
-      req.reqLogger(`disk.storage.router.get mp4 ${req.url}`);
-      // console.log(222, req._parsedUrl.path);
+  //   router.get(
+  //     /u_[a-z0-9]+\/c_[a-z0-9]+\/.*\.mp4/,
+  //     asyncHandler(async (req, res) => {
+  //       req.reqLogger(`disk.storage.router.get mp4 ${req.url}`);
+  //       // console.log(222, req._parsedUrl.path);
 
-      const filePath = req._parsedUrl.pathname;
-      const fileFullPath = createFullPath(filePath);
+  //       const filePath = req._parsedUrl.pathname;
+  //       const fileFullPath = createFullPath(filePath);
 
-      res.sendFile(fileFullPath);
-      req.resLogger(req);
-    })
-  );
+  //       res.sendFile(fileFullPath);
+  //       req.resLogger(req);
+  //     })
+  //   );
 
   return router;
 };

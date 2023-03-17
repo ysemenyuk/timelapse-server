@@ -40,7 +40,7 @@ const addStats = () => {
   ];
 };
 
-const populateAvatar = () => {
+const addAvatar = () => {
   return [
     {
       $lookup: {
@@ -70,12 +70,13 @@ export default class CameraRepository {
   }
 
   async find(userId, query) {
-    console.log('CameraRepository.find', query);
+    const withStats = query.stats;
+    const withAvatar = query.avatar;
 
     const cameras = await Camera.aggregate([
       { $match: { user: ObjectId(userId) } },
-      ...addStats(),
-      ...populateAvatar(),
+      ...(withStats && addStats()),
+      ...(withAvatar && addAvatar()),
       { $project: { videos: 0, photos: 0, avatars: 0 } },
     ]);
     return cameras;

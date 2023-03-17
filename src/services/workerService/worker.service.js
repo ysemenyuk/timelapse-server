@@ -31,21 +31,25 @@ export default class WorkerService {
     //   console.log(job.attrs);
     // });
     // }
-
-    return `workerService successfully started!`;
   }
 
-  async startJobs(jobTypesToStart, jobs, services, logger) {
+  async startJobs(jobs, sLogger) {
+    const jobTypesToStart = Object.keys(jobs);
+    sLogger(`jobTypesToStart: ${jobTypesToStart}`);
+
     if (jobTypesToStart.length === 0) {
+      sLogger(`no jobs to start!`);
       return;
     }
 
     jobTypesToStart.forEach((type) => {
       this.agenda.define(type, async (job) => {
         const data = job.attrs.data;
-        await jobs[type](data, services, logger);
+        await jobs[type](data);
       });
     });
+
+    sLogger(`jobs successfully started!`);
   }
 
   //

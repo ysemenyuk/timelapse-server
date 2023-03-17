@@ -1,4 +1,4 @@
-import { makeDateName } from '../utils/utils.js';
+import { makeDateName } from '../utils/index.js';
 
 export const createDateInfo = async ({ services, logger, userId, cameraId }) => {
   const { cameraService, weatherService, dateInfoService } = services;

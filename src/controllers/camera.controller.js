@@ -1,5 +1,3 @@
-// import cameraService from '../services/camera.service.js';
-
 export default class CameraController {
   constructor(cameraService) {
     this.cameraService = cameraService;

@@ -1,12 +1,8 @@
 import debug from 'debug';
 
 export default class LoggerService {
-  constructor() {
-    this.logger = debug;
-  }
-
   create(name) {
-    return this.logger(name);
+    return debug(name);
   }
 
   extend(logger, name) {

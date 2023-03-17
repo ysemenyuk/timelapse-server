@@ -6,8 +6,8 @@ export default class SocketService {
     this.sessions = new Map();
   }
 
-  init(httpServer, sLogger) {
-    this.logger = this.loggerService.extend(sLogger, 'socket');
+  init(config, sLogger, httpServer) {
+    const logger = this.loggerService.extend(sLogger, 'socket');
 
     this.socket = new Server(httpServer, {
       cors: { origin: '*' },
@@ -28,23 +28,22 @@ export default class SocketService {
     });
 
     this.socket.on('connection', (socket) => {
-      this.logger('client connected', socket.handshake.auth.userId);
+      logger('client connected', socket.handshake.auth.userId);
       this.sessions.set(socket.userId, socket);
 
       socket.on('disconnect', () => {
-        this.logger('client disconnect', socket.userId);
+        logger('client disconnect', socket.userId);
         this.sessions.delete(socket.userId);
       });
 
       socket.on('http-server', (mess) => {
-        this.logger('http-server mess.name to mess.userId:', mess.name, mess.userId.toString());
+        logger('http-server mess.name to mess.userId:', mess.name, mess.userId.toString());
         const { userId, name, data } = mess;
         this.send(userId, name, data);
       });
     });
 
     sLogger('socketService successfully started!');
-    return 'socketService successfully started!';
   }
 
   send(userId, name, data) {

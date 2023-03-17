@@ -1,5 +1,3 @@
-// import { dateInfoRepo } from '../db/index.js';
-
 export default class DateInfoService {
   constructor(dateInfoRepo) {
     this.dateInfoRepo = dateInfoRepo;

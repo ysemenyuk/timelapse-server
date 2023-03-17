@@ -1,4 +1,6 @@
-export const THUMBNAIL_SIZE = 200;
+export const imageSize = {
+  THUMBNAIL: 200,
+};
 
 // type
 export const type = {

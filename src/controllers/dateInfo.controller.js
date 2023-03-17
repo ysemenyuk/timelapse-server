@@ -1,5 +1,3 @@
-// import dateInfoService from '../services/dateInfo.service.js';
-
 export default class DateInfoController {
   constructor(dateInfoService) {
     this.dateInfoService = dateInfoService;

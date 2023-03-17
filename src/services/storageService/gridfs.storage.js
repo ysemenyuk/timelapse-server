@@ -1,9 +1,9 @@
-import mongodb from 'mongodb';
 import _ from 'lodash';
+import mongodb from 'mongodb';
 import { Readable } from 'stream';
 import { pipeline } from 'stream/promises';
 import { type } from '../../utils/constants.js';
-import { makeVideoFileName, makePhotoFileName, makePosterFileName } from '../../utils/utils.js';
+import { makeVideoFileName, makePhotoFileName, makePosterFileName } from '../../utils/index.js';
 
 const { MongoClient, ObjectId } = mongodb;
 
@@ -38,20 +38,17 @@ export default class GridfsStorage {
   }
 
   async init(config, sLogger) {
-    const mongoClient = new MongoClient(config.dbUri, {
+    const mongoClient = new MongoClient(config.gridfsDbUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
 
     await mongoClient.connect();
 
-    const dbName = 'myFirstDatabase'; // TODO: from config
-
-    const database = mongoClient.db(dbName);
+    const database = mongoClient.db(config.gridfsDbName);
     this.bucket = new mongodb.GridFSBucket(database);
 
-    sLogger(`storageService successfully starded! storageType: "gridfs", database: "${dbName}"`);
-    return `storageService successfully starded! storageType: "gridfs", database: "${dbName}"`;
+    sLogger(`storageService successfully starded! storageType: "gridfs", database: "${config.gridfsDbName}"`);
   }
 
   // create

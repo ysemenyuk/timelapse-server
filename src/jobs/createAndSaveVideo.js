@@ -1,7 +1,7 @@
-import { makeNumber, makePosterFileName, makeUniformSample, makeVideoFileName } from '../utils/utils.js';
+import { makeNumber, makePosterFileName, makeUniformSample, makeVideoFileName } from '../utils/index.js';
 import { fileType, type } from '../utils/constants.js';
 
-const createAndSaveVideo = async ({ services, logger, userId, cameraId, taskId, createType, videoSettings }) => {
+export default async ({ services, logger, userId, cameraId, taskId, createType, videoSettings }) => {
   const { videoService, storageService, fsService, fileService } = services;
   //
   console.log('videoSettings', videoSettings);
@@ -138,5 +138,3 @@ const createAndSaveVideo = async ({ services, logger, userId, cameraId, taskId, 
 
   return video;
 };
-
-export default createAndSaveVideo;

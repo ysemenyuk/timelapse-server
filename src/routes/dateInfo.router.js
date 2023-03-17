@@ -1,5 +1,5 @@
 import express from 'express';
-import { asyncHandler } from '../utils/utils.js';
+import { asyncHandler } from '../utils/index.js';
 
 export default (middlewares, dateInfoController) => {
   const router = express.Router({ mergeParams: true });

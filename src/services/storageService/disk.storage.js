@@ -3,7 +3,7 @@ import * as fsp from 'fs/promises';
 import { pipeline } from 'stream/promises';
 import path from 'path';
 import _ from 'lodash';
-import { isPhotoFile } from '../../utils/utils.js';
+import { isPhotoFile } from '../../utils/index.js';
 import diskpaths from './disk.paths.js';
 
 const {
@@ -19,16 +19,14 @@ const {
 // main
 //
 
-class DiskStorage {
+export default class DiskStorage {
   constructor(loggerService) {
     this.loggerService = loggerService;
   }
 
-  init(config, sLogger) {
+  async init(config, sLogger) {
     this.pathToDiskSpace = config.pathToDiskSpace;
-
     sLogger(`storageService successfully starded! storageType: "disk", pathOnDisk: "${config.pathToDiskSpace}"`);
-    return `storageService successfully starded! storageType: "disk", pathOnDisk: "${config.pathToDiskSpace}"`;
   }
 
   //
@@ -205,5 +203,3 @@ class DiskStorage {
     return existsSync(fullPath);
   }
 }
-
-export default DiskStorage;

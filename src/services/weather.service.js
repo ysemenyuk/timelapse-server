@@ -1,7 +1,7 @@
 // import axios from 'axios';
 
 export default class WeatherService {
-  constructor(config, httpService) {
+  constructor(httpService, config) {
     this.config = config;
     this.httpService = httpService;
   }

@@ -1,20 +1,21 @@
-// import taskService from '../../services/task.service.js';
-import { makeTimeName } from '../utils/utils.js';
+import { makeTimeName } from '../utils/index.js';
 import { fileCreateType, taskName, taskStatus } from '../utils/constants.js';
 import createAndSavePhoto from './createAndSavePhoto.js';
 import createDateInfoIfNotExist from './createDateInfoIfNotExist.js';
-import { fromUnixTime } from 'date-fns';
+import getTimeRange from './getTimeRange.js';
+
+const { CREATE_PHOTO, CREATE_PHOTOS_BY_TIME } = taskName;
 
 //
 //
 //
 
-export const createPhotoJob = async (data, services, wLogger) => {
+export const createPhotoJob = (services, serverLogger) => async (data) => {
   const { cameraId, userId, taskId } = data;
-  const { loggerService, taskService, brokerService } = services;
+  const { loggerService, taskService, socketService } = services;
 
-  const logger = loggerService.extend(wLogger, taskName.CREATE_PHOTO);
-  logger(`start ${taskName.CREATE_PHOTO} job`);
+  const logger = loggerService.extend(serverLogger, CREATE_PHOTO);
+  logger(`start ${CREATE_PHOTO} job`);
 
   try {
     const task = await taskService.getOneById({ taskId });
@@ -28,7 +29,7 @@ export const createPhotoJob = async (data, services, wLogger) => {
       },
     });
 
-    brokerService.send(userId, 'update-task', { cameraId, userId, task: rtask });
+    socketService.send(userId, 'update-task', { cameraId, userId, task: rtask });
 
     await createDateInfoIfNotExist({ services, logger, userId, cameraId });
 
@@ -51,10 +52,10 @@ export const createPhotoJob = async (data, services, wLogger) => {
       },
     });
 
-    brokerService.send(userId, 'update-task', { cameraId, userId, task: stask });
-    brokerService.send(userId, 'create-file', { cameraId, userId, file: photo });
+    socketService.send(userId, 'update-task', { cameraId, userId, task: stask });
+    socketService.send(userId, 'create-file', { cameraId, userId, file: photo });
 
-    logger(`successed ${taskName.CREATE_PHOTO} job`);
+    logger(`successed ${CREATE_PHOTO} job`);
   } catch (error) {
     console.log('--- error CreatePhoto ---', error);
 
@@ -67,54 +68,23 @@ export const createPhotoJob = async (data, services, wLogger) => {
       },
     });
 
-    brokerService.send(userId, 'update-task', { cameraId, userId, task: etask });
-    logger(`error ${taskName.CREATE_PHOTO} job`);
+    socketService.send(userId, 'update-task', { cameraId, userId, task: etask });
+    logger(`error ${CREATE_PHOTO} job`);
   }
 
-  logger(`finish ${taskName.CREATE_PHOTO} job`);
+  logger(`finish ${CREATE_PHOTO} job`);
 };
 
 //
 //
 //
 
-const getTimeRange = (photoSettings, dateInfo) => {
-  const { timeRangeType } = photoSettings;
-
-  const isAllTime = timeRangeType === 'allTime';
-  const isSunTime = timeRangeType === 'sunTime';
-  const isCustomTime = timeRangeType === 'customTime';
-
-  let startTime;
-  let stopTime;
-
-  if (isSunTime && dateInfo && dateInfo.weather) {
-    const { weather } = dateInfo;
-    startTime = makeTimeName(fromUnixTime(weather.sys.sunrise));
-    stopTime = makeTimeName(fromUnixTime(weather.sys.sunset));
-  } else if (isCustomTime) {
-    const { customTimeStart, customTimeStop } = photoSettings;
-    startTime = `${customTimeStart}:00`;
-    stopTime = `${customTimeStop}:00`;
-  } else if (isAllTime) {
-    startTime = `00:00:00`;
-    stopTime = `23:59:59`;
-  } else {
-    startTime = `08:00:00`;
-    stopTime = `20:00:00`;
-  }
-
-  return { startTime, stopTime };
-};
-
-//
-
-export const createPhotosByTimeJob = async (data, services, wLogger) => {
+export const createPhotosByTimeJob = (services, serverLogger) => async (data) => {
   const { cameraId, userId, taskId } = data;
-  const { loggerService, taskService, brokerService } = services;
+  const { loggerService, taskService, socketService } = services;
 
-  const logger = loggerService.extend(wLogger, taskName.CREATE_PHOTOS_BY_TIME);
-  logger(`start ${taskName.CREATE_PHOTOS_BY_TIME} job`);
+  const logger = loggerService.extend(serverLogger, CREATE_PHOTOS_BY_TIME);
+  logger(`start ${CREATE_PHOTOS_BY_TIME} job`);
 
   try {
     const task = await taskService.getOneById({ logger, taskId });
@@ -129,7 +99,7 @@ export const createPhotosByTimeJob = async (data, services, wLogger) => {
     logger(`currentTime: ${currentTime}, startTime: ${startTime} stopTime: ${stopTime}`);
 
     if (currentTime < startTime || currentTime > stopTime) {
-      logger(`skip ${taskName.CREATE_PHOTOS_BY_TIME} job - out of time - `);
+      logger(`skip ${CREATE_PHOTOS_BY_TIME} job - out of time - `);
       return;
     }
 
@@ -143,14 +113,14 @@ export const createPhotosByTimeJob = async (data, services, wLogger) => {
       create: fileCreateType.BY_TIME,
     });
 
-    logger(`successed ${taskName.CREATE_PHOTOS_BY_TIME} job`);
-    brokerService.send(userId, 'create-file', { cameraId, userId, file: photo });
+    logger(`successed ${CREATE_PHOTOS_BY_TIME} job`);
+    socketService.send(userId, 'create-file', { cameraId, userId, file: photo });
   } catch (error) {
     console.log('--- error CreatePhotosByTime ---', error);
 
-    logger(`error ${taskName.CREATE_PHOTOS_BY_TIME} job`);
-    brokerService.send(userId, 'task-error', { cameraId, userId, taskId, error });
+    logger(`error ${CREATE_PHOTOS_BY_TIME} job`);
+    socketService.send(userId, 'task-error', { cameraId, userId, taskId, error });
   }
 
-  logger(`finish ${taskName.CREATE_PHOTOS_BY_TIME} job`);
+  logger(`finish ${CREATE_PHOTOS_BY_TIME} job`);
 };

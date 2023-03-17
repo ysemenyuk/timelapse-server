@@ -1,5 +1,5 @@
 import express from 'express';
-import { asyncHandler } from '../utils/utils.js';
+import { asyncHandler } from '../utils/index.js';
 
 export default (middlewares, cameraController, cameraValidator) => {
   const router = express.Router({ mergeParams: true });
@@ -13,6 +13,12 @@ export default (middlewares, cameraController, cameraValidator) => {
   router.get(
     '/',
     asyncHandler(cameraController.getAll.bind(cameraController)) //
+  );
+
+  router.get(
+    '/:cameraId/stats',
+    cameraMiddleware,
+    asyncHandler(cameraController.getCameraStats.bind(cameraController)) //
   );
 
   router.get(
@@ -38,12 +44,6 @@ export default (middlewares, cameraController, cameraValidator) => {
     '/:cameraId',
     cameraMiddleware,
     asyncHandler(cameraController.deleteOne.bind(cameraController)) //
-  );
-
-  router.get(
-    '/:cameraId/stats',
-    cameraMiddleware,
-    asyncHandler(cameraController.getCameraStats.bind(cameraController)) //
   );
 
   return router;

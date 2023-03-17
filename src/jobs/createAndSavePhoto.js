@@ -1,7 +1,7 @@
-import { makeDateName, makePhotoFileName, makeTimeName } from '../utils/utils.js';
+import { makeDateName, makePhotoFileName, makeTimeName } from '../utils/index.js';
 import { fileType, type } from '../utils/constants.js';
 
-const createAndSavePhoto = async ({ services, logger, userId, cameraId, taskId, photoSettings, createType }) => {
+export default async ({ services, logger, userId, cameraId, taskId, photoSettings, createType }) => {
   const { cameraService, httpService, fileService } = services;
 
   const camera = await cameraService.getOneById({ cameraId });
@@ -38,5 +38,3 @@ const createAndSavePhoto = async ({ services, logger, userId, cameraId, taskId, 
 
   return photo;
 };
-
-export default createAndSavePhoto;

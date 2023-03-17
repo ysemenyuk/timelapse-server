@@ -6,7 +6,7 @@ import {
   makeVideoFileName,
   makePhotoFileName,
   makePosterFileName,
-} from '../../utils/utils.js';
+} from '../../utils/index.js';
 
 //
 // dirs paths

@@ -1,5 +1,3 @@
-// import fileService from '../services/file.service.js';
-
 export default class FileController {
   constructor(fileService) {
     this.fileService = fileService;

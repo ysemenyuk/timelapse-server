@@ -1,18 +1,18 @@
-// import taskService from '../services/task.service.js';
 import { fileCreateType, taskName, taskStatus } from '../utils/constants.js';
 import createAndSaveVideo from './createAndSaveVideo.js';
 
+const { CREATE_VIDEO, CREATE_VIDEOS_BY_TIME } = taskName;
+
 //
 //
 //
 
-export const createVideoJob = async (data, services, wLogger) => {
-  const logger = wLogger.extend(taskName.CREATE_VIDEO);
-  logger(`start ${taskName.CREATE_VIDEO} job`);
-
-  const { taskService, brokerService } = services;
-
+export const createVideoJob = (services, serverLogger) => async (data) => {
   const { cameraId, userId, taskId } = data;
+  const { loggerService, taskService, socketService } = services;
+
+  const logger = loggerService.extend(serverLogger, CREATE_VIDEO);
+  logger(`start ${CREATE_VIDEO} job`);
 
   try {
     const task = await taskService.getOneById({ taskId });
@@ -26,7 +26,7 @@ export const createVideoJob = async (data, services, wLogger) => {
       },
     });
 
-    brokerService.send(userId, 'update-task', { cameraId, userId, task: rtask });
+    socketService.send(userId, 'update-task', { cameraId, userId, task: rtask });
 
     const video = await createAndSaveVideo({
       services,
@@ -46,9 +46,9 @@ export const createVideoJob = async (data, services, wLogger) => {
       },
     });
 
-    brokerService.send(userId, 'update-task', { cameraId, userId, task: stask });
-    brokerService.send(userId, 'create-file', { cameraId, userId, file: video });
-    logger(`successed ${taskName.CREATE_VIDEO} job`);
+    socketService.send(userId, 'update-task', { cameraId, userId, task: stask });
+    socketService.send(userId, 'create-file', { cameraId, userId, file: video });
+    logger(`successed ${CREATE_VIDEO} job`);
   } catch (error) {
     console.log('-- error createVideo job --', error);
 
@@ -61,21 +61,25 @@ export const createVideoJob = async (data, services, wLogger) => {
       },
     });
 
-    brokerService.send(userId, 'update-task', { cameraId, userId, task: etask });
-    logger(`error ${taskName.CREATE_VIDEO} job`);
+    socketService.send(userId, 'update-task', { cameraId, userId, task: etask });
+    logger(`error ${CREATE_VIDEO} job`);
   }
 
-  logger(`finish ${taskName.CREATE_VIDEO} job`);
+  logger(`finish ${CREATE_VIDEO} job`);
 };
 
 //
 //
 //
 
-export const createVideosByTimeJob = async (data, socket, wLogger) => {
-  const logger = wLogger.extend(taskName.CREATE_VIDEOS_BY_TIME);
+export const createVideosByTimeJob = (services, serverLogger) => async (data) => {
+  const { cameraId, userId, taskId } = data;
+  const { loggerService } = services;
 
-  logger(`start ${taskName.CREATE_VIDEOS_BY_TIME} job`);
+  const logger = loggerService.extend(serverLogger, CREATE_VIDEOS_BY_TIME);
+  logger(`start ${CREATE_VIDEOS_BY_TIME} job`);
 
-  logger(`finish ${taskName.CREATE_VIDEOS_BY_TIME} job`);
+  logger(`${(cameraId, userId, taskId)}`);
+
+  logger(`finish ${CREATE_VIDEOS_BY_TIME} job`);
 };
