@@ -1,5 +1,5 @@
 import { ValidateError } from '../errors.js';
-import { taskNameSchema, taskSchemaByName } from './task.schema.js';
+import { taskNameSchema, taskSchemaByName } from './task.schema.yup.js';
 
 const validateTask = async (req, res, next) => {
   // console.log('- validateTask createOne req.body -', req.body);
