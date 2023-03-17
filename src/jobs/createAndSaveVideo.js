@@ -1,24 +1,56 @@
 import { makeNumber, makePosterFileName, makeUniformSample, makeVideoFileName } from '../utils/index.js';
 import { fileType, type } from '../utils/constants.js';
 
+//
+
+const getFileName = (videoSettings, createType) => {
+  const { customName } = videoSettings;
+
+  if (createType === 'byHand') {
+    return customName;
+  }
+
+  // make name by time
+  return 'name111';
+};
+
+const getDateRange = (videoSettings, createType) => {
+  const { dateRangeType, startDate, endDate } = videoSettings;
+
+  if (createType === 'byTask') {
+    // make dates by dateRangeType
+    // allDates, lastDay, lastWeek, lastMonth
+    console.log(dateRangeType);
+  }
+
+  if (createType === 'byHand') {
+    return { startDate, endDate };
+  }
+
+  return { startDate: null, endDate: null };
+};
+
+const getTimeRange = (videoSettings) => {
+  const { timeRangeType, startTime, endTime } = videoSettings;
+
+  if (timeRangeType === 'customTime') {
+    return { startTime, endTime };
+  }
+
+  return { startTime: null, endTime: null };
+};
+
+//
+
 export default async ({ services, logger, userId, cameraId, taskId, createType, videoSettings }) => {
   const { videoService, storageService, fsService, fileService } = services;
   //
   console.log('videoSettings', videoSettings);
 
-  const {
-    customName,
-    // dateRangeType,
-    startDate,
-    endDate,
-    timeRangeType,
-    customTimeStart,
-    customTimeEnd,
-    duration,
-    fps,
-  } = videoSettings;
-
-  const isCustomTime = timeRangeType === 'customTime';
+  const fileName = getFileName(videoSettings, createType);
+  const { startDate, endDate } = getDateRange(videoSettings, createType);
+  const { startTime, endTime } = getTimeRange(videoSettings, createType);
+  const { duration, fps } = videoSettings;
 
   // create tmp-dir on disk
   const tmpdir = await fsService.createTmpDir();
@@ -27,9 +59,10 @@ export default async ({ services, logger, userId, cameraId, taskId, createType, 
   // getFile from DB
   const query = {
     type: 'photo',
-    date_gte: startDate,
-    date_lte: endDate,
-    ...(isCustomTime && { time_gte: customTimeStart, time_lte: customTimeEnd }),
+    ...(startDate && { date_gte: startDate }),
+    ...(endDate && { date_lte: endDate }),
+    ...(startTime && { time_gte: startTime }),
+    ...(endTime && { time_lte: endTime }),
   };
 
   const photos = await fileService.getFilesForVideo({ logger, cameraId, query });
@@ -118,14 +151,13 @@ export default async ({ services, logger, userId, cameraId, taskId, createType, 
       createType: createType,
       poster: poster._id,
       videoFileData: {
-        customName: customName,
+        fileName: fileName,
         startDate: startDate,
         endDate: endDate,
-        timeRangeType: timeRangeType,
-        customTimeStart: customTimeStart,
-        customTimeEnd: customTimeEnd,
-        duration: videoinfo.format.duration,
+        startTime: startTime,
+        endTime: endTime,
         fps: fps,
+        duration: videoinfo.format.duration,
       },
     },
   });

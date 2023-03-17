@@ -21,8 +21,6 @@ export default class FileController {
   async getCount(req, res) {
     req.reqLogger(`fileController.getCount`);
 
-    console.log(1111111);
-
     const count = await this.fileService.getCount({
       logger: req.reqLogger,
       cameraId: req.cameraId,
@@ -35,8 +33,6 @@ export default class FileController {
 
   async getCountsByDates(req, res) {
     req.reqLogger(`fileController.getCountsByDates`);
-
-    console.log(2222222);
 
     const counts = await this.fileService.getCountsByDates({
       logger: req.reqLogger,

@@ -76,10 +76,10 @@ export default class TaskService {
       removable: false,
       photoSettings: {
         // default settings
-        interval: 60,
         timeRangeType: 'customTime',
         customTimeStart: '08:00',
         customTimeStop: '20:00',
+        interval: 60,
       },
     });
 
@@ -91,16 +91,15 @@ export default class TaskService {
       removable: false,
       videoSettings: {
         // default settings
-        customName: 'videoByTime',
-        dateRangeType: 'allDates', // allDates, customDates, lastDay, lastWeek, lastMonth
-        startDate: '', // dateString
-        endDate: '', // dateString
-        timeRangeType: 'customTime', // allTime, customTime
-        customTimeStart: '08:00', // timeString
-        customTimeEnd: '18:00', // timeString
-        fps: 25, // fps
-        duration: 60, // seconds
-        interval: 'oneTimeInMonth', // string
+        dateRangeType: 'customDates', // allDates, customDates
+        dateRange: 'lastDay', // lastDay, lastWeek, lastMonth
+        timeRangeType: 'allTime', // allTime, customTime
+        startTime: '09:00',
+        endTime: '18:00',
+        interval: 'oneTimeDay', // oneTimeMonth, oneTimeWeek, oneTimeDay
+        duration: 60,
+        fps: 30,
+        deletExistingFile: 'yes',
       },
     };
 

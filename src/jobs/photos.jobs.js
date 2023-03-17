@@ -7,7 +7,7 @@ import getTimeRange from './getTimeRange.js';
 const { CREATE_PHOTO, CREATE_PHOTOS_BY_TIME } = taskName;
 
 //
-//
+// createPhotoJob
 //
 
 export const createPhotoJob = (services, serverLogger) => async (data) => {
@@ -76,7 +76,7 @@ export const createPhotoJob = (services, serverLogger) => async (data) => {
 };
 
 //
-//
+// createPhotosByTimeJob
 //
 
 export const createPhotosByTimeJob = (services, serverLogger) => async (data) => {
@@ -93,12 +93,12 @@ export const createPhotosByTimeJob = (services, serverLogger) => async (data) =>
     logger(`timeRangeType: ${photoSettings.timeRangeType}`);
 
     const dateInfo = await createDateInfoIfNotExist({ services, logger, userId, cameraId });
-    const { startTime, stopTime } = getTimeRange(photoSettings, dateInfo);
+    const { startTime, endTime } = getTimeRange(photoSettings, dateInfo);
 
     const currentTime = makeTimeName(new Date());
-    logger(`currentTime: ${currentTime}, startTime: ${startTime} stopTime: ${stopTime}`);
+    logger(`currentTime: ${currentTime}, startTime: ${startTime} endTime: ${endTime}`);
 
-    if (currentTime < startTime || currentTime > stopTime) {
+    if (currentTime < startTime || currentTime > endTime) {
       logger(`skip ${CREATE_PHOTOS_BY_TIME} job - out of time - `);
       return;
     }

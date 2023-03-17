@@ -16,25 +16,26 @@ const TaskSchema = mongoose.Schema({
   message: { type: String, default: '' },
 
   photoSettings: {
-    photoUrlType: { type: String }, // cameraUrl, customUrl
     photoUrl: { type: String }, // url
     timeRangeType: { type: String }, // allTime, customTime, sunTime
-    customTimeStart: { type: String }, // default 08:00
-    customTimeStop: { type: String }, // default 20:00
+    startTime: { type: String }, // default 08:00
+    endTime: { type: String }, // default 20:00
     interval: { type: Number }, // seconds
   },
 
   videoSettings: {
     customName: { type: String },
-    dateRangeType: { type: String }, // allDates, customDates, lastDay, lastWeek, lastMonth
+    dateRangeType: { type: String }, // allDates, customDates
+    dateRange: { type: String }, // lastDay, lastWeek, lastMonth
     startDate: { type: String }, // dateString
     endDate: { type: String }, // dateString
     timeRangeType: { type: String }, // allTime, customTime
-    customTimeStart: { type: String }, // timeString
-    customTimeEnd: { type: String }, // timeString
-    fps: { type: Number }, // fps
+    startTime: { type: String }, // timeString
+    endTime: { type: String }, // timeString
+    interval: { type: String }, // oneTimeMonth, oneTimeWeek, oneTimeDay
     duration: { type: Number }, // seconds
-    interval: { type: String }, // cron format
+    fps: { type: Number }, // fps
+    deletExistingFile: { type: String }, // yes, no
   },
 });
 

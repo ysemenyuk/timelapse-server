@@ -79,6 +79,7 @@ export default class CameraRepository {
       ...(withAvatar && addAvatar()),
       { $project: { videos: 0, photos: 0, avatars: 0 } },
     ]);
+
     return cameras;
   }
 

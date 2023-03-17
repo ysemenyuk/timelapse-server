@@ -108,8 +108,6 @@ export default class FileService {
     logger && logger(`fileService.getCountByQuery`);
 
     const counts = await this.fileRepo.countsByDates(cameraId, query);
-    console.log(222333, counts);
-
     return counts;
   }
 

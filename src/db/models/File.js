@@ -25,12 +25,11 @@ const FileSchema = mongoose.Schema({
   },
 
   videoFileData: {
-    customName: { type: String },
+    fileName: { type: String },
     startDate: { type: String }, // dateString
     endDate: { type: String }, // dateString
-    timeRangeType: { type: String }, // allTime, customTime
-    customTimeStart: { type: String }, // timeString
-    customTimeEnd: { type: String }, // timeString
+    startTime: { type: String }, // timeString
+    endTime: { type: String }, // timeString
     duration: { type: Number }, // seconds
     fps: { type: Number }, // fps
   },
