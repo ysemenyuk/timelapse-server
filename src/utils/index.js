@@ -33,19 +33,19 @@ export const makePosterFileName = (date) => {
 
 //
 
-export const makeDateAndTimeName = (date) => {
+export const makeDateAndTimeString = (date) => {
   return format(date, 'yyyy-MM-dd HH:mm:ss');
 };
 
-export const makeTimeName = (date) => {
+export const makeTimeString = (date) => {
   return format(date, 'HH:mm:ss');
 };
 
-export const makeDateName = (date) => {
+export const makeDateString = (date) => {
   return format(date, 'yyyy-MM-dd');
 };
 
-export const makeMonthName = (date) => {
+export const makeMonthString = (date) => {
   return format(date, 'yyyy-MM');
 };
 

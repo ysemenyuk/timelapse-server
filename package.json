@@ -5,9 +5,8 @@
   "main": "./index.js",
   "type": "module",
   "scripts": {
-    "tgbot": "nodemon src/tg/telegraph.js",
-    "start": "nodemon src/main.js",
-    "dev": "set DEBUG=request*,server*,socket.io:server*,agenda:db_init*,agenda:create*,agenda:job* & nodemon src/main.js"
+    "start": "nodemon src/index.js",
+    "dev": "set DEBUG=request*,server*,socket.io:server*,agenda:db_init*,agenda:create*,agenda:job* & nodemon src/index.js"
   },
   "author": "",
   "license": "ISC",

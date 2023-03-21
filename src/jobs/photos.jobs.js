@@ -1,4 +1,4 @@
-import { makeTimeName } from '../utils/index.js';
+import { makeTimeString } from '../utils/index.js';
 import { fileCreateType, taskName, taskStatus } from '../utils/constants.js';
 import createAndSavePhoto from './createAndSavePhoto.js';
 import createDateInfoIfNotExist from './createDateInfoIfNotExist.js';
@@ -95,7 +95,7 @@ export const createPhotosByTimeJob = (services, serverLogger) => async (data) =>
     const dateInfo = await createDateInfoIfNotExist({ services, logger, userId, cameraId });
     const { startTime, endTime } = getTimeRange(photoSettings, dateInfo);
 
-    const currentTime = makeTimeName(new Date());
+    const currentTime = makeTimeString(new Date());
     logger(`currentTime: ${currentTime}, startTime: ${startTime} endTime: ${endTime}`);
 
     if (currentTime < startTime || currentTime > endTime) {
@@ -113,13 +113,13 @@ export const createPhotosByTimeJob = (services, serverLogger) => async (data) =>
       create: fileCreateType.BY_TIME,
     });
 
-    logger(`successed ${CREATE_PHOTOS_BY_TIME} job`);
     socketService.send(userId, 'create-file', { cameraId, userId, file: photo });
+    logger(`successed ${CREATE_PHOTOS_BY_TIME} job`);
   } catch (error) {
     console.log('--- error CreatePhotosByTime ---', error);
 
-    logger(`error ${CREATE_PHOTOS_BY_TIME} job`);
     socketService.send(userId, 'task-error', { cameraId, userId, taskId, error });
+    logger(`error ${CREATE_PHOTOS_BY_TIME} job`);
   }
 
   logger(`finish ${CREATE_PHOTOS_BY_TIME} job`);

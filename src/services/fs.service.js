@@ -6,7 +6,7 @@ import path from 'path';
 // create dir
 
 const createTmpDir = async () => {
-  const fullPath = path.join(process.cwd(), 'tmp-');
+  const fullPath = path.join(process.cwd(), 'temp', 'tmp-');
   const created = await fsp.mkdtemp(fullPath);
   return created;
 };
@@ -14,7 +14,7 @@ const createTmpDir = async () => {
 // remove dir
 
 const removeDir = async ({ dir }) => {
-  const deleted = await fsp.rmdir(dir, { recursive: true });
+  const deleted = await fsp.rm(dir, { recursive: true });
   return deleted;
 };
 

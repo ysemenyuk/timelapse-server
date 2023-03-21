@@ -1,4 +1,4 @@
-import { makeDateName } from '../utils/index.js';
+import { makeDateString } from '../utils/index.js';
 
 export const createDateInfo = async ({ services, logger, userId, cameraId }) => {
   const { cameraService, weatherService, dateInfoService } = services;
@@ -18,7 +18,7 @@ export const createDateInfo = async ({ services, logger, userId, cameraId }) => 
     return null;
   }
 
-  const currentDateName = makeDateName(new Date());
+  const currentDateName = makeDateString(new Date());
 
   const dateInfo = await dateInfoService.createOne({
     logger,
@@ -34,7 +34,7 @@ export const createDateInfo = async ({ services, logger, userId, cameraId }) => 
 export const getDateInfo = async ({ services, logger, userId, cameraId }) => {
   const { dateInfoService } = services;
 
-  const currentDateName = makeDateName(new Date());
+  const currentDateName = makeDateString(new Date());
 
   const dateInfo = await dateInfoService.getOne({
     logger,

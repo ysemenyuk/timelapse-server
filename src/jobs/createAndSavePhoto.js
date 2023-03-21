@@ -1,13 +1,10 @@
-import { makeDateName, makePhotoFileName, makeTimeName } from '../utils/index.js';
+import { makeDateString, makePhotoFileName, makeTimeString } from '../utils/index.js';
 import { fileType, type } from '../utils/constants.js';
 
-export default async ({ services, logger, userId, cameraId, taskId, photoSettings, createType }) => {
-  const { cameraService, httpService, fileService } = services;
+export default async ({ services, logger, userId, cameraId, taskId, createType, photoSettings }) => {
+  const { httpService, fileService } = services;
 
-  const camera = await cameraService.getOneById({ cameraId });
-  const url = photoSettings.photoUrl || camera.photoUrl;
-
-  // await validatorService.validateUrl(url);
+  const url = photoSettings.photoUrl;
 
   const bufferData = await httpService.getData(url, { responseType: 'arraybuffer' });
 
@@ -23,8 +20,8 @@ export default async ({ services, logger, userId, cameraId, taskId, photoSetting
       task: taskId,
 
       name: makePhotoFileName(date),
-      dateString: makeDateName(date),
-      timeString: makeTimeName(date),
+      dateString: makeDateString(date),
+      timeString: makeTimeString(date),
 
       type: type.PHOTO,
       fileType: fileType.IMAGE_JPG,

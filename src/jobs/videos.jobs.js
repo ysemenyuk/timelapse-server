@@ -4,7 +4,7 @@ import createAndSaveVideo from './createAndSaveVideo.js';
 const { CREATE_VIDEO, CREATE_VIDEOS_BY_TIME } = taskName;
 
 //
-//
+// createVideoJob
 //
 
 export const createVideoJob = (services, serverLogger) => async (data) => {
@@ -69,17 +69,37 @@ export const createVideoJob = (services, serverLogger) => async (data) => {
 };
 
 //
-//
+// createVideosByTimeJob
 //
 
 export const createVideosByTimeJob = (services, serverLogger) => async (data) => {
   const { cameraId, userId, taskId } = data;
-  const { loggerService } = services;
+  const { loggerService, taskService, socketService } = services;
 
   const logger = loggerService.extend(serverLogger, CREATE_VIDEOS_BY_TIME);
   logger(`start ${CREATE_VIDEOS_BY_TIME} job`);
 
-  logger(`${(cameraId, userId, taskId)}`);
+  try {
+    const task = await taskService.getOneById({ taskId });
+    const { videoSettings } = task;
+
+    const video = await createAndSaveVideo({
+      services,
+      logger,
+      userId,
+      cameraId,
+      videoSettings,
+      createType: fileCreateType.BY_HAND,
+    });
+
+    socketService.send(userId, 'create-file', { cameraId, userId, file: video });
+    logger(`successed ${CREATE_VIDEOS_BY_TIME} job`);
+  } catch (error) {
+    console.log('-- error createVideo job --', error);
+
+    socketService.send(userId, 'task-error', { cameraId, userId, taskId, error });
+    logger(`error ${CREATE_VIDEOS_BY_TIME} job`);
+  }
 
   logger(`finish ${CREATE_VIDEOS_BY_TIME} job`);
 };

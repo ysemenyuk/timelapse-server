@@ -25,7 +25,7 @@ const FileSchema = mongoose.Schema({
   },
 
   videoFileData: {
-    fileName: { type: String },
+    customName: { type: String },
     startDate: { type: String }, // dateString
     endDate: { type: String }, // dateString
     startTime: { type: String }, // timeString

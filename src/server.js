@@ -23,18 +23,18 @@ export default async (db, services, config) => {
 
   const controllers = getControllers(services);
   const middlewares = getMiddlewares(services);
-  const validators = getValidators(services);
+  const validators = getValidators();
 
   const routers = getRouters(controllers, middlewares, validators);
 
   app.use(middlewares.debugMiddleware);
 
-  app.use('/files', routers.storageRouter);
+  app.use('/api/users', routers.userRouter);
   app.use('/api/cameras/:cameraId/tasks', routers.taskRouter);
   app.use('/api/cameras/:cameraId/files', routers.fileRouter);
   app.use('/api/cameras/:cameraId/date-info', routers.dateInfoRouter);
   app.use('/api/cameras', routers.cameraRouter);
-  app.use('/api/users', routers.userRouter);
+  app.use('/files', routers.storageRouter);
 
   app.use(middlewares.errorHandlerMiddleware);
 
@@ -42,14 +42,12 @@ export default async (db, services, config) => {
     res.status(404).send('Sorry cant find that!');
   });
 
-  const jobs = getJobs(jobTypesToStart, services, logger);
+  const jobs = getJobs(services, jobTypesToStart, logger);
 
   try {
     logger(`Starting server`);
 
-    await db.connect(config);
-    logger(`db successfully connected!`);
-
+    await db.connect(config, logger);
     await socketService.init(config, logger, httpServer);
     await storageService.init(config, logger);
     await workerService.init(config, logger);

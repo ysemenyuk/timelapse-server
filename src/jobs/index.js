@@ -4,7 +4,7 @@ import { taskName } from '../utils/constants.js';
 
 const { CREATE_PHOTO, CREATE_VIDEO, CREATE_PHOTOS_BY_TIME, CREATE_VIDEOS_BY_TIME } = taskName;
 
-export default (jobTypesToStart, services, logger) => {
+export default (services, jobTypesToStart, logger) => {
   // logger(`jobTypesToStart: ${jobTypesToStart}`);
 
   return {

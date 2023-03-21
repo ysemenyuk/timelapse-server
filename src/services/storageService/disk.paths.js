@@ -1,6 +1,6 @@
 import { dirName, type } from '../../utils/constants.js';
 import {
-  makeDateName,
+  makeDateString,
   makeUserDirName,
   makeCameraDirName,
   makeVideoFileName,
@@ -37,7 +37,7 @@ const createVideosDirPath = (userId, cameraId) => {
 
 const createDateDirPath = (userId, cameraId, date) => {
   const photosDirPath = createPhotosDirPath(userId, cameraId);
-  const dateDirName = makeDateName(date);
+  const dateDirName = makeDateString(date);
   return [photosDirPath, dateDirName].join('/');
 };
 

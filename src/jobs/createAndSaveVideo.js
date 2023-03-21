@@ -1,29 +1,34 @@
-import { makeNumber, makePosterFileName, makeUniformSample, makeVideoFileName } from '../utils/index.js';
+import {
+  makeDateString,
+  makeNumber,
+  makePosterFileName,
+  makeUniformSample,
+  makeVideoFileName,
+} from '../utils/index.js';
 import { fileType, type } from '../utils/constants.js';
 
 //
 
-const getFileName = (videoSettings, createType) => {
-  const { customName } = videoSettings;
+const getDateRange = (videoSettings) => {
+  const { dateRangeType, dateRange, startDate, endDate } = videoSettings;
 
-  if (createType === 'byHand') {
-    return customName;
+  if (dateRangeType === 'allDates') {
+    return { startDate: null, endDate: null };
   }
 
-  // make name by time
-  return 'name111';
-};
-
-const getDateRange = (videoSettings, createType) => {
-  const { dateRangeType, startDate, endDate } = videoSettings;
-
-  if (createType === 'byTask') {
-    // make dates by dateRangeType
-    // allDates, lastDay, lastWeek, lastMonth
-    console.log(dateRangeType);
+  if (dateRange === 'lastDay') {
+    //
   }
 
-  if (createType === 'byHand') {
+  if (dateRange === 'lastWeek') {
+    //
+  }
+
+  if (dateRange === 'lastMonth') {
+    //
+  }
+
+  if (startDate && endDate) {
     return { startDate, endDate };
   }
 
@@ -33,11 +38,11 @@ const getDateRange = (videoSettings, createType) => {
 const getTimeRange = (videoSettings) => {
   const { timeRangeType, startTime, endTime } = videoSettings;
 
-  if (timeRangeType === 'customTime') {
-    return { startTime, endTime };
+  if (timeRangeType === 'allTime') {
+    return { startTime: null, endTime: null };
   }
 
-  return { startTime: null, endTime: null };
+  return { startTime, endTime };
 };
 
 //
@@ -47,10 +52,9 @@ export default async ({ services, logger, userId, cameraId, taskId, createType, 
   //
   console.log('videoSettings', videoSettings);
 
-  const fileName = getFileName(videoSettings, createType);
   const { startDate, endDate } = getDateRange(videoSettings, createType);
   const { startTime, endTime } = getTimeRange(videoSettings, createType);
-  const { duration, fps } = videoSettings;
+  const { customName, duration, fps } = videoSettings;
 
   // create tmp-dir on disk
   const tmpdir = await fsService.createTmpDir();
@@ -83,7 +87,16 @@ export default async ({ services, logger, userId, cameraId, taskId, createType, 
   const checked = await Promise.all(checkedp);
   const existing = checked.filter((file) => file);
   console.log('existing.length', existing.length);
-  //
+
+  if (existing.length < 300) {
+    throw new Error('no files for video');
+  }
+
+  const firstFile = existing[0];
+  const lastFile = existing[existing.length - 1];
+
+  const realStartDate = makeDateString(new Date(firstFile.date));
+  const realEndDate = makeDateString(new Date(lastFile.date));
 
   // download and rename files in tmp-dir from storage
   const savedp = existing.map(async (photo, index) => {
@@ -92,6 +105,7 @@ export default async ({ services, logger, userId, cameraId, taskId, createType, 
     const saved = await fsService.saveFile({ dir: tmpdir, file: fileName, stream });
     return saved;
   });
+
   const saved = await Promise.all(savedp);
   console.log('saved.length', saved.length);
 
@@ -151,11 +165,11 @@ export default async ({ services, logger, userId, cameraId, taskId, createType, 
       createType: createType,
       poster: poster._id,
       videoFileData: {
-        fileName: fileName,
-        startDate: startDate,
-        endDate: endDate,
-        startTime: startTime,
-        endTime: endTime,
+        customName: customName || null,
+        startDate: realStartDate || null,
+        endDate: realEndDate || null,
+        startTime: startTime || null,
+        endTime: endTime || null,
         fps: fps,
         duration: videoinfo.format.duration,
       },

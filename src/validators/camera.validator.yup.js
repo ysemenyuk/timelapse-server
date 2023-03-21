@@ -2,8 +2,8 @@ import * as yup from 'yup';
 import { ValidateError } from '../errors.js';
 
 const createOneSchema = yup.object({
-  name: yup.string().required(),
-  description: yup.string().required(),
+  name: yup.string().required().min(3).max(20),
+  description: yup.string().required().min(3).max(30),
   model: yup.string(),
   photoUrl: yup.string().url(),
   rtspUrl: yup.string(),
