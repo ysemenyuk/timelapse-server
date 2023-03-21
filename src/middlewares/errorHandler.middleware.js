@@ -1,7 +1,7 @@
 import { BadRequestError, ValidateError } from '../errors.js';
 
 // eslint-disable-next-line no-unused-vars
-export default () => (err, req, res, next) => {
+export default (loggerService) => (err, req, res, next) => {
   console.log('- errorHandlerMiddleware err -', err);
 
   if (err instanceof BadRequestError) {

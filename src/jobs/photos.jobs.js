@@ -2,7 +2,7 @@ import { makeTimeString } from '../utils/index.js';
 import { fileCreateType, taskName, taskStatus } from '../utils/constants.js';
 import createAndSavePhoto from './createAndSavePhoto.js';
 import createDateInfoIfNotExist from './createDateInfoIfNotExist.js';
-import getTimeRange from './getTimeRange.js';
+import { getTimeRangePhotosByTime } from './helpers.js';
 
 const { CREATE_PHOTO, CREATE_PHOTOS_BY_TIME } = taskName;
 
@@ -93,7 +93,7 @@ export const createPhotosByTimeJob = (services, serverLogger) => async (data) =>
     logger(`timeRangeType: ${photoSettings.timeRangeType}`);
 
     const dateInfo = await createDateInfoIfNotExist({ services, logger, userId, cameraId });
-    const { startTime, endTime } = getTimeRange(photoSettings, dateInfo);
+    const { startTime, endTime } = getTimeRangePhotosByTime(photoSettings, dateInfo);
 
     const currentTime = makeTimeString(new Date());
     logger(`currentTime: ${currentTime}, startTime: ${startTime} endTime: ${endTime}`);

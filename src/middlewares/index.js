@@ -7,5 +7,5 @@ export default (services) => ({
   authMiddleware: getAuthMiddleware(services.userService),
   cameraMiddleware: getCameraMiddleware(services.cameraService),
   debugMiddleware: getDebugMiddleware(services.loggerService),
-  errorHandlerMiddleware: getErrorHandlerMiddleware(),
+  errorHandlerMiddleware: getErrorHandlerMiddleware(services.loggerService),
 });

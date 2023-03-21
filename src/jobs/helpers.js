@@ -1,7 +1,7 @@
 import { makeTimeString } from '../utils/index.js';
 import { fromUnixTime } from 'date-fns';
 
-export default (photoSettings, dateInfo) => {
+export const getTimeRangePhotosByTime = (photoSettings, dateInfo) => {
   const { timeRangeType } = photoSettings;
 
   const isAllTime = timeRangeType === 'allTime';
@@ -24,6 +24,42 @@ export default (photoSettings, dateInfo) => {
   } else {
     startTime = `08:00:00`;
     endTime = `20:00:00`;
+  }
+
+  return { startTime, endTime };
+};
+
+export const getDateRangeForVideo = (videoSettings) => {
+  const { dateRangeType, dateRange, startDate, endDate } = videoSettings;
+
+  if (dateRangeType === 'allDates') {
+    return { startDate: null, endDate: null };
+  }
+
+  if (dateRange === 'lastDay') {
+    //
+  }
+
+  if (dateRange === 'lastWeek') {
+    //
+  }
+
+  if (dateRange === 'lastMonth') {
+    //
+  }
+
+  if (startDate && endDate) {
+    return { startDate, endDate };
+  }
+
+  return { startDate: null, endDate: null };
+};
+
+export const getTimeRangeForVideo = (videoSettings) => {
+  const { timeRangeType, startTime, endTime } = videoSettings;
+
+  if (timeRangeType === 'allTime') {
+    return { startTime: null, endTime: null };
   }
 
   return { startTime, endTime };

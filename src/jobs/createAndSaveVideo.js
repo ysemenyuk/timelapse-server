@@ -6,44 +6,7 @@ import {
   makeVideoFileName,
 } from '../utils/index.js';
 import { fileType, type } from '../utils/constants.js';
-
-//
-
-const getDateRange = (videoSettings) => {
-  const { dateRangeType, dateRange, startDate, endDate } = videoSettings;
-
-  if (dateRangeType === 'allDates') {
-    return { startDate: null, endDate: null };
-  }
-
-  if (dateRange === 'lastDay') {
-    //
-  }
-
-  if (dateRange === 'lastWeek') {
-    //
-  }
-
-  if (dateRange === 'lastMonth') {
-    //
-  }
-
-  if (startDate && endDate) {
-    return { startDate, endDate };
-  }
-
-  return { startDate: null, endDate: null };
-};
-
-const getTimeRange = (videoSettings) => {
-  const { timeRangeType, startTime, endTime } = videoSettings;
-
-  if (timeRangeType === 'allTime') {
-    return { startTime: null, endTime: null };
-  }
-
-  return { startTime, endTime };
-};
+import { getDateRangeForVideo, getTimeRangeForVideo } from './helpers.js';
 
 //
 
@@ -52,8 +15,8 @@ export default async ({ services, logger, userId, cameraId, taskId, createType, 
   //
   console.log('videoSettings', videoSettings);
 
-  const { startDate, endDate } = getDateRange(videoSettings, createType);
-  const { startTime, endTime } = getTimeRange(videoSettings, createType);
+  const { startDate, endDate } = getDateRangeForVideo(videoSettings, createType);
+  const { startTime, endTime } = getTimeRangeForVideo(videoSettings, createType);
   const { customName, duration, fps } = videoSettings;
 
   // create tmp-dir on disk
