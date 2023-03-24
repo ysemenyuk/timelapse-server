@@ -4,13 +4,23 @@ import { taskName } from '../utils/constants.js';
 
 const { CREATE_PHOTO, CREATE_VIDEO, CREATE_PHOTOS_BY_TIME, CREATE_VIDEOS_BY_TIME } = taskName;
 
-export default (services, jobTypesToStart, logger) => {
-  // logger(`jobTypesToStart: ${jobTypesToStart}`);
+const jobsMap = {
+  [CREATE_PHOTO]: createPhotoJob,
+  [CREATE_VIDEO]: createVideoJob,
+  [CREATE_PHOTOS_BY_TIME]: createPhotosByTimeJob,
+  [CREATE_VIDEOS_BY_TIME]: createVideosByTimeJob,
+};
 
-  return {
-    [CREATE_PHOTO]: createPhotoJob(services, logger),
-    [CREATE_VIDEO]: createVideoJob(services, logger),
-    [CREATE_PHOTOS_BY_TIME]: createPhotosByTimeJob(services, logger),
-    [CREATE_VIDEOS_BY_TIME]: createVideosByTimeJob(services, logger),
-  };
+export default (config, logger, services) => {
+  if (!config.jobTypesToStart) {
+    return {};
+  }
+
+  const jobsToStart = {};
+
+  config.jobTypesToStart.forEach((jobName) => {
+    jobsToStart[jobName] = jobsMap[jobName](services, logger);
+  });
+
+  return jobsToStart;
 };

@@ -8,11 +8,8 @@ import getControllers from './controllers/index.js';
 import getRouters from './routes/index.js';
 import getJobs from './jobs/index.js';
 
-export default async (db, services, config) => {
-  const { socketService, storageService, workerService, loggerService } = services;
-  const { jobTypesToStart, port, mode } = config;
-
-  const logger = loggerService.create('server');
+export default async (config, logger, services, db) => {
+  const { socketService, storageService, workerService } = services;
 
   const app = express();
   const httpServer = http.createServer(app);
@@ -42,8 +39,6 @@ export default async (db, services, config) => {
     res.status(404).send('Sorry cant find that!');
   });
 
-  const jobs = getJobs(services, jobTypesToStart, logger);
-
   try {
     logger(`Starting server`);
 
@@ -52,12 +47,12 @@ export default async (db, services, config) => {
     await storageService.init(config, logger);
     await workerService.init(config, logger);
 
+    const jobs = getJobs(config, logger, services);
+
     await workerService.startJobs(jobs, logger);
 
-    httpServer.listen(port, () => {
-      logger(`httpServer running in ${mode} mode on port ${port}`);
-    });
-  } catch (err) {
-    console.log('catch server err', err);
+    return httpServer;
+  } catch (e) {
+    console.log('catch err', e);
   }
 };
