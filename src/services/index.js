@@ -1,5 +1,5 @@
-import GridfsStorage from './storageService/gridfs.storage.js';
-// import DiskStorage from './storageService/disk.storage.js';
+// import GridfsStorage from './storageService/gridfs.storage.js';
+import DiskStorage from './storageService/disk.storage.js';
 import WorkerService from './workerService/worker.service.js';
 import SocketService from './socketService/socket.service.js';
 import LoggerService from './logger.service.js';
@@ -42,12 +42,13 @@ class Container {
 export default (repos, config) => {
   const c = new Container();
 
-  c.add('storageService', (c) => new GridfsStorage(c.loggerService));
+  // c.add('storageService', (c) => new GridfsStorage(c.loggerService));
+  c.add('storageService', (c) => new DiskStorage(c.loggerService));
   c.add('workerService', (c) => new WorkerService(c.loggerService));
   c.add('socketService', (c) => new SocketService(c.loggerService));
   c.add('loggerService', () => new LoggerService());
 
-  c.add('userService', () => new UserService(repos.userRepo, config));
+  c.add('userService', () => new UserService(repos.userRepo, c.fileService, config));
   c.add('cameraService', (c) => new CameraService(repos.cameraRepo, c.taskService, c.fileService));
   c.add('taskService', (c) => new TaskService(repos.taskRepo, c.workerService));
   c.add('fileService', (c) => new FileService(repos.fileRepo, c.storageService));

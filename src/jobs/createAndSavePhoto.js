@@ -2,9 +2,11 @@ import { makeDateString, makePhotoFileName, makeTimeString } from '../utils/inde
 import { fileType, type } from '../utils/constants.js';
 
 export default async ({ services, logger, userId, cameraId, taskId, createType, photoSettings }) => {
-  const { httpService, fileService } = services;
+  const { httpService, fileService, cameraService } = services;
 
-  const url = photoSettings.photoUrl;
+  const camera = await cameraService.getOneById({ logger, cameraId });
+
+  const url = photoSettings.photoUrl || camera.photoUrl;
 
   const bufferData = await httpService.getData(url, { responseType: 'arraybuffer' });
 

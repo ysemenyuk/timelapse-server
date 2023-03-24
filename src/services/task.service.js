@@ -77,13 +77,13 @@ export default class TaskService {
       photoSettings: {
         // default settings
         timeRangeType: 'customTime',
-        customTimeStart: '08:00',
-        customTimeStop: '20:00',
+        startTime: '08:00',
+        endTime: '20:00',
         interval: 60,
       },
     });
 
-    const videosByTimeTask = {
+    const videosByTimeTask = await this.taskRepo.create({
       user: userId,
       camera: cameraId,
       name: taskName.CREATE_VIDEOS_BY_TIME,
@@ -101,7 +101,7 @@ export default class TaskService {
         fps: 30,
         deletExistingFile: 'yes',
       },
-    };
+    });
 
     return { photosByTimeTask, videosByTimeTask };
   }

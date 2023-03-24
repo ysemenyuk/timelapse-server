@@ -55,4 +55,36 @@ export default class StorageController {
       req.resLogger(req);
     });
   }
+
+  //
+
+  async getPhotoFromDisk(req, res) {
+    // req.reqLogger(`disk.storage.router.get jpg ${req.url}`);
+
+    const filePath = req._parsedUrl.pathname;
+    const fileFullPath = this.storageService.createFullPath(filePath);
+
+    const isThumbnail = req.query && req.query.size && req.query.size === 'thumbnail';
+
+    if (isThumbnail) {
+      res.set('Content-Type', 'image/jpg');
+      const buffer = await this.imageService.resizeToBuffer(fileFullPath, imageSize.THUMBNAIL);
+      res.send(buffer);
+      req.resLogger(req);
+      return;
+    }
+
+    res.sendFile(fileFullPath);
+    req.resLogger(req);
+  }
+
+  async getVideoFromDisk(req, res) {
+    // req.reqLogger(`disk.storage.router.get mp4 ${req.url}`);
+
+    const filePath = req._parsedUrl.pathname;
+    const fileFullPath = this.storageService.createFullPath(filePath);
+
+    res.sendFile(fileFullPath);
+    req.resLogger(req);
+  }
 }

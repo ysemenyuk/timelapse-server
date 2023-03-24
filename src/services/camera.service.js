@@ -48,7 +48,6 @@ export default class CameraService {
     logger && logger(`cameraService.getOne`);
 
     const camera = await this.cameraRepo.findOne({ _id: cameraId });
-    // console.log('cameraService.getOne camera', camera);
     return camera;
   }
 
@@ -63,7 +62,6 @@ export default class CameraService {
     logger && logger(`cameraService.getCameraStats`);
 
     const stats = await this.cameraRepo.getStats(cameraId);
-    // console.log('cameraService.getCameraStats stats', stats);
     return stats;
   }
 

@@ -10,7 +10,7 @@ import getJobs from './jobs/index.js';
 
 export default async (db, services, config) => {
   const { socketService, storageService, workerService, loggerService } = services;
-  const { jobTypesToStart, serverPort, mode } = config;
+  const { jobTypesToStart, port, mode } = config;
 
   const logger = loggerService.create('server');
 
@@ -54,10 +54,10 @@ export default async (db, services, config) => {
 
     await workerService.startJobs(jobs, logger);
 
-    httpServer.listen(serverPort, () => {
-      logger(`httpServer running in ${mode} mode on port ${serverPort}`);
+    httpServer.listen(port, () => {
+      logger(`httpServer running in ${mode} mode on port ${port}`);
     });
-  } catch (e) {
-    console.log('catch err', e);
+  } catch (err) {
+    console.log('catch server err', err);
   }
 };

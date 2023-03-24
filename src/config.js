@@ -8,14 +8,12 @@ export default {
   pathToDiskSpace: process.env.DISK_PATH,
 
   mode: process.env.NODE_ENV,
-  serverPort: process.env.SERVER_PORT,
-  workerPort: process.env.WORKER_PORT,
+  port: process.env.SERVER_PORT,
 
   dbUri: process.env.MONGO_URI,
   dbName: process.env.MONGO_DB_NAME,
-
-  gridfsDbUri: process.env.MONGO_URI,
   gridfsDbName: process.env.MONGO_GRIDFS_DB_NAME,
+  agendaDbName: process.env.MONGO_AGENDA_DB_NAME,
 
   secretkey: process.env.SECRET_KEY,
   weatherApiKey: process.env.WEATHER_API_KEY,

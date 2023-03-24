@@ -17,7 +17,7 @@ export default class WorkerService {
 
     await mongoClient.connect();
 
-    this.agenda = new Agenda({ mongo: mongoClient.db(config.dbName) });
+    this.agenda = new Agenda({ mongo: mongoClient.db(config.agendaDbName) });
 
     await this.agenda.start();
     sLogger(`workerService successfully started!`);

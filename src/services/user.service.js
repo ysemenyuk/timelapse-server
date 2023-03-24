@@ -9,8 +9,9 @@ const filterProps = (user) => _.pick(user, fields);
 //
 
 export default class UserService {
-  constructor(userRepo, config) {
+  constructor(userRepo, fileService, config) {
     this.userRepo = userRepo;
+    this.fileService = fileService;
     this.config = config;
   }
 
@@ -55,6 +56,7 @@ export default class UserService {
     const newUser = await this.userRepo.create({ email, password: hashPassword });
 
     // crete user folder
+    // if error send error but user created!
     await this.fileService.createUserFolder({
       logger,
       userId: newUser._id,
