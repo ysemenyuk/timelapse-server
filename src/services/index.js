@@ -39,7 +39,7 @@ class Container {
   }
 }
 
-export default (repos, config) => {
+export default (config, repos) => {
   const c = new Container();
 
   c.add('storageService', (c) => new GridfsStorage(c.loggerService));
