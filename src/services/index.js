@@ -16,6 +16,8 @@ import httpService from './http.service.js';
 import imageService from './image.service.js';
 import videoService from './video.service.js';
 
+import getRepos from '../db/repos/index.js';
+
 class Container {
   constructor() {
     this.services = {};
@@ -39,14 +41,16 @@ class Container {
   }
 }
 
-export default (config, repos) => {
+export default (config) => {
   const c = new Container();
+  const repos = getRepos();
+
+  c.add('loggerService', () => new LoggerService(config));
 
   // c.add('storageService', (c) => new GridfsStorage(c.loggerService));
   c.add('storageService', (c) => new DiskStorage(c.loggerService));
   c.add('workerService', (c) => new WorkerService(c.loggerService));
   c.add('socketService', (c) => new SocketService(c.loggerService));
-  c.add('loggerService', () => new LoggerService());
 
   c.add('userService', () => new UserService(repos.userRepo, c.fileService, config));
   c.add('cameraService', (c) => new CameraService(repos.cameraRepo, c.taskService, c.fileService));

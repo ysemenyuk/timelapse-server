@@ -7,11 +7,11 @@ const { CREATE_VIDEO, CREATE_VIDEOS_BY_TIME } = taskName;
 // createVideoJob
 //
 
-export const createVideoJob = (services, serverLogger) => async (data) => {
+export const createVideoJob = (services) => async (data) => {
   const { cameraId, userId, taskId } = data;
   const { loggerService, taskService, socketService } = services;
 
-  const logger = loggerService.extend(serverLogger, CREATE_VIDEO);
+  const logger = loggerService.createLogger('worker:', CREATE_VIDEO);
   logger(`start ${CREATE_VIDEO} job`);
 
   try {
@@ -72,11 +72,11 @@ export const createVideoJob = (services, serverLogger) => async (data) => {
 // createVideosByTimeJob
 //
 
-export const createVideosByTimeJob = (services, serverLogger) => async (data) => {
+export const createVideosByTimeJob = (services) => async (data) => {
   const { cameraId, userId, taskId } = data;
   const { loggerService, taskService, socketService } = services;
 
-  const logger = loggerService.extend(serverLogger, CREATE_VIDEOS_BY_TIME);
+  const logger = loggerService.createLogger('worker:', CREATE_VIDEOS_BY_TIME);
   logger(`start ${CREATE_VIDEOS_BY_TIME} job`);
 
   try {

@@ -10,6 +10,10 @@ class MongoDB {
 
     logger(`db successfully connected!`);
   }
+
+  disconnect() {
+    mongoose.connection.close();
+  }
 }
 
 export default MongoDB;

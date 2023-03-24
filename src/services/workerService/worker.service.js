@@ -33,7 +33,7 @@ export default class WorkerService {
     // }
   }
 
-  async startJobs(jobs, sLogger) {
+  async startJobs(config, sLogger, jobs) {
     const jobTypesToStart = Object.keys(jobs);
     sLogger(`jobTypesToStart: ${jobTypesToStart}`);
 

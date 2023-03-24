@@ -13,7 +13,6 @@ export default class CameraService {
     logger && logger(`cameraService.createOne`);
 
     const camera = await this.cameraRepo.create({ user: userId, avatar: null, ...payload });
-    // console.log('camera', camera);
 
     // create camera folders
     await this.fileService.createCameraFolders({
@@ -40,7 +39,6 @@ export default class CameraService {
     logger && logger(`cameraService.getAll`);
 
     const cameras = this.cameraRepo.find(userId, query);
-    // console.log('cameraService.getAll cameras', cameras);
     return cameras;
   }
 
@@ -75,7 +73,6 @@ export default class CameraService {
     // TODO: validate payload
 
     const updated = await this.cameraRepo.updateOneById(cameraId, payload);
-    // console.log('cameraService.updateOneById updated', updated);
     return updated;
   }
 

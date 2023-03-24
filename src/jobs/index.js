@@ -11,7 +11,7 @@ const jobsMap = {
   [CREATE_VIDEOS_BY_TIME]: createVideosByTimeJob,
 };
 
-export default (config, logger, services) => {
+export default (config, sLogger, services) => {
   if (!config.jobTypesToStart) {
     return {};
   }
@@ -19,7 +19,7 @@ export default (config, logger, services) => {
   const jobsToStart = {};
 
   config.jobTypesToStart.forEach((jobName) => {
-    jobsToStart[jobName] = jobsMap[jobName](services, logger);
+    jobsToStart[jobName] = jobsMap[jobName](services);
   });
 
   return jobsToStart;

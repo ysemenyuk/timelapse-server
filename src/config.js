@@ -8,7 +8,7 @@ export default {
   pathToDiskSpace: process.env.DISK_PATH,
 
   mode: process.env.NODE_ENV,
-  port: process.env.SERVER_PORT,
+  port: process.env.PORT,
 
   dbUri: process.env.MONGO_URI,
   dbName: process.env.MONGO_DB_NAME,

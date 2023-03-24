@@ -10,11 +10,11 @@ const { CREATE_PHOTO, CREATE_PHOTOS_BY_TIME } = taskName;
 // createPhotoJob
 //
 
-export const createPhotoJob = (services, serverLogger) => async (data) => {
+export const createPhotoJob = (services) => async (data) => {
   const { cameraId, userId, taskId } = data;
   const { loggerService, taskService, socketService } = services;
 
-  const logger = loggerService.extend(serverLogger, CREATE_PHOTO);
+  const logger = loggerService.createLogger(`worker:${CREATE_PHOTO}`);
   logger(`start ${CREATE_PHOTO} job`);
 
   try {
@@ -79,11 +79,11 @@ export const createPhotoJob = (services, serverLogger) => async (data) => {
 // createPhotosByTimeJob
 //
 
-export const createPhotosByTimeJob = (services, serverLogger) => async (data) => {
+export const createPhotosByTimeJob = (services) => async (data) => {
   const { cameraId, userId, taskId } = data;
   const { loggerService, taskService, socketService } = services;
 
-  const logger = loggerService.extend(serverLogger, CREATE_PHOTOS_BY_TIME);
+  const logger = loggerService.createLogger(`worker:${CREATE_PHOTOS_BY_TIME}`);
   logger(`start ${CREATE_PHOTOS_BY_TIME} job`);
 
   try {
