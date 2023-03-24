@@ -1,128 +1,106 @@
 import 'dotenv/config';
-import moment from 'moment';
 import fs from 'fs';
 import path from 'path';
-import mongoose from 'mongoose';
-import CameraFile from '../models/CameraFile.js';
+import MongoDB from '../db/mongo.db.js';
+import getServices from '../services/index.js';
+import config from '../config.js';
+import { makeDateString, makeTimeString } from './index.js';
+import { fileCreateType, fileType, type } from './constants.js';
 
-const dbUri = process.env.MONGO_URI;
-const pathToStorage = process.env.PATH_TO_STORAGE;
+const startPath = 'u_641a9f7e23911029305ee801\\c_641aa43d482f2817d4b8f455\\Photos\\';
+const userId = '641a9f7e23911029305ee801';
+const cameraId = '641aa43d482f2817d4b8f455';
 
-const startPath = ['627cbb044c4bb63594cc2bd2', 'ScreenshotsByTime'];
-const startParent = 'ScreenshotsByTime';
-
-const userId = '60db0585ad1d0c334ff80948';
-const cameraId = '627cbb044c4bb63594cc2bd2';
-const parentId = '627cbb054c4bb63594cc2bd8';
-
-const readFilesAndFolders = (pathToStorage, startPath, startParent, fileType = 'photo', folderType = 'folder') => {
-  const fullPath = path.join(pathToStorage, ...startPath);
+const readFiles = (pathToDir) => {
+  const fullPath = path.join(config.pathToDiskSpace, pathToDir);
   const items = fs.readdirSync(fullPath);
 
   const result = [];
 
   items.forEach((itemName) => {
-    const fullItemPath = path.join(fullPath, itemName);
+    const itemPath = path.join(pathToDir, itemName);
+    const fullItemPath = path.join(config.pathToDiskSpace, itemPath);
+
     const itemStat = fs.statSync(fullItemPath);
-    const itemType = itemStat.isDirectory() ? folderType : fileType;
-    const item = { name: itemName, path: startPath, parent: startParent, type: itemType };
 
     if (itemStat.isDirectory()) {
-      result.push(item, ...readFilesAndFolders(pathToStorage, [...startPath, itemName], itemName));
+      result.push(...readFiles(itemPath));
     } else {
-      result.push(item);
+      const file = { name: itemName, path: itemPath, size: itemStat.size };
+      result.push(file);
     }
   });
 
   return result;
 };
 
-const updateFolderInDb = async (folder) => {
-  const folderInDb = await CameraFile.findOne({ camera: cameraId, parent: parentId, name: folder.name });
+const updateFileInDb = async (file, fileService) => {
+  const fileInDb = await fileService.getOne({ camera: cameraId, name: file.name });
 
-  const item = {
-    name: folder.name,
-    date: moment(folder.name).format(),
-    user: userId,
-    camera: cameraId,
-    parent: parentId,
-    path: folder.path,
-    type: folder.type,
-  };
-
-  if (folderInDb) {
-    const updatedFolder = await CameraFile.findOneAndUpdate({ _id: folderInDb._id }, item, { new: true });
-    return updatedFolder;
-  } else {
-    const folder = new CameraFile(item);
-    await folder.save();
-    return folder;
-  }
-};
-
-const updateFileInDb = async (file) => {
-  const fileInDb = await CameraFile.findOne({ camera: cameraId, name: file.name });
-  const parentInDb = await CameraFile.findOne({ camera: cameraId, parent: parentId, name: file.parent });
-
-  if (!parentInDb) {
-    return;
+  if (fileInDb) {
+    return null;
   }
 
-  const dateStringForParsing = file.name
-    .slice(5, -4)
+  // console.log('file', file);
+
+  const dateString = file.name
+    .slice(7, -4)
     .split('--')
     .map((item, index) => (index === 0 ? item : item.replace(/-/g, ':')))
     .join('T');
 
-  const item = {
+  const date = new Date(dateString);
+
+  const payload = {
     name: file.name,
-    date: moment(dateStringForParsing).format(),
+    date: date,
     user: userId,
     camera: cameraId,
-    parent: parentInDb._id,
-    path: file.path,
-    storage: 'disk',
-    type: file.type,
+    task: null,
+
+    dateString: makeDateString(date),
+    timeString: makeTimeString(date),
+
+    link: `/files/${file.path}`,
+    size: file.size,
+
+    type: type.PHOTO,
+    fileType: fileType.IMAGE_JPG,
+    createType: fileCreateType.BY_HAND,
+
+    photoFileData: {
+      photoUrl: null,
+    },
   };
 
-  if (fileInDb) {
-    const updatedFile = await CameraFile.findOneAndUpdate({ _id: fileInDb._id }, item, { new: true });
-    return updatedFile;
-  } else {
-    const file = new CameraFile(item);
-    await file.save();
-    return file;
-  }
+  // console.log('payload', payload);
+
+  const addedFileInDb = await fileService.createFileInDb({ payload });
+  return addedFileInDb;
 };
 
 const start = async () => {
+  const db = new MongoDB();
+  const services = getServices(config);
+
   try {
-    await mongoose.connect(dbUri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      useFindAndModify: false,
-    });
+    await db.connect(config, () => {});
 
-    console.log(111, `Mongoose successfully Connected`);
+    const filesOnDisk = readFiles(startPath);
+    console.log('filesOnDisk.length', filesOnDisk.length);
 
-    const filesAndFolders = readFilesAndFolders(pathToStorage, startPath, startParent);
+    const filesPromises = filesOnDisk.map(async (file) => await updateFileInDb(file, services.fileService));
+    // console.log('filesPromises', filesPromises);
 
-    const folders = filesAndFolders.filter((item) => item.type === 'folder');
-    const foldersPromises = folders.map(updateFolderInDb);
-    const foldersResult = await Promise.all(foldersPromises);
-
-    console.log(222, 'foldersResult', foldersResult);
-
-    const files = filesAndFolders.filter((item) => item.type !== 'folder');
-    const filesPromises = files.map(updateFileInDb);
     const filesResult = await Promise.all(filesPromises);
+    // console.log('filesResult', filesResult);
 
-    console.log(333, 'filesResult', filesResult);
+    console.log('filesAddedInDb', filesResult.filter((i) => !!i).length);
   } catch (error) {
-    console.log(999, 'error', error);
+    console.log('error', error);
   }
 
-  mongoose.connection.close();
+  db.disconnect();
 };
 
 start();

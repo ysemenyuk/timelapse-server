@@ -95,7 +95,6 @@ export default class GridfsStorage {
 
     const link = `/files/g/${fileName}`;
     const [metadata] = await this.bucket.find({ filename: fileName }).toArray();
-    // console.log('metadata', metadata);
 
     return { link, size: metadata.length };
   }

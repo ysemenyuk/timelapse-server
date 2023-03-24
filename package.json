@@ -16,7 +16,7 @@
     "dev": "set DEBUG=server*,request*,worker* & nodemon src/index.js",
     "debug": "set DEBUG=server*,request*,worker*,socket.io*,agenda* & nodemon src/index.js"
   },
-  "author": "",
+  "author": "yu.semenyuk",
   "license": "ISC",
   "dependencies": {
     "agenda": "^4.4.0",

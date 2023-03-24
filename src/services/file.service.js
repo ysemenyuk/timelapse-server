@@ -31,7 +31,7 @@ const makeFilter = (camera, query) => {
 };
 
 //
-//
+// FileService
 //
 
 export default class FileService {
@@ -60,6 +60,13 @@ export default class FileService {
     const created = await this.fileRepo.updateOneById(file._id, fileInfo);
     // console.log('created', created);
     return created;
+  }
+
+  async createFileInDb({ logger, payload }) {
+    logger && logger(`fileService.createFileInDb`);
+
+    const file = await this.fileRepo.create(payload);
+    return file;
   }
 
   //
