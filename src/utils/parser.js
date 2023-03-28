@@ -9,29 +9,30 @@ import { fileCreateType, fileType, type } from './constants.js';
 
 const readDirs = async (pathToDir) => {
   const fullPath = path.join(config.pathToDiskSpace, pathToDir);
-  const dirs = await fsp.readdir(fullPath);
+  const dirsNames = await fsp.readdir(fullPath);
 
-  const result = dirs.map((dirName) => {
+  const dirsPaths = dirsNames.map((dirName) => {
     const dirPath = path.join(pathToDir, dirName);
     return dirPath;
   });
 
-  return result;
+  return dirsPaths;
 };
 
 const readFiles = async (pathToDir) => {
   const fullPath = path.join(config.pathToDiskSpace, pathToDir);
-  const files = await fsp.readdir(fullPath);
+  const filesNames = await fsp.readdir(fullPath);
 
-  const filesPromises = files.map(async (fileName) => {
-    const filePath = path.join(pathToDir, fileName);
-    const fileStat = await fsp.stat(path.join(config.pathToDiskSpace, filePath));
-    const file = { name: fileName, path: filePath, size: fileStat.size };
-    return file;
-  });
+  const filesInDir = await Promise.all(
+    filesNames.map(async (fileName) => {
+      const filePath = path.join(pathToDir, fileName);
+      const fileStat = await fsp.stat(path.join(config.pathToDiskSpace, filePath));
+      const file = { name: fileName, path: filePath, size: fileStat.size };
+      return file;
+    })
+  );
 
-  const result = await Promise.all(filesPromises);
-  return result;
+  return filesInDir;
 };
 
 const createFileInDb = async (userId, cameraId, file, fileService) => {
@@ -87,8 +88,9 @@ const start = async (userId, cameraId) => {
       console.log({ dir });
 
       const filesInDir = await readFiles(dir);
-      const filesPromises = filesInDir.map(async (file) => await createFileInDb(userId, cameraId, file, fileService));
-      const filesResult = await Promise.all(filesPromises);
+      const filesResult = await Promise.all(
+        filesInDir.map(async (file) => await createFileInDb(userId, cameraId, file, fileService))
+      );
 
       console.log('filesInDir', filesResult.length);
       console.log('filesAddedInDb', filesResult.filter((i) => !!i).length);
