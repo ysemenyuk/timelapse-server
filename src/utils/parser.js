@@ -20,29 +20,29 @@ const readDirs = async (pathToDir) => {
   return dirsPaths;
 };
 
-const renameFiles = async (pathToDir) => {
-  const fullPath = path.join(config.pathToDiskSpace, pathToDir);
-  const filesNames = await fsp.readdir(fullPath);
+// const renameFiles = async (pathToDir) => {
+//   const fullPath = path.join(config.pathToDiskSpace, pathToDir);
+//   const filesNames = await fsp.readdir(fullPath);
 
-  const filesInDir = await Promise.all(
-    filesNames.map(async (fileName) => {
-      const filePath = path.join(pathToDir, fileName);
-      const fileStat = await fsp.stat(path.join(config.pathToDiskSpace, filePath));
+//   const filesInDir = await Promise.all(
+//     filesNames.map(async (fileName) => {
+//       const filePath = path.join(pathToDir, fileName);
+//       const fileStat = await fsp.stat(path.join(config.pathToDiskSpace, filePath));
 
-      const newFileName = `photo--${format(fileStat.mtime, 'yyyy-MM-dd--HH-mm-ss')}.jpg`
-      const newFilePath = path.join(pathToDir, newFileName);
+//       const newFileName = `photo--${format(fileStat.mtime, 'yyyy-MM-dd--HH-mm-ss')}.jpg`
+//       const newFilePath = path.join(pathToDir, newFileName);
 
-      if (fileName !== newFileName) {
-        await fsp.rename(path.join(config.pathToDiskSpace, filePath), path.join(config.pathToDiskSpace, newFilePath))
-        console.log(fileName, '--->', newFileName)
-      }
+//       if (fileName !== newFileName) {
+//         await fsp.rename(path.join(config.pathToDiskSpace, filePath), path.join(config.pathToDiskSpace, newFilePath))
+//         console.log(fileName, '--->', newFileName)
+//       }
 
-      return newFileName;
-    })
-  );
+//       return newFileName;
+//     })
+//   );
 
-  return filesInDir;
-}
+//   return filesInDir;
+// }
 
 const readFiles = async (pathToDir) => {
   const fullPath = path.join(config.pathToDiskSpace, pathToDir);
@@ -51,39 +51,63 @@ const readFiles = async (pathToDir) => {
   const filesInDir = await Promise.all(
     filesNames.map(async (fileName) => {
       const filePath = path.join(pathToDir, fileName);
-      const fileStat = await fsp.stat(path.join(config.pathToDiskSpace, filePath));
+      const fileStat = await fsp.stat(
+        path.join(config.pathToDiskSpace, filePath),
+      );
 
-      const file = { name: fileName, path: filePath, stat: fileStat };
+      const newFileName = `photo--${format(
+        fileStat.mtime,
+        'yyyy-MM-dd--HH-mm-ss',
+      )}.jpg`;
+      const newFilePath = path.join(pathToDir, newFileName);
+
+      if (fileName !== newFileName) {
+        await fsp.rename(
+          path.join(config.pathToDiskSpace, filePath),
+          path.join(config.pathToDiskSpace, newFilePath),
+        );
+        console.log(fileName, '--->', newFileName);
+      }
+
+      const file = { name: newFileName, path: newFilePath, stat: fileStat };
       return file;
-    })
+    }),
   );
 
   return filesInDir;
 };
 
 const createFileInDb = async (userId, cameraId, file, fileService) => {
-  const fileInDb = await fileService.getOne({ camera: cameraId, name: file.name });
+  const fileInDb = await fileService.getOne({
+    camera: cameraId,
+    name: file.name,
+  });
 
-  if (fileInDb) {
-    return null;
-  }
-
-  // const dateAndTime = file.name.replace(/.jpg/, '').split('--');
-  // const dateString = `${dateAndTime[1]}T${dateAndTime[2].replace(/-/, ':')}`;
-  // const date = new Date(dateString);
-
-  const payload = {
+  const mainPayload = {
     name: file.name,
     date: file.stat.mtime,
+
     user: userId,
     camera: cameraId,
-    task: null,
 
     dateString: makeDateString(file.stat.mtime),
     timeString: makeTimeString(file.stat.mtime),
 
     link: `/files/${file.path}`,
     size: file.size,
+  };
+
+  if (fileInDb) {
+    const updatedFileInDb = await fileService.updateOneById({
+      itemId: fileInDb._id,
+      payload: mainPayload,
+    });
+
+    return updatedFileInDb;
+  }
+
+  const fullPayload = {
+    ...mainPayload,
 
     type: type.PHOTO,
     fileType: fileType.IMAGE_JPG,
@@ -94,7 +118,10 @@ const createFileInDb = async (userId, cameraId, file, fileService) => {
     },
   };
 
-  const addedFileInDb = await fileService.createFileInDb({ payload });
+  const addedFileInDb = await fileService.createFileInDb({
+    payload: fullPayload,
+  });
+
   return addedFileInDb;
 };
 
@@ -112,14 +139,16 @@ const start = async (userId, cameraId) => {
     for (const dir of datesDirs) {
       console.log({ dir });
 
-      await renameFiles(dir)
       const filesInDir = await readFiles(dir);
       const filesResult = await Promise.all(
-        filesInDir.map(async (file) => await createFileInDb(userId, cameraId, file, fileService))
+        filesInDir.map(
+          async (file) =>
+            await createFileInDb(userId, cameraId, file, fileService),
+        ),
       );
 
       console.log('filesInDir', filesResult.length);
-      console.log('filesAddedInDb', filesResult.filter((i) => !!i).length);
+      // console.log('filesAddedInDb', filesResult.filter((i) => !!i).length);
     }
   } catch (error) {
     console.log('error', error);

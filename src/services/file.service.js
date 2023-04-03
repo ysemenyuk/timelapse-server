@@ -18,7 +18,10 @@ const makeFilter = (camera, query) => {
   }
 
   if (date_gte && date_lte) {
-    dateRange = { $gte: getGteDateTime(date_gte), $lte: getLteDateTime(date_lte) };
+    dateRange = {
+      $gte: getGteDateTime(date_gte),
+      $lte: getLteDateTime(date_lte),
+    };
   }
 
   let timeString;
@@ -27,7 +30,10 @@ const makeFilter = (camera, query) => {
     timeString = { $gte: `${time_gte}:00`, $lte: `${time_lte}:00` };
   }
 
-  return _.pickBy({ camera, type, createType, date: dateRange, timeString }, _.identity);
+  return _.pickBy(
+    { camera, type, createType, date: dateRange, timeString },
+    _.identity,
+  );
 };
 
 //
@@ -204,7 +210,10 @@ export default class FileService {
     }
 
     // delete files from DB
-    const deletedFromDb = await this.fileRepo.deleteMany({ user: userId, camera: cameraId });
+    const deletedFromDb = await this.fileRepo.deleteMany({
+      user: userId,
+      camera: cameraId,
+    });
     return deletedFromDb;
   }
 
