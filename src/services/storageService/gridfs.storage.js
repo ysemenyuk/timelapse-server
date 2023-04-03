@@ -3,7 +3,11 @@ import mongodb from 'mongodb';
 import { Readable } from 'stream';
 import { pipeline } from 'stream/promises';
 import { type } from '../../utils/constants.js';
-import { makeVideoFileName, makePhotoFileName, makePosterFileName } from '../../utils/index.js';
+import {
+  makeVideoFileName,
+  makePhotoFileName,
+  makePosterFileName,
+} from '../../utils/index.js';
 
 const { MongoClient, ObjectId } = mongodb;
 
@@ -48,7 +52,9 @@ export default class GridfsStorage {
     const database = mongoClient.db(config.gridfsDbName);
     this.bucket = new mongodb.GridFSBucket(database);
 
-    sLogger(`storageService successfully starded! storageType: "gridfs", database: "${config.gridfsDbName}"`);
+    sLogger(
+      `storageService successfully starded! storageType: "gridfs", database: "${config.gridfsDbName}"`,
+    );
   }
 
   // create
@@ -69,7 +75,10 @@ export default class GridfsStorage {
   }
 
   removeCameraFiles({ logger, userId, cameraId }) {
-    logger && logger(`gridfs.storage.removeCameraFiles userId cameraId: ${userId} ${cameraId}`);
+    logger &&
+      logger(
+        `gridfs.storage.removeCameraFiles userId cameraId: ${userId} ${cameraId}`,
+      );
     // delete all camera files
   }
 
@@ -79,7 +88,9 @@ export default class GridfsStorage {
     logger && logger(`gridfs.storage.saveFile filePath: ${file.name}`);
 
     const fileName = createFileName(file);
-    const uploadStream = this.bucket.openUploadStream(fileName, { metadata: { user: file.user, camera: file.camera } });
+    const uploadStream = this.bucket.openUploadStream(fileName, {
+      metadata: { user: file.user, camera: file.camera },
+    });
 
     try {
       if (stream) {
@@ -127,14 +138,15 @@ export default class GridfsStorage {
     const fileName = createFileName(file);
     const [metadata] = await this.bucket.find({ filename: fileName }).toArray();
     // console.log('metadata', metadata);
-    const deleted = await this.bucket.delete(ObjectId(metadata._id));
+    const deleted = await this.bucket.delete(new ObjectId(metadata._id));
     return deleted;
   }
 
   // streams
 
   openDownloadStream({ logger, file }) {
-    logger && logger(`gridFs.storage.openDownloadStream  file.name: ${file.name}`);
+    logger &&
+      logger(`gridFs.storage.openDownloadStream  file.name: ${file.name}`);
 
     const fileName = createFileName(file);
     const downloadStream = this.bucket.openDownloadStreamByName(fileName);
@@ -142,7 +154,8 @@ export default class GridfsStorage {
   }
 
   openDownloadStreamByLink({ logger, fileLink }) {
-    logger && logger(`gridFs.storage.openDownloadStreamByLink fileName: ${fileLink}`);
+    logger &&
+      logger(`gridFs.storage.openDownloadStreamByLink fileName: ${fileLink}`);
 
     const fileName = _.trimStart(fileLink, '/g/');
     const downloadStream = this.bucket.openDownloadStreamByName(fileName);

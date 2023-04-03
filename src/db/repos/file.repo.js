@@ -17,7 +17,9 @@ export default class FileRepository {
   }
 
   async findOne(filter, projection, options) {
-    const file = await File.findOne(filter, projection, options).populate('poster');
+    const file = await File.findOne(filter, projection, options).populate(
+      'poster',
+    );
     return file;
   }
 
@@ -27,7 +29,9 @@ export default class FileRepository {
   }
 
   async updateOneById(id, payload) {
-    const file = await File.findOneAndUpdate({ _id: id }, payload, { new: true });
+    const file = await File.findOneAndUpdate({ _id: id }, payload, {
+      new: true,
+    });
     return file;
   }
 
@@ -51,10 +55,10 @@ export default class FileRepository {
   async countsByDates(cameraId, query) {
     const match = _.pickBy(
       {
-        camera: ObjectId(cameraId),
+        camera: new ObjectId(cameraId),
         type: query.type || 'photo',
       },
-      _.identity
+      _.identity,
     );
 
     const counts = await File.aggregate([

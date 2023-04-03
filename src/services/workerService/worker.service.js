@@ -2,7 +2,7 @@ import mongodb from 'mongodb';
 import { Agenda } from 'agenda/es.js';
 import { taskStatus } from '../../utils/constants.js';
 
-const { MongoClient, ObjectID } = mongodb;
+const { ObjectId } = mongodb;
 
 export default class WorkerService {
   constructor(loggerService) {
@@ -10,14 +10,17 @@ export default class WorkerService {
   }
 
   async init(config, sLogger) {
-    const mongoClient = new MongoClient(config.dbUri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
+    // const mongoClient = new MongoClient(config.dbUri, {
+    //   useNewUrlParser: true,
+    //   useUnifiedTopology: true,
+    // });
+
+    // await mongoClient.connect();
+    // this.agenda = new Agenda({ mongo: mongoClient.db(config.agendaDbName) });
+
+    this.agenda = new Agenda({
+      db: { address: config.dbUri, collection: config.agendaDbName },
     });
-
-    await mongoClient.connect();
-
-    this.agenda = new Agenda({ mongo: mongoClient.db(config.agendaDbName) });
 
     await this.agenda.start();
     sLogger(`workerService successfully started!`);
@@ -25,12 +28,12 @@ export default class WorkerService {
     const currentjobs = await this.agenda.jobs();
     sLogger(`workerService currentjobs: ${currentjobs.length}`);
 
-    // if (currentjobs.length) {
-    // await Promise.all(currentjobs.map(async (job) => await job.remove()));
-    // currentjobs.forEach((job) => {
-    //   console.log(job.attrs);
-    // });
-    // }
+    if (currentjobs.length) {
+      // await Promise.all(currentjobs.map(async (job) => await job.remove()));
+      currentjobs.forEach((job) => {
+        console.log(job.attrs);
+      });
+    }
   }
 
   async startJobs(config, sLogger, jobs) {
@@ -127,14 +130,18 @@ export default class WorkerService {
   //
 
   async removeTaskJobs(taskId) {
-    const jobs = await this.agenda.jobs({ 'data.taskId': ObjectID(taskId) });
+    const jobs = await this.agenda.jobs({
+      'data.taskId': new ObjectId(taskId),
+    });
     if (jobs.length) {
       await Promise.all(jobs.map(async (job) => await job.remove()));
     }
   }
 
   async removeCameraJobs(cameraId) {
-    const jobs = await this.agenda.jobs({ 'data.cameraId': ObjectID(cameraId) });
+    const jobs = await this.agenda.jobs({
+      'data.cameraId': new ObjectId(cameraId),
+    });
     if (jobs.length) {
       await Promise.all(jobs.map((job) => job.remove()));
     }

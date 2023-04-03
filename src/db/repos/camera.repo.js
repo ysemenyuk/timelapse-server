@@ -74,7 +74,7 @@ export default class CameraRepository {
     const withAvatar = query.avatar;
 
     const cameras = await Camera.aggregate([
-      { $match: { user: ObjectId(userId) } },
+      { $match: { user: new ObjectId(userId) } },
       ...(withStats && addStats()),
       ...(withAvatar && addAvatar()),
       { $project: { videos: 0, photos: 0, avatars: 0 } },
@@ -94,7 +94,9 @@ export default class CameraRepository {
   }
 
   async updateOneById(id, payload) {
-    const camera = await Camera.findOneAndUpdate({ _id: id }, payload, { new: true }).populate('avatar');
+    const camera = await Camera.findOneAndUpdate({ _id: id }, payload, {
+      new: true,
+    }).populate('avatar');
     return camera;
   }
 
@@ -107,7 +109,7 @@ export default class CameraRepository {
 
   async getStats(cameraId) {
     const [stats] = await Camera.aggregate([
-      { $match: { _id: ObjectId(cameraId) } },
+      { $match: { _id: new ObjectId(cameraId) } },
       ...addStats(),
       { $project: { _id: 1, stats: 1 } },
     ]);
