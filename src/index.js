@@ -11,7 +11,8 @@ const start = async () => {
   const services = getServices(config);
   const server = getServer(services);
 
-  const { loggerService, socketService, storageService, workerService } = services;
+  const { loggerService, socketService, storageService, workerService } =
+    services;
 
   const logger = loggerService.createLogger('server');
 
@@ -27,7 +28,7 @@ const start = async () => {
 
     await workerService.startJobs(config, logger, jobs);
 
-    server.listen(config.port, () => {
+    server.listen(config.port, config.host, () => {
       logger(`server running in ${config.mode} mode on port ${config.port}`);
     });
   } catch (e) {

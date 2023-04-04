@@ -30,11 +30,11 @@ export default (services) => {
   app.use('/api/cameras', routers.cameraRouter);
   app.use('/files', routers.storageRouter);
 
-  app.use(middlewares.errorHandlerMiddleware);
-
   app.use('/*', (req, res) => {
     res.status(200).send('server is running');
   });
+
+  app.use(middlewares.errorHandlerMiddleware);
 
   return server;
 };

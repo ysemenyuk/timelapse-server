@@ -30,9 +30,9 @@ export default class WorkerService {
 
     if (currentjobs.length) {
       // await Promise.all(currentjobs.map(async (job) => await job.remove()));
-      currentjobs.forEach((job) => {
-        console.log(job.attrs);
-      });
+      // currentjobs.forEach((job) => {
+      //   console.log(job.attrs);
+      // });
     }
   }
 
