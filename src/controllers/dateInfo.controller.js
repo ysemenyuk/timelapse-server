@@ -3,10 +3,10 @@ export default class DateInfoController {
     this.dateInfoService = dateInfoService;
   }
 
-  async getAll(req, res) {
-    req.reqLogger('dateInfo.controller getAll');
+  async getMany(req, res) {
+    req.reqLogger('dateInfo.controller getMany');
 
-    const datesInfo = await this.dateInfoService.getAll({
+    const datesInfo = await this.dateInfoService.getMany({
       userId: req.userId,
       cameraId: req.params.cameraId,
       logger: req.reqLogger,

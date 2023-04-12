@@ -1,40 +1,5 @@
 import _ from 'lodash';
-import { addHours } from 'date-fns';
 import { type } from '../utils/constants.js';
-
-const getGteDateTime = (date) => new Date(`${date} 00:00:00`);
-const getLteDateTime = (date) => addHours(new Date(`${date} 00:00:00`), 24);
-
-const makeFilter = (camera, query) => {
-  const { type, date, date_gte, date_lte, time_gte, time_lte } = query;
-  // console.log(1111, 'query', query);
-
-  const createType = query.createType && query.createType.split(',');
-
-  let dateRange;
-
-  if (date) {
-    dateRange = { $gte: getGteDateTime(date), $lte: getLteDateTime(date) };
-  }
-
-  if (date_gte && date_lte) {
-    dateRange = {
-      $gte: getGteDateTime(date_gte),
-      $lte: getLteDateTime(date_lte),
-    };
-  }
-
-  let timeString;
-
-  if (time_gte && time_lte) {
-    timeString = { $gte: `${time_gte}:00`, $lte: `${time_lte}:00` };
-  }
-
-  return _.pickBy(
-    { camera, type, createType, date: dateRange, timeString },
-    _.identity,
-  );
-};
 
 //
 // FileService
@@ -64,7 +29,6 @@ export default class FileService {
     });
 
     const created = await this.fileRepo.updateOneById(file._id, fileInfo);
-    // console.log('created', created);
     return created;
   }
 
@@ -82,17 +46,14 @@ export default class FileService {
   async getFilesForVideo({ logger, cameraId, query }) {
     logger && logger(`fileService.getFilesForVideo`);
 
-    const filter = makeFilter(cameraId, query);
-    const files = await this.fileRepo.find(filter);
-
+    const files = await this.fileRepo.find({ cameraId, ...query });
     return files;
   }
 
   async getMany({ logger, cameraId, query }) {
     logger && logger(`fileService.getMany`);
 
-    const filter = makeFilter(cameraId, query);
-    const total = await this.fileRepo.countDocuments(filter);
+    const total = await this.fileRepo.countDocuments({ cameraId, ...query });
 
     const page = parseInt(query.page, 10);
     const limit = parseInt(query.limit, 10);
@@ -100,34 +61,32 @@ export default class FileService {
     const skip = (page - 1) * limit;
     const pages = Math.ceil(total / limit);
 
-    const populate = 'poster'; // query.populate
+    const populate = 'poster'; // query.populate for video files
 
     const options = _.pickBy({ limit, skip, populate }, _.identity);
 
-    const items = await this.fileRepo.find(filter, null, options);
-    return { page, pages, total, items };
+    const items = await this.fileRepo.find({ cameraId, ...query }, null, options);
+    return { total, page, pages, items };
   }
 
   async getCount({ logger, cameraId, query }) {
     logger && logger(`fileService.getCountByQuery`);
 
-    const filter = makeFilter(cameraId, query);
-    const count = await this.fileRepo.countDocuments(filter);
-    // console.log(111, count);
+    const count = await this.fileRepo.countDocuments({ cameraId, ...query });
     return { count };
   }
 
   async getCountsByDates({ logger, cameraId, query }) {
     logger && logger(`fileService.getCountByQuery`);
 
-    const counts = await this.fileRepo.countsByDates(cameraId, query);
-    return counts;
+    const countsByDates = await this.fileRepo.countsDocumentsByDates({ cameraId, ...query });
+    return { countsByDates };
   }
 
-  async getOne({ logger, ...query }) {
+  async getOne({ logger, query }) {
     logger && logger(`fileService.getOne`);
     // check query?
-    const file = await this.fileRepo.findOne({ ...query });
+    const file = await this.fileRepo.findOne(query);
     return file;
   }
 

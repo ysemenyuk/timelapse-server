@@ -11,7 +11,7 @@ export default (middlewares, fileController) => {
 
   // /api/cameras/:cameraId/files
 
-  router.get('/', asyncHandler(fileController.getAll.bind(fileController)));
+  router.get('/', asyncHandler(fileController.getMany.bind(fileController)));
 
   router.post('/upload', asyncHandler(fileController.upload.bind(fileController)));
   router.get('/download', asyncHandler(fileController.download.bind(fileController)));

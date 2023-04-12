@@ -5,8 +5,8 @@ export default class FileController {
 
   // get
 
-  async getAll(req, res) {
-    req.reqLogger(`fileController.getAll`);
+  async getMany(req, res) {
+    req.reqLogger(`fileController.getMany`);
 
     const files = await this.fileService.getMany({
       logger: req.reqLogger,

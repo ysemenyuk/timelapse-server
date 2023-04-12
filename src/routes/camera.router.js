@@ -12,38 +12,38 @@ export default (middlewares, cameraController, cameraValidator) => {
 
   router.get(
     '/',
-    asyncHandler(cameraController.getAll.bind(cameraController)) //
+    asyncHandler(cameraController.getMany.bind(cameraController)), //
   );
 
   router.get(
     '/:cameraId/stats',
     cameraMiddleware,
-    asyncHandler(cameraController.getCameraStats.bind(cameraController)) //
+    asyncHandler(cameraController.getCameraStats.bind(cameraController)), //
   );
 
   router.get(
     '/:cameraId',
     cameraMiddleware,
-    asyncHandler(cameraController.getOne.bind(cameraController)) //
+    asyncHandler(cameraController.getOne.bind(cameraController)), //
   );
 
   router.post(
     '/',
     cameraValidator.validateCamera,
-    asyncHandler(cameraController.createOne.bind(cameraController)) //
+    asyncHandler(cameraController.createOne.bind(cameraController)), //
   );
 
   router.put(
     '/:cameraId',
     cameraMiddleware,
     cameraValidator.validateCamera,
-    asyncHandler(cameraController.updateOne.bind(cameraController)) //
+    asyncHandler(cameraController.updateOne.bind(cameraController)), //
   );
 
   router.delete(
     '/:cameraId',
     cameraMiddleware,
-    asyncHandler(cameraController.deleteOne.bind(cameraController)) //
+    asyncHandler(cameraController.deleteOne.bind(cameraController)), //
   );
 
   return router;

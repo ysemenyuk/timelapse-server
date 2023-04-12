@@ -5,10 +5,10 @@ export default class CameraController {
 
   // get
 
-  async getAll(req, res) {
-    req.reqLogger('cameraController.getAll');
+  async getMany(req, res) {
+    req.reqLogger('cameraController.getMany');
 
-    const cameras = await this.cameraService.getAll({
+    const cameras = await this.cameraService.getMany({
       logger: req.reqLogger,
       userId: req.userId,
       query: req.query,

@@ -11,7 +11,8 @@ export default (middlewares, dateInfoController) => {
 
   // /api/cameras/:cameraId/dateInfo/
 
-  router.get('/', asyncHandler(dateInfoController.getAll.bind(dateInfoController)));
+  router.get('/', asyncHandler(dateInfoController.getMany.bind(dateInfoController)));
+
   router.get('/:date', asyncHandler(dateInfoController.getOne.bind(dateInfoController)));
 
   return router;

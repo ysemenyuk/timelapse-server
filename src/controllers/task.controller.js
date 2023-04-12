@@ -5,10 +5,10 @@ export default class TaskController {
 
   //
 
-  async getAll(req, res) {
-    req.reqLogger('cameraTask.controller getAll');
+  async getMany(req, res) {
+    req.reqLogger('cameraTask.controller getMany');
 
-    const tasks = await this.taskService.getAll({
+    const tasks = await this.taskService.getMany({
       logger: req.reqLogger,
       cameraId: req.cameraId,
     });

@@ -69,7 +69,7 @@ export default class CameraRepository {
     return camera;
   }
 
-  async find(userId, query) {
+  async findManyByUser(userId, query = {}) {
     const withStats = query.stats;
     const withAvatar = query.avatar;
 
@@ -83,8 +83,8 @@ export default class CameraRepository {
     return cameras;
   }
 
-  async findOne(filter) {
-    const camera = await Camera.findOne(filter).populate('avatar');
+  async findOne(where) {
+    const camera = await Camera.findOne(where).populate('avatar');
     return camera;
   }
 
@@ -107,7 +107,7 @@ export default class CameraRepository {
 
   //
 
-  async getStats(cameraId) {
+  async getStatsById(cameraId) {
     const [stats] = await Camera.aggregate([
       { $match: { _id: new ObjectId(cameraId) } },
       ...addStats(),

@@ -23,8 +23,8 @@ export default class TaskService {
 
   // get
 
-  async getAll({ logger, cameraId }) {
-    logger && logger(`taskService.getAll`);
+  async getMany({ logger, cameraId }) {
+    logger && logger(`taskService.getMany`);
 
     const tasks = await this.taskRepo.find({ camera: cameraId });
     return tasks;

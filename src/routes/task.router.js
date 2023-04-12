@@ -11,7 +11,7 @@ export default (middlewares, taskController, taskValidator) => {
 
   // /api/cameras/:cameraId/tasks
 
-  router.get('/', asyncHandler(taskController.getAll.bind(taskController)));
+  router.get('/', asyncHandler(taskController.getMany.bind(taskController)));
   router.get('/:taskId', asyncHandler(taskController.getOne.bind(taskController)));
 
   router.post('/', taskValidator.validateTask, asyncHandler(taskController.createOne.bind(taskController)));

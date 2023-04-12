@@ -3,8 +3,8 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { BadRequestError } from '../errors.js';
 
-const fields = ['_id', 'name', 'email', 'avatar'];
-const filterProps = (user) => _.pick(user, fields);
+const userFields = ['_id', 'name', 'email', 'avatar'];
+const userEntity = (user) => _.pick(user, userFields);
 
 //
 
@@ -64,7 +64,7 @@ export default class UserService {
 
     const token = this.sign(newUser._id);
 
-    return { token, user: filterProps(newUser) };
+    return { token, user: userEntity(newUser) };
   }
 
   //
@@ -88,7 +88,7 @@ export default class UserService {
 
     const token = this.sign(user._id);
 
-    return { token, user: filterProps(user) };
+    return { token, user: userEntity(user) };
   }
 
   //
@@ -96,7 +96,7 @@ export default class UserService {
   async auth({ userId, logger }) {
     logger(`userService.auth userId: ${userId}`);
 
-    const user = await this.userRepo.findOneById(userId, fields);
+    const user = await this.userRepo.findOneById(userId, userFields);
     const token = this.sign(user._id);
 
     return { token, user };
@@ -107,7 +107,7 @@ export default class UserService {
   async getOneById({ userId, logger }) {
     logger(`userService.getById userId: ${userId}`);
 
-    const user = await this.userRepo.findOneById(userId, fields);
+    const user = await this.userRepo.findOneById(userId, userFields);
     return { user };
   }
 
@@ -116,7 +116,7 @@ export default class UserService {
   async getOneByEmail({ email, logger }) {
     logger(`userService.getOneByEmail email: ${email}`);
 
-    const user = await this.userRepo.findOne({ email }, fields);
+    const user = await this.userRepo.findOne({ email }, userFields);
     return { user };
   }
 
@@ -134,7 +134,7 @@ export default class UserService {
     const fields = _.pickBy({ name, email, password: hashPassword }, _.identity);
 
     const updated = await this.userRepo.updateOneById(userId, fields);
-    return { user: filterProps(updated) };
+    return { user: userEntity(updated) };
   }
 
   //

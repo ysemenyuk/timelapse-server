@@ -12,7 +12,11 @@ export default class CameraService {
   async createOne({ logger, userId, payload }) {
     logger && logger(`cameraService.createOne`);
 
-    const camera = await this.cameraRepo.create({ user: userId, avatar: null, ...payload });
+    const camera = await this.cameraRepo.create({
+      user: userId,
+      avatar: null,
+      ...payload,
+    });
 
     // create camera folders
     await this.fileService.createCameraFolders({
@@ -35,10 +39,10 @@ export default class CameraService {
   // get
   //
 
-  getAll({ userId, logger, query }) {
-    logger && logger(`cameraService.getAll`);
+  getMany({ logger, userId, query }) {
+    logger && logger(`cameraService.getMany`);
 
-    const cameras = this.cameraRepo.find(userId, query);
+    const cameras = this.cameraRepo.findManyByUser(userId, query);
     return cameras;
   }
 
@@ -59,7 +63,7 @@ export default class CameraService {
   async getCameraStats({ logger, cameraId }) {
     logger && logger(`cameraService.getCameraStats`);
 
-    const stats = await this.cameraRepo.getStats(cameraId);
+    const stats = await this.cameraRepo.getStatsById(cameraId);
     return stats;
   }
 

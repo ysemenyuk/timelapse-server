@@ -19,8 +19,8 @@ export default class DateInfoService {
 
   // get
 
-  async getAll({ logger, cameraId }) {
-    logger && logger(`dateInfoService.getAll`);
+  async getMany({ logger, cameraId }) {
+    logger && logger(`dateInfoService.getMany`);
 
     const datesInfo = await this.dateInfoRepo.find({ camera: cameraId });
     return datesInfo;
